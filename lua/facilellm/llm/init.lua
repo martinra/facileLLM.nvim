@@ -12,6 +12,8 @@ local config = require("facilellm.config")
 local dispatch = function (implementation)
   if implementation == "OpenAI API" then
     return require("facilellm.llm.openai").create
+  elseif implementation == "The Void Mock LLM" then
+    return require("facilellm.llm.void").create
   else
     error("Unknown LLM implementation " .. vim.inspect(implementation))
   end

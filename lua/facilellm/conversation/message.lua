@@ -8,12 +8,14 @@
 
 
 ---@param role string
----@param lines string | string[]
+---@param content string | string[]
 ---@return Message
-local create = function (role, lines)
-  lines = lines or ""
-  if type(lines) == "string" then
-    lines = { lines }
+local create = function (role, content)
+  local lines = {}
+  if type(content) == "string" then
+    lines = vim.split(content, "\n")
+  else
+    lines = content
   end
 
   ---@type Message

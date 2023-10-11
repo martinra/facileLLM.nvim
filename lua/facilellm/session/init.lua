@@ -103,6 +103,10 @@ end
 ---@param render_conversation function(number): nil
 ---@return nil
 local query_model = function (sessionid, render_conversation)
+  if is_conversation_locked(sessionid) then
+    vim.notify("querying model despite lock", vim.log.levels.WARN)
+    return
+  end
   local model = get_model(sessionid)
   if model then
     local add_message_wrapped = function (role, content)

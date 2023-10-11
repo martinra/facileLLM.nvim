@@ -1,16 +1,5 @@
+local session = require("facilellm.session")
 local ui_common = require("facilellm.ui.common")
-
-
----@param bufnr number
----@param on_confirm function(string[]): nil
----@return nil
-local confirm_input = function (bufnr, on_confirm)
-  local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-  vim.api.nvim_buf_set_lines(bufnr, 0,-1, true, {})
-  if on_confirm then
-    on_confirm(lines)
-  end
-end
 
 ---@param bufnr number
 ---@param on_confirm function(string[]): nil
@@ -18,7 +7,16 @@ end
 local set_confirm_hook = function (bufnr, on_confirm)
   vim.api.nvim_buf_set_keymap(bufnr, "n", "<Enter>", "",
     { callback = function ()
-        confirm_input(bufnr, on_confirm)
+        local sessionid = ui_common.buf_get_session(bufnr)
+        if session.is_conversation_locked(sessionid) then
+          return
+        end
+
+        local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+        vim.api.nvim_buf_set_lines(bufnr, 0,-1, true, {})
+        if on_confirm then
+          on_confirm(lines)
+        end
       end,
     })
 end

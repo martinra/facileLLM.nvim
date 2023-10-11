@@ -28,11 +28,13 @@ local new_sessionid = function ()
   end
 end
 
+---@param model_config LLMConfig
+---@param name? string
 ---@return number sessionid of the newly created session
 local create = function (model_config, name)
   local sessionid = new_sessionid()
   local model = llm.dispatch(model_config.implementation)(model_config.opts)
-  name = name or model.name or "New Session"
+  name = name or model_config.name or model.name
 
   ---@type Session
   local sess = {

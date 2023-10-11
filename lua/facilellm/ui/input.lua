@@ -53,7 +53,7 @@ local create_window = function (sessionid, bufnr, conv_winid)
   local conv_height = vim.api.nvim_win_get_height(conv_winid)
   vim.api.nvim_win_set_height(input_winid, math.ceil(0.2*conv_height))
 
-  ui_common.set_session(input_winid, sessionid)
+  ui_common.win_set_session(input_winid, sessionid)
   vim.api.nvim_win_set_buf(input_winid, bufnr)
 
   return input_winid

@@ -96,8 +96,8 @@ local create = function (sessionid, name)
     end
 
   local sess = {
-    conv_bufnr = ui_conversation.create_buffer("facileLLM " .. name),
-    input_bufnr = ui_input.create_buffer("facileLLM Input " .. name, on_confirm),
+    conv_bufnr = ui_conversation.create_buffer(sessionid, "facileLLM " .. name),
+    input_bufnr = ui_input.create_buffer(sessionid, "facileLLM Input " .. name, on_confirm),
     render_state = { msg = 0, line = 0, char = 0,},
     conversation_winids = {},
     follow_conversation_flags = {},

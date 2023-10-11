@@ -23,10 +23,11 @@ local set_confirm_hook = function (bufnr, on_confirm)
     })
 end
 
+---@param sessionid number
 ---@param name string
 ---@param on_confirm function(string):nil
 ---@return number bufnr number of the newly created buffer
-local create_buffer = function (name, on_confirm)
+local create_buffer = function (sessionid, name, on_confirm)
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_name(bufnr, name)
 
@@ -35,6 +36,8 @@ local create_buffer = function (name, on_confirm)
   vim.api.nvim_buf_set_option(bufnr, "buflisted",  false)
   vim.api.nvim_buf_set_option(bufnr, "bufhidden",  "hide")
   vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
+
+  ui_common.buf_set_session(bufnr, sessionid)
 
   set_confirm_hook(bufnr, on_confirm)
 

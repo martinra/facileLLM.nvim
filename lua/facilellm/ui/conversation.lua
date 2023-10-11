@@ -3,9 +3,10 @@ local ui_common = require("facilellm.ui.common")
 local util = require("facilellm.util")
 
 
+---@param sessionid number
 ---@param name string
 ---@return number bufnr number of the newly created buffer
-local create_buffer = function (name)
+local create_buffer = function (sessionid, name)
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_name(bufnr, name)
 
@@ -14,6 +15,8 @@ local create_buffer = function (name)
   vim.api.nvim_buf_set_option(bufnr, "buflisted",  false)
   vim.api.nvim_buf_set_option(bufnr, "bufhidden",  "hide")
   vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
+
+  ui_common.buf_set_session(bufnr, sessionid)
 
   return bufnr
 end

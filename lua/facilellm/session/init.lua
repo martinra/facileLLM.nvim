@@ -100,30 +100,37 @@ end
 
 ---@param sessionid number
 ---@param render_conversation function(number): nil
+---@param on_complete function(): nil
 ---@return nil
-local query_model = function (sessionid, render_conversation)
+local query_model = function (sessionid, render_conversation, on_complete)
   if is_conversation_locked(sessionid) then
     vim.notify("querying model despite lock", vim.log.levels.WARN)
     return
   end
-  local model = get_model(sessionid)
-  if model then
-    local add_message_wrapped = function (role, content)
-      add_message(sessionid, role, content)
-      vim.schedule(function ()
-        render_conversation(sessionid)
-      end)
-    end
-    local on_complete = function ()
-      unlock_conversation(sessionid)
-      vim.schedule(function ()
-        render_conversation(sessionid)
-      end)
-    end
-    lock_conversation(sessionid)
-    model.response_to(get_conversation(sessionid),
-      add_message_wrapped, on_complete)
+
+  ---@param role string
+  ---@param content string | string[]
+  ---@return nil
+  local add_message_wrapped = function (role, content)
+    add_message(sessionid, role, content)
+    vim.schedule(function ()
+      render_conversation(sessionid)
+    end)
   end
+
+  ---@return nil
+  local on_complete__loc = function ()
+    unlock_conversation(sessionid)
+    on_complete()
+    vim.schedule(function ()
+      render_conversation(sessionid)
+    end)
+  end
+
+  lock_conversation(sessionid)
+  local model = get_model(sessionid)
+  model.response_to(get_conversation(sessionid),
+    add_message_wrapped, on_complete__loc)
 end
 
 

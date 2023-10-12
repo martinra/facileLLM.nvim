@@ -86,18 +86,27 @@ end
 ---@param name string
 ---@return nil
 local create = function (sessionid, name)
-  local on_confirm = function (lines)
-      session.add_message(sessionid, "Input", lines)
-      session.query_model(sessionid, render_conversation)
-      vim.schedule(
-        function ()
-          render_conversation(sessionid)
-        end)
-    end
+
+  ---@return nil
+  local on_complete_query = function ()
+    ui_conversation.on_complete_query(get_conv_bufnr(sessionid))
+    ui_input.on_complete_query(get_input_bufnr(sessionid))
+  end
+
+  ---@param lines string[]
+  ---@return nil
+  local on_confirm_input = function (lines)
+    session.add_message(sessionid, "Input", lines)
+    session.query_model(sessionid, render_conversation, on_complete_query)
+    vim.schedule(
+      function ()
+        render_conversation(sessionid)
+      end)
+  end
 
   local sess = {
     conv_bufnr = ui_conversation.create_buffer(sessionid, "facileLLM " .. name),
-    input_bufnr = ui_input.create_buffer(sessionid, "facileLLM Input " .. name, on_confirm),
+    input_bufnr = ui_input.create_buffer(sessionid, "facileLLM Input " .. name, on_confirm_input),
     render_state = { msg = 0, line = 0, char = 0,},
     conversation_winids = {},
     follow_conversation_flags = {},

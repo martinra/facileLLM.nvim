@@ -1,6 +1,12 @@
 local session = require("facilellm.session")
 local ui_common = require("facilellm.ui.common")
 
+
+---@return number
+local buf_get_namespace_confirm_feedback = function (bufnr)
+  return vim.api.nvim_create_namespace("facilellm-namespace-confirm-feedback-" .. bufnr)
+end
+
 ---@param bufnr number
 ---@param on_confirm function(string[]): nil
 ---@return nil
@@ -9,6 +15,12 @@ local set_confirm_hook = function (bufnr, on_confirm)
     { callback = function ()
         local sessionid = ui_common.buf_get_session(bufnr)
         if session.is_conversation_locked(sessionid) then
+          local nspc_confirm_feedback = buf_get_namespace_confirm_feedback(bufnr)
+          vim.api.nvim_buf_set_extmark(bufnr, nspc_confirm_feedback, 0, 0,
+            {
+              virt_text = { {"Response not yet completed", "WarningMsg"} },
+              virt_text_pos = "eol"
+            })
           return
         end
 
@@ -60,8 +72,17 @@ local create_window = function (sessionid, bufnr, conv_winid)
   return input_winid
 end
 
+---@param bufnr number
+---@return nil
+local on_complete_query = function (bufnr)
+  local nspc_confirm_feedback = buf_get_namespace_confirm_feedback(bufnr)
+  vim.api.nvim_buf_clear_namespace(bufnr, nspc_confirm_feedback, 0, -1)
+end
+
 
 return {
   create_buffer = create_buffer,
   create_window = create_window,
+  buf_get_namespace_confirm_feedback = buf_get_namespace_confirm_feedback,
+  on_complete_query = on_complete_query,
 }

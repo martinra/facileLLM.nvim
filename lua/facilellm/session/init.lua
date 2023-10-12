@@ -77,7 +77,6 @@ end
 ---@param content string | string[]
 ---@return nil
 local add_message = function (sessionid, role, content)
-  print(vim.inspect(content))
   conversation.add_message(get_conversation(sessionid), role, content)
 end
 

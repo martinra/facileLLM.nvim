@@ -160,7 +160,6 @@ local response_to = function (conversation, add_message, on_complete, opts)
 
   curl_job:after(on_complete)
   curl_job:after_failure(function ()
-      print("failure")
       local stderr_text = curl_job:stderr_result()
       local stdout_json = get_last_json_record(stdout_record)
       local errmsg

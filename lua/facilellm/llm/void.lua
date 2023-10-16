@@ -1,3 +1,54 @@
+local R = {}
+
+---comment
+---@param add_message function
+---@param on_complete function
+---@param lines (string[] | string)[]
+---@param delay number
+---@return nil
+R.send_word_by_word = function (add_message, on_complete, lines, delay)
+  if #lines == 0 then
+    on_complete()
+    return
+  end
+
+  local fst_line = lines[1]
+  if type(fst_line) == "string" then
+    ---@cast fst_line string
+    local words = {}
+    for w in string.gmatch(fst_line, "%S+") do
+      table.insert(words, w)
+    end
+    fst_line = words
+    lines[1] = words
+  end
+  if #fst_line ~= 0 then
+    local word = table.remove(fst_line, 1)
+    add_message("Void", word .. " ")
+  else
+    add_message("Void", "\n")
+    table.remove(lines, 1)
+  end
+
+  vim.defer_fn(function () R.send_word_by_word(add_message, on_complete, lines, delay) end, delay)
+end
+
+---comment
+---@param add_message function
+---@param on_complete function
+---@param lines string[]
+---@param response_lines string[]
+---@return nil
+R.send_response = function(add_message, on_complete, lines, response_lines)
+  if #response_lines == 0 then
+    vim.defer_fn(function () R.send_word_by_word(add_message, on_complete, lines, 20) end, 1500)
+  else
+    local line = table.remove(response_lines, 1)
+    add_message("Void", line .. "\n")
+    vim.defer_fn(function () R.send_response(add_message, on_complete, lines, response_lines) end, 1500)
+  end
+end
+
 ---@param conv Conversation
 ---@param add_message function
 ---@param on_complete function
@@ -12,23 +63,13 @@ local response_to = function (conv, add_message, on_complete, _)
 
   local lines = conv[#conv].lines
 
-  add_message("Void", "The void heard your message.\n")
-  vim.defer_fn(
-    function()
-      add_message("Void", "The echo of your message comes closer.\n")
-      vim.defer_fn(
-        function()
-          add_message("Void", "Soon it will arrive.\n")
-          vim.defer_fn(
-            function()
-              add_message("Void", lines)
-              on_complete()
-            end,
-            2000)
-        end,
-        1000)
-    end,
-    500)
+  local response_lines = {
+    "The void heard your message.",
+    "The echo of your message comes closer.",
+    "Soon it will arrive.",
+   }
+
+  R.send_response(add_message, on_complete, lines, response_lines)
 end
 
 ---@return table

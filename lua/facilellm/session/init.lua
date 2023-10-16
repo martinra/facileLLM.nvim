@@ -121,8 +121,8 @@ local query_model = function (sessionid, render_conversation, on_complete)
   ---@return nil
   local on_complete__loc = function ()
     unlock_conversation(sessionid)
-    on_complete()
     vim.schedule(function ()
+      on_complete()
       render_conversation(sessionid)
     end)
   end

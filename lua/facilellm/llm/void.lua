@@ -1,12 +1,11 @@
 local R = {}
 
----comment
 ---@param add_message function
 ---@param on_complete function
 ---@param lines (string[] | string)[]
 ---@param delay number
 ---@return nil
-R.send_word_by_word = function (add_message, on_complete, lines, delay)
+R.send_word_by_word = function (conv, add_message, on_complete, lines, delay)
   if #lines == 0 then
     on_complete()
     return
@@ -30,31 +29,44 @@ R.send_word_by_word = function (add_message, on_complete, lines, delay)
     table.remove(lines, 1)
   end
 
-  vim.defer_fn(function () R.send_word_by_word(add_message, on_complete, lines, delay) end, delay)
+  vim.defer_fn(function () R.send_word_by_word(conv, add_message, on_complete, lines, delay) end, delay)
 end
 
----comment
 ---@param add_message function
 ---@param on_complete function
 ---@param lines string[]
 ---@param response_lines string[]
+---@param major_delay number
+---@param minor_delay number
 ---@return nil
-R.send_response = function(add_message, on_complete, lines, response_lines)
+R.send_response = function(conv, add_message, on_complete, lines, response_lines, major_delay, minor_delay)
   if #response_lines == 0 then
-    vim.defer_fn(function () R.send_word_by_word(add_message, on_complete, lines, 20) end, 1500)
+    local lines_loc = {}
+    for k,v in pairs(lines) do
+      lines_loc[k] = v
+    end
+    vim.defer_fn(
+      function ()
+        R.send_word_by_word(conv, add_message, on_complete, lines_loc, minor_delay)
+      end,
+      major_delay)
   else
     local line = table.remove(response_lines, 1)
     add_message("Void", line .. "\n")
-    vim.defer_fn(function () R.send_response(add_message, on_complete, lines, response_lines) end, 1500)
+    vim.defer_fn(
+      function ()
+        R.send_response(conv, add_message, on_complete, lines, response_lines, major_delay, minor_delay)
+      end,
+      major_delay)
   end
 end
 
 ---@param conv Conversation
 ---@param add_message function
 ---@param on_complete function
----@param _ table
+---@param opts table
 ---@return nil
-local response_to = function (conv, add_message, on_complete, _)
+local response_to = function (conv, add_message, on_complete, opts)
   if #conv == 0 then
     add_message("Void", "The void tried to hear your message, but there is nothing to be heard.")
     on_complete()
@@ -69,14 +81,19 @@ local response_to = function (conv, add_message, on_complete, _)
     "Soon it will arrive.",
    }
 
-  R.send_response(add_message, on_complete, lines, response_lines)
+  local major_delay = opts.params.major_delay
+  local minor_delay = opts.params.minor_delay
+  R.send_response(conv, add_message, on_complete, lines, response_lines, major_delay, minor_delay)
 end
 
 ---@return table
 local default_opts = function ()
   return {
     name = "The Void Mock LLM",
-    params = {},
+    params = {
+      major_delay = 1500,
+      minor_delay = 20,
+    },
   }
 end
 
@@ -90,7 +107,9 @@ local create = function (opts)
   local llm = {
     name = opts.name,
     params = opts.params,
-    response_to = response_to,
+    response_to = function(conv, add_message, on_complete)
+      response_to(conv, add_message, on_complete, opts)
+    end,
   }
   return llm
 end

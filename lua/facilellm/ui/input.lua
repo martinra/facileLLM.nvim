@@ -12,16 +12,19 @@ end
 ---@param on_confirm function(string[]): nil
 ---@return nil
 local set_confirm_hook = function (bufnr, on_confirm)
+  local feedback_extmark = nil
   vim.api.nvim_buf_set_keymap(bufnr, "n", "<Enter>", "",
     { callback = function ()
         local sessionid = ui_common.buf_get_session(bufnr)
         if session.is_conversation_locked(sessionid) then
           local nspc_confirm_feedback = buf_get_namespace_confirm_feedback(bufnr)
-          vim.api.nvim_buf_set_extmark(bufnr, nspc_confirm_feedback, 0, 0,
-            {
-              virt_text = { {"Response not yet completed", "WarningMsg"} },
-              virt_text_pos = "eol"
-            })
+          if feedback_extmark == nil then
+            feedback_extmark = vim.api.nvim_buf_set_extmark(bufnr, nspc_confirm_feedback, 0, 0,
+              {
+                virt_text = { {"Response not yet completed", "WarningMsg"} },
+                virt_text_pos = "eol"
+              })
+          end
           return
         end
 

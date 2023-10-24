@@ -113,7 +113,7 @@ local create = function (sessionid, name)
   ---@return nil
   local on_confirm_input = function (lines)
     session.add_message(sessionid, "Input", lines)
-    ui_render.highlight_msg_receiving(
+    ui_render.start_highlight_msg_receiving(
       session.get_conversation(sessionid), get_render_state(sessionid))
     session.query_model(sessionid, render_conversation, on_complete_query)
     vim.schedule(

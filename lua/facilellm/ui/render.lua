@@ -10,15 +10,33 @@
 ---@field extmark number?
 
 
----@param bufnr number
----@return number
-local buf_get_namespace_highlight_receiving = function (bufnr)
-  return vim.api.nvim_create_namespace("facilellm-highlight-receiving" .. bufnr)
-end
-
 ---@return string
 local receiving_hl_group = function ()
-  return "WarningMsg"
+  return "DiffAdd"
+end
+
+---@return number
+local buf_get_namespace_highlight_receiving = function ()
+  return vim.api.nvim_create_namespace("facilellm-highlight-receiving")
+end
+
+---@param conv Conversation
+---@param render_state RenderState
+---@return nil
+local start_highlight_msg_receiving = function (conv, render_state)
+  render_state.highlight_receiving = {
+    msg = #conv + 1,
+    extmark = nil,
+  }
+end
+
+---@param bufnr number
+---@param render_state RenderState
+---@return nil
+local end_highlight_msg_receiving = function (bufnr, render_state)
+  render_state.highlight_receiving = nil
+  local ns = buf_get_namespace_highlight_receiving()
+  vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
 end
 
 ---@param bufnr number
@@ -26,9 +44,9 @@ end
 ---@param mx number message index
 ---@param msg Message
 ---@return nil
-local start_highlight_msg_receiving = function (bufnr, render_state, mx, msg)
+local create_highlight_msg_receiving = function (bufnr, render_state, mx, msg)
   if render_state.highlight_receiving and render_state.highlight_receiving.msg == mx then
-    local ns = buf_get_namespace_highlight_receiving(bufnr)
+    local ns = buf_get_namespace_highlight_receiving()
     local row = render_state.lines_total
     local col = 0
     local end_row = render_state.lines_total + #msg.lines
@@ -56,7 +74,7 @@ end
 ---@return nil
 local update_highlight_msg_receiving = function (bufnr, render_state, msg)
   if render_state.highlight_receiving and render_state.highlight_receiving.extmark then
-    local ns = buf_get_namespace_highlight_receiving(bufnr)
+    local ns = buf_get_namespace_highlight_receiving()
     local id = render_state.highlight_receiving.extmark
     local row, col = unpack(vim.api.nvim_buf_get_extmark_by_id(bufnr, ns, id, {}))
     local end_row = render_state.lines_total-1
@@ -102,7 +120,7 @@ local conversation = function (conv, bufnr, render_state)
     vim.api.nvim_buf_set_lines(bufnr, -2, -1, false, {msg.role .. ":"})
     vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, msg.lines)
 
-    start_highlight_msg_receiving(bufnr, render_state, 1, msg)
+    create_highlight_msg_receiving(bufnr, render_state, 1, msg)
 
     render_state.lines_total = 1 + #msg.lines
 
@@ -148,7 +166,7 @@ local conversation = function (conv, bufnr, render_state)
     vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, {msg.role .. ":"})
     vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, msg.lines)
 
-    start_highlight_msg_receiving(bufnr, render_state, mx, msg)
+    create_highlight_msg_receiving(bufnr, render_state, mx, msg)
 
     render_state.lines_total = render_state.lines_total + 1 + #msg.lines
   end
@@ -163,29 +181,10 @@ local conversation = function (conv, bufnr, render_state)
   render_state.char = line and string.len(line) or 0
 end
 
----@param conv Conversation
----@param render_state RenderState
----@return nil
-local highlight_msg_receiving = function (conv, render_state)
-  render_state.highlight_receiving = {
-    msg = #conv + 1,
-    extmark = nil,
-  }
-end
-
----@param bufnr number
----@param render_state RenderState
----@return nil
-local end_highlight_msg_receiving = function (bufnr, render_state)
-  render_state.highlight_receiving = nil
-  local ns = buf_get_namespace_highlight_receiving(bufnr)
-  vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
-end
-
 
 return {
   create_state = create_state,
   conversation = conversation,
-  highlight_msg_receiving = highlight_msg_receiving,
+  start_highlight_msg_receiving = start_highlight_msg_receiving,
   end_highlight_msg_receiving = end_highlight_msg_receiving,
 }

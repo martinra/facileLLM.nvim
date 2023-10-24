@@ -63,6 +63,20 @@ end
 
 ---@param sessionid number
 ---@param winid number
+---@return nil
+local follow_conversation = function (sessionid, winid)
+  session_uis[sessionid].follow_conversation_flags[winid] = true
+end
+
+---@param sessionid number
+---@param winid number
+---@return nil
+local unfollow_conversation = function (sessionid, winid)
+  session_uis[sessionid].follow_conversation_flags[winid] = false
+end
+
+---@param sessionid number
+---@param winid number
 ---@return boolean
 local does_follow_conversation = function (sessionid, winid)
   return session_uis[sessionid].follow_conversation_flags[winid]
@@ -205,6 +219,7 @@ local show = function (sessionid)
   if not conv_winid then
     local bufnr = get_conv_bufnr(sessionid)
     conv_winid = ui_conversation.create_window(sessionid, bufnr, "right")
+    follow_conversation(sessionid, conv_winid)
   end
   local input_winid = get_some_input_window(sessionid)
   if not input_winid then

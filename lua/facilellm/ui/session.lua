@@ -195,8 +195,8 @@ local show = function (sessionid)
   sessionid = sessionid or get_most_recent() or select()
   if not sessionid then
     -- TOOD: allow for model selection
-    local model = llm.default_model_config()
-    sessionid = session.create(model)
+    local model_config = llm.default_model_config()
+    sessionid = session.create(model_config)
     create(sessionid, session.get_name(sessionid))
     touch(sessionid)
   end

@@ -35,11 +35,36 @@ end
 
 ---@param opts table
 ---@return nil | string
-local validate = function (opts)
-   if type(opts) ~= "table" then
-     return "opts must be a table"
+local validate_facilellm_config = function (opts)
+  vim.validate({
+    opts = {opts, "t"},
+  })
+  vim.validate({
+    default_model = {opts.default_model, {"s", "n"}, true},
+    models        = {opts.models,        "t",        true},
+    layout        = {opts.layout,        "t",        true},
+  })
+
+  if opts.models then
+    for _,model in ipairs(opts.models) do
+      vim.validate({
+        model                = {model, "t", false}
+      })
+      vim.validate({
+        name                 = {model.name,           "s",        true},
+        implementation       = {model.implementation, {"s", "f"}, false},
+        opts                 = {model.opts,           "t",        true},
+        initial_conversation = {model.initial_conversation, "t",  true},
+      })
+    end
   end
-  -- WARN: validation not yet implemented
+
+  if opts.layout then
+    local layout = opts.layout
+    vim.validate({
+      relative = {layout.relative, "s", true}
+    })
+  end
 end
 
 
@@ -52,10 +77,8 @@ local M = {
 ---@return nil
 M.setup = function (opts)
   opts = opts or {}
-  local validation_error = validate(opts)
-  if validation_error then
-    vim.notify("FacileLLM: Error validating options passed to setup.\n" .. validation_error, vim.log.levels.ERROR)
-  end
+  validate_facilellm_config(opts)
+
   -- We merge options anyway, because this has the best change to mirror the expected behavior.
   M.opts = vim.tbl_deep_extend("force", M.opts, opts)
 end

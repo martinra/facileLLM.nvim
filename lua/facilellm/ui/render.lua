@@ -173,11 +173,15 @@ local highlight_msg_receiving = function (conv, render_state)
   }
 end
 
+---@param bufnr number
+---@param render_state RenderState
+---@return nil
 local end_highlight_msg_receiving = function (bufnr, render_state)
   render_state.highlight_receiving = nil
   local ns = buf_get_namespace_highlight_receiving(bufnr)
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
 end
+
 
 return {
   create_state = create_state,

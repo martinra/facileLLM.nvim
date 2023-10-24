@@ -193,7 +193,6 @@ local create = function (opts)
   opts = opts or {}
   opts = vim.tbl_extend("force", default_opts(), opts)
 
-  -- TODO: Check that this works as intended.
   -- We expose name and model parameters to the caller for later
   -- modification.
 

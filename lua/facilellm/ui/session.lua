@@ -89,7 +89,9 @@ local create = function (sessionid, name)
 
   ---@return nil
   local on_complete_query = function ()
-    ui_conversation.on_complete_query(get_conv_bufnr(sessionid))
+    local bufnr = get_conv_bufnr(sessionid)
+    ui_render.end_highlight_msg_receiving(bufnr, get_render_state(sessionid))
+    ui_conversation.on_complete_query(bufnr)
     ui_input.on_complete_query(get_input_bufnr(sessionid))
   end
 
@@ -97,6 +99,8 @@ local create = function (sessionid, name)
   ---@return nil
   local on_confirm_input = function (lines)
     session.add_message(sessionid, "Input", lines)
+    ui_render.highlight_msg_receiving(
+      session.get_conversation(sessionid), get_render_state(sessionid))
     session.query_model(sessionid, render_conversation, on_complete_query)
     vim.schedule(
       function ()
@@ -107,7 +111,7 @@ local create = function (sessionid, name)
   local sess = {
     conv_bufnr = ui_conversation.create_buffer(sessionid, "facileLLM " .. name),
     input_bufnr = ui_input.create_buffer(sessionid, "facileLLM Input " .. name, on_confirm_input),
-    render_state = { msg = 0, line = 0, char = 0,},
+    render_state = ui_render.create_state(),
     conversation_winids = {},
     follow_conversation_flags = {},
     recent_winid = nil,

@@ -111,9 +111,9 @@ local conversation = function (conv, bufnr, render_state)
     render_state.char = msg.lines and string.len(msg.lines[#msg.lines])
 
   else
-    -- Render the remainder of the last rendered line, if it was extended.
     local msg = conv[render_state.msg]
-    do
+    if #msg.lines > 0 then
+      -- Render the remainder of the last rendered line, if it was extended.
       local line = msg.lines[render_state.line]
       if render_state.char ~= string.len(line) then
         vim.api.nvim_buf_set_text(bufnr,
@@ -121,23 +121,23 @@ local conversation = function (conv, bufnr, render_state)
           render_state.lines_total-1, render_state.char,
           { string.sub(line, render_state.char+1, string.len(line)) })
       end
-    end
 
-    -- Render new lines in the last rendered message, if it was extended.
-    if render_state.line ~= #msg.lines then
-      local new_lines = {}
-      for lx = render_state.line+1, #msg.lines do
-        table.insert(new_lines, msg.lines[lx])
+      -- Render new lines in the last rendered message, if it was extended.
+      if render_state.line ~= #msg.lines then
+        local new_lines = {}
+        for lx = render_state.line+1, #msg.lines do
+          table.insert(new_lines, msg.lines[lx])
+        end
+        vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, new_lines)
+
+        render_state.lines_total = render_state.lines_total + #new_lines
       end
-      vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, new_lines)
-
-      render_state.lines_total = render_state.lines_total + #new_lines
-    end
 
       update_highlight_msg_receiving(bufnr, render_state, msg)
 
-    render_state.line = #msg.lines
-    render_state.char = msg.lines and string.len(msg.lines[#msg.lines])
+      render_state.line = #msg.lines
+      render_state.char = msg.lines and string.len(msg.lines[#msg.lines])
+    end
   end
 
   -- Render new messages

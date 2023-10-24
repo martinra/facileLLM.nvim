@@ -23,28 +23,31 @@ end
 
 ---@param bufnr number
 ---@param render_state RenderState
+---@param mx number message index
 ---@param msg Message
 ---@return nil
-local start_highlight_msg_receiving = function (bufnr, render_state, msg)
-  local ns = buf_get_namespace_highlight_receiving(bufnr)
-  local row = render_state.lines_total
-  local col = 0
-  local end_row = render_state.lines_total + #msg.lines
-  local end_col
-  if #msg.lines == 0 then
-    end_col = string.len(msg.role .. ":")
-  else
-    end_col = string.len(msg.lines[#msg.lines])
-  end
+local start_highlight_msg_receiving = function (bufnr, render_state, mx, msg)
+  if render_state.highlight_receiving and render_state.highlight_receiving.msg == mx then
+    local ns = buf_get_namespace_highlight_receiving(bufnr)
+    local row = render_state.lines_total
+    local col = 0
+    local end_row = render_state.lines_total + #msg.lines
+    local end_col
+    if #msg.lines == 0 then
+      end_col = string.len(msg.role .. ":")
+    else
+      end_col = string.len(msg.lines[#msg.lines])
+    end
 
-  render_state.highlight_receiving.extmark =
-    vim.api.nvim_buf_set_extmark(bufnr, ns,
-      row, col,
-      {
-        end_row = end_row,
-        end_col = end_col,
-        hl_group = receiving_hl_group(),
-      })
+    render_state.highlight_receiving.extmark =
+      vim.api.nvim_buf_set_extmark(bufnr, ns,
+        row, col,
+        {
+          end_row = end_row,
+          end_col = end_col,
+          hl_group = receiving_hl_group(),
+        })
+  end
 end
 
 ---@param bufnr number
@@ -52,20 +55,22 @@ end
 ---@param msg Message
 ---@return nil
 local update_highlight_msg_receiving = function (bufnr, render_state, msg)
-  local ns = buf_get_namespace_highlight_receiving(bufnr)
-  local id = render_state.highlight_receiving.extmark
-  local row, col = unpack(vim.api.nvim_buf_get_extmark_by_id(bufnr, ns, id, {}))
-  local end_row = render_state.lines_total-1
-  local end_col = string.len(msg.lines[#msg.lines])
+  if render_state.highlight_receiving and render_state.highlight_receiving.extmark then
+    local ns = buf_get_namespace_highlight_receiving(bufnr)
+    local id = render_state.highlight_receiving.extmark
+    local row, col = unpack(vim.api.nvim_buf_get_extmark_by_id(bufnr, ns, id, {}))
+    local end_row = render_state.lines_total-1
+    local end_col = string.len(msg.lines[#msg.lines])
 
-  vim.api.nvim_buf_set_extmark(bufnr, ns,
-    row, col,
-    {
-      id = id,
-      end_row = end_row,
-      end_col = end_col,
-      hl_group = receiving_hl_group(),
-    })
+    vim.api.nvim_buf_set_extmark(bufnr, ns,
+      row, col,
+      {
+        id = id,
+        end_row = end_row,
+        end_col = end_col,
+        hl_group = receiving_hl_group(),
+      })
+  end
 end
 
 ---@return table
@@ -97,9 +102,7 @@ local conversation = function (conv, bufnr, render_state)
     vim.api.nvim_buf_set_lines(bufnr, -2, -1, false, {msg.role .. ":"})
     vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, msg.lines)
 
-    if render_state.highlight_receiving and render_state.highlight_receiving.msg == 1 then
-      start_highlight_msg_receiving(bufnr, render_state, msg)
-    end
+    start_highlight_msg_receiving(bufnr, render_state, 1, msg)
 
     render_state.lines_total = 1 + #msg.lines
 
@@ -131,9 +134,7 @@ local conversation = function (conv, bufnr, render_state)
       render_state.lines_total = render_state.lines_total + #new_lines
     end
 
-    if render_state.highlight_receiving and render_state.highlight_receiving.extmark then
       update_highlight_msg_receiving(bufnr, render_state, msg)
-    end
 
     render_state.line = #msg.lines
     render_state.char = msg.lines and string.len(msg.lines[#msg.lines])
@@ -147,9 +148,7 @@ local conversation = function (conv, bufnr, render_state)
     vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, {msg.role .. ":"})
     vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, msg.lines)
 
-    if render_state.highlight_receiving and render_state.highlight_receiving.msg == mx then
-      start_highlight_msg_receiving(bufnr, render_state, msg)
-    end
+    start_highlight_msg_receiving(bufnr, render_state, mx, msg)
 
     render_state.lines_total = render_state.lines_total + 1 + #msg.lines
   end

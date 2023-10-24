@@ -2,9 +2,10 @@ local session = require("facilellm.session")
 local ui_common = require("facilellm.ui.common")
 
 
+---@param bufnr number
 ---@return number
 local buf_get_namespace_confirm_feedback = function (bufnr)
-  return vim.api.nvim_create_namespace("facilellm-namespace-confirm-feedback-" .. bufnr)
+  return vim.api.nvim_create_namespace("facilellm-confirm-feedback-" .. bufnr)
 end
 
 ---@param bufnr number

@@ -17,7 +17,11 @@ end
 local add_message = function (conversation, role, content)
   local last_msg = conversation[#conversation]
   if role == nil or last_msg and role == last_msg.role then
-    message.append(last_msg, content)
+    if type(content) == "string" then
+      message.append(last_msg, content)
+    else
+      message.append_lines(last_msg, content)
+    end
   else
     table.insert(conversation, message.create(role, content))
   end

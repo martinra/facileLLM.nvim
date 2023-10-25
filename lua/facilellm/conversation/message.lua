@@ -1,5 +1,5 @@
 ---@class Message
----@field role  string
+---@field role ("Context"| "Input"| "LLM")
 ---@field lines string[]
 
 -- Possible roles in a Message need to be provided/translated by
@@ -27,16 +27,10 @@ local create = function (role, content)
 end
 
 ---@param msg Message
----@param content string | string[]
+---@param content string
 ---@return nil
 local append = function (msg, content)
-  local lines = {}
-  if type(content) == "string" then
-    lines = vim.split(content, "\n")
-  else
-    lines = content
-  end
-
+  local lines = vim.split(content, "\n")
   for ix,line in ipairs(lines) do
     if ix == 1 then
       msg.lines[#msg.lines] = msg.lines[#msg.lines] .. line
@@ -46,8 +40,18 @@ local append = function (msg, content)
   end
 end
 
+---@param msg Message
+---@param lines string[]
+---@return nil
+local append_lines = function (msg, lines)
+  for _,line in ipairs(lines) do
+    table.insert(msg.lines, line)
+  end
+end
+
 
 return {
-  create = create,
-  append = append,
+  create       = create,
+  append       = append,
+  append_lines = append_lines,
 }

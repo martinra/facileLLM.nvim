@@ -1,5 +1,6 @@
 local conversation = require("facilellm.conversation")
 local llm = require("facilellm.llm")
+local util = require("facilellm.util")
 
 ---@class Session
 ---@field name string
@@ -91,6 +92,16 @@ local add_message = function (sessionid, role, content)
 end
 
 ---@param sessionid number
+---@param role string
+---@return nil
+local add_message_selection = function (sessionid, role)
+  local lines = util.get_visual_selection()
+  if lines then
+    add_message(sessionid, role, lines)
+  end
+end
+
+---@param sessionid number
 ---@return boolean
 local is_conversation_locked = function (sessionid)
   return sessions[sessionid].conversation_locked
@@ -152,6 +163,7 @@ return {
   get_model              = get_model,
   get_conversation       = get_conversation,
   add_message            = add_message,
+  add_message_selection  = add_message_selection,
   is_conversation_locked = is_conversation_locked,
   lock_conversation      = lock_conversation,
   unlock_conversation    = unlock_conversation,

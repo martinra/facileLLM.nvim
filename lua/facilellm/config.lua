@@ -79,8 +79,12 @@ M.setup = function (opts)
   opts = opts or {}
   validate_facilellm_config(opts)
 
-  -- We merge options anyway, because this has the best change to mirror the expected behavior.
+  -- We merge options anyway, because this has the best change to mirror the
+  -- expected behavior.
   M.opts = vim.tbl_deep_extend("force", M.opts, opts)
+
+  vim.api.nvim_set_hl(0, "FacileLLMMsgReceiving", {link = "DiffAdd"})
+  vim.api.nvim_set_hl(0, "FacileLLMRole", {link = "markdownH1"})
 end
 
 

@@ -11,13 +11,23 @@
 
 
 ---@return string
-local receiving_hl_group = function ()
-  return "DiffAdd"
+local get_hl_group_receiving = function ()
+  return "FacileLLMMsgReceiving"
+end
+
+---@return string
+local get_hl_group_role = function ()
+  return "FacileLLMRole"
 end
 
 ---@return number
 local buf_get_namespace_highlight_msg_receiving = function ()
   return vim.api.nvim_create_namespace("facilellm-highlight-msg-receiving")
+end
+
+---@return number
+local buf_get_namespace_highlight_role = function ()
+  return vim.api.nvim_create_namespace("facilellm-highlight-role")
 end
 
 ---@param conv Conversation
@@ -37,6 +47,21 @@ local end_highlight_msg_receiving = function (bufnr, render_state)
   render_state.highlight_receiving = nil
   local ns = buf_get_namespace_highlight_msg_receiving()
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
+end
+
+---@param bufnr number
+---@param row number
+---@param len number
+---@return nil
+local create_highlight_role = function (bufnr, row, len)
+  local ns = buf_get_namespace_highlight_role()
+  vim.api.nvim_buf_set_extmark(bufnr, ns,
+    row, 0,
+    {
+      end_row = row,
+      end_col = len,
+      hl_group = get_hl_group_role(),
+    })
 end
 
 ---@param bufnr number
@@ -63,7 +88,7 @@ local create_highlight_msg_receiving = function (bufnr, render_state, mx, msg)
         {
           end_row = end_row,
           end_col = end_col,
-          hl_group = receiving_hl_group(),
+          hl_group = get_hl_group_receiving(),
         })
   end
 end
@@ -86,7 +111,7 @@ local update_highlight_msg_receiving = function (bufnr, render_state, msg)
         id = id,
         end_row = end_row,
         end_col = end_col,
-        hl_group = receiving_hl_group(),
+        hl_group = get_hl_group_receiving(),
       })
   end
 end
@@ -120,6 +145,7 @@ local conversation = function (conv, bufnr, render_state)
     vim.api.nvim_buf_set_lines(bufnr, -2, -1, false, {msg.role .. ":"})
     vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, msg.lines)
 
+    create_highlight_role(bufnr, 0, string.len(msg.role)+1)
     create_highlight_msg_receiving(bufnr, render_state, 1, msg)
 
     render_state.lines_total = 1 + #msg.lines
@@ -166,6 +192,7 @@ local conversation = function (conv, bufnr, render_state)
     vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, {msg.role .. ":"})
     vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, msg.lines)
 
+    create_highlight_role(bufnr, render_state.lines_total, string.len(msg.role)+1)
     create_highlight_msg_receiving(bufnr, render_state, mx, msg)
 
     render_state.lines_total = render_state.lines_total + 1 + #msg.lines

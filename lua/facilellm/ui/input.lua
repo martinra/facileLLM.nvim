@@ -27,6 +27,7 @@ local set_confirm_hook = function (bufnr, on_confirm)
           return
         end
 
+        feedback_extmark = nil
         local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
         vim.api.nvim_buf_set_lines(bufnr, 0,-1, true, {})
         if on_confirm then

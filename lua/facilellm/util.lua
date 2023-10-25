@@ -1,10 +1,7 @@
-local M = {}
-
-
 ---@param relative string
 ---@param direction string
 ---@return string
-M.win_vsplit_modifier = function (relative, direction)
+local win_vsplit_modifier = function (relative, direction)
   if relative == "editor" then
     if direction == "right" then
       return "botright"
@@ -27,4 +24,6 @@ M.win_vsplit_modifier = function (relative, direction)
 end
 
 
-return M
+return {
+  win_vsplit_modifier  = win_vsplit_modifier,
+}

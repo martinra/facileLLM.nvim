@@ -4,7 +4,7 @@ local job = require("plenary.job")
 
 
 ---@class OpenAIMessage
----@field role string "system", "assistant", or "user"
+---@field role ("system"| "assistant"| "user")
 ---@field content string
 
 ---@alias OpenAIConversation OpenAIMessage[]

@@ -293,4 +293,5 @@ return {
   set_current_win_input              = set_current_win_input,
   set_current_win_conversation_input = set_current_win_conversation_input,
   show            = show,
+  render_conversation = render_conversation,
 }

@@ -130,7 +130,6 @@ local create = function (sessionid, name)
     render_state = ui_render.create_state(),
     conversation_winids = {},
     follow_conversation_flags = {},
-    recent_winid = nil,
     input_winid = nil,
     input_conv_winid = nil,
   }
@@ -186,10 +185,9 @@ end
 
 ---@param winid number
 ---@return nil
-local touch_conversation_window = function (winid)
-  local sessionid = ui_common.get_session(winid)
+local touch_window = function (winid)
+  local sessionid = ui_common.win_get_session(winid)
   touch(sessionid)
-  session_uis[sessionid].recent_winid = winid
 end
 
 ---@param sessionid number
@@ -281,13 +279,13 @@ end
 
 
 return {
-  create                                          = create,
-  delete                                          = delete,
-  touch                                           = touch,
-  get_most_recent                                 = get_most_recent,
-  select                                          = select,
-  get_conv_bufnr                                  = get_conv_bufnr,
-  get_input_bufnr                                 = get_input_bufnr,
-  touch_conversation_window                       = touch_conversation_window,
-  show                                            = show,
+  create          = create,
+  delete          = delete,
+  touch           = touch,
+  get_most_recent = get_most_recent,
+  select          = select,
+  get_conv_bufnr  = get_conv_bufnr,
+  get_input_bufnr = get_input_bufnr,
+  touch_window    = touch_window,
+  show            = show,
 }

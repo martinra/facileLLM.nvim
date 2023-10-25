@@ -269,29 +269,21 @@ local set_current_win_conversation_input = function (sessionid)
   end
 end
 
----@param sessionid number?
----@return nil
-local show = function (sessionid)
-  sessionid = sessionid or get_most_recent() or select() or create_from_model()
-  touch(sessionid)
-  set_current_win_conversation_input(sessionid)
-end
-
 
 return {
-  create          = create,
-  delete          = delete,
-  select          = select,
-  get_most_recent = get_most_recent,
-  touch           = touch,
-  touch_window    = touch_window,
-  get_conv_bufnr  = get_conv_bufnr,
-  get_input_bufnr = get_input_bufnr,
+  create                             = create,
+  delete                             = delete,
+  create_from_model                  = create_from_model,
+  select                             = select,
+  get_most_recent                    = get_most_recent,
+  touch                              = touch,
+  touch_window                       = touch_window,
+  get_conv_bufnr                     = get_conv_bufnr,
+  get_input_bufnr                    = get_input_bufnr,
   follow_conversation                = follow_conversation,
   unfollow_conversation              = unfollow_conversation,
   set_current_win_conversation       = set_current_win_conversation,
   set_current_win_input              = set_current_win_input,
   set_current_win_conversation_input = set_current_win_conversation_input,
-  show            = show,
-  render_conversation = render_conversation,
+  render_conversation                = render_conversation,
 }

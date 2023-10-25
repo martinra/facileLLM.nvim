@@ -38,6 +38,7 @@ local select = function ()
     return nil
   else
     for id,_ in pairs(session_uis) do
+      touch(id)
       return id
     end
   end
@@ -112,6 +113,7 @@ local create = function (sessionid, name)
   ---@param lines string[]
   ---@return nil
   local on_confirm_input = function (lines)
+    touch(sessionid)
     session.add_message(sessionid, "Input", lines)
     ui_render.start_highlight_msg_receiving(
       session.get_conversation(sessionid), get_render_state(sessionid))

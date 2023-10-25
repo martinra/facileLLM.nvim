@@ -162,6 +162,15 @@ local create = function (sessionid, name)
     sess.conv_bufnr, sess.render_state)
 end
 
+---@return number
+local create_from_model = function()
+  -- TODO: allow for model selection
+  local model_config = llm.default_model_config()
+  local sessionid = session.create(model_config)
+  create(sessionid, session.get_name(sessionid))
+  return sessionid
+end
+
 ---@param sessionid number
 ---@return nil
 local delete = function (sessionid)
@@ -204,30 +213,68 @@ local get_some_input_window = function (sessionid)
 end
 
 ---@param sessionid number
+---@return number
+local create_conversation_win = function (sessionid)
+  local bufnr = get_conv_bufnr(sessionid)
+  local conv_winid = ui_conversation.create_window(sessionid, bufnr, "right")
+  follow_conversation(sessionid, conv_winid)
+  return conv_winid
+end
+
+---@param sessionid number
+---@param conv_winid number?
+---@return number
+local create_input_win = function (sessionid, conv_winid)
+  local bufnr = get_input_bufnr(sessionid)
+  return ui_input.create_window(sessionid, bufnr, conv_winid)
+end
+
+---@param sessionid number
+---@return number
+local set_current_win_conversation = function (sessionid)
+  local conv_winid = get_some_conversation_window(sessionid)
+  if conv_winid then
+    vim.api.nvim_set_current_win(conv_winid)
+    return conv_winid
+  else
+    return create_conversation_win(sessionid)
+  end
+end
+
+---@param sessionid number
+---@return number
+local set_current_win_input = function (sessionid)
+  local input_winid = get_some_input_window(sessionid)
+  if input_winid then
+    vim.api.nvim_set_current_win(input_winid)
+    return input_winid
+  else
+    return create_input_win(sessionid)
+  end
+end
+
+---@param sessionid number
+---@return number
+local set_current_win_conversation_input = function (sessionid)
+  local input_winid = get_some_input_window(sessionid)
+  if input_winid then
+    vim.api.nvim_set_current_win(input_winid)
+    return input_winid
+  else
+    local conv_winid = get_some_conversation_window(sessionid)
+    if not conv_winid then
+      conv_winid = create_conversation_win(sessionid)
+    end
+    return create_input_win(sessionid, conv_winid)
+  end
+end
+
+---@param sessionid number?
 ---@return nil
 local show = function (sessionid)
-  sessionid = sessionid or get_most_recent() or select()
-  if not sessionid then
-    -- TOOD: allow for model selection
-    local model_config = llm.default_model_config()
-    sessionid = session.create(model_config)
-    create(sessionid, session.get_name(sessionid))
-    touch(sessionid)
-  end
-
-  local conv_winid = get_some_conversation_window(sessionid)
-  if not conv_winid then
-    local bufnr = get_conv_bufnr(sessionid)
-    conv_winid = ui_conversation.create_window(sessionid, bufnr, "right")
-    follow_conversation(sessionid, conv_winid)
-  end
-  local input_winid = get_some_input_window(sessionid)
-  if not input_winid then
-    local bufnr = get_input_bufnr(sessionid)
-    ui_input.create_window(sessionid, bufnr, conv_winid)
-  else
-    vim.api.nvim_win_set_current_win(input_winid)
-  end
+  sessionid = sessionid or get_most_recent() or select() or create_from_model()
+  touch(sessionid)
+  set_current_win_conversation_input(sessionid)
 end
 
 

@@ -287,5 +287,8 @@ return {
   get_conv_bufnr  = get_conv_bufnr,
   get_input_bufnr = get_input_bufnr,
   touch_window    = touch_window,
+  set_current_win_conversation       = set_current_win_conversation,
+  set_current_win_input              = set_current_win_input,
+  set_current_win_conversation_input = set_current_win_conversation_input,
   show            = show,
 }

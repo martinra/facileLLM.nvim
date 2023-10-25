@@ -6,9 +6,12 @@ local buf_set_session = function (bufnr, sessionid)
 end
 
 ---@param bufnr number
----@return number sessionid
+---@return number? sessionid
 local buf_get_session = function (bufnr)
-  return vim.api.nvim_buf_get_var(bufnr, "facilellm-sessionid")
+  local flag, sessionid = pcall(vim.api.nvim_buf_get_var, bufnr, "facilellm-sessionid")
+  if flag then
+    return sessionid
+  end
 end
 
 ---@param winid number
@@ -19,9 +22,12 @@ local win_set_session = function (winid, sessionid)
 end
 
 ---@param winid number
----@return number sessionid
+---@return number? sessionid
 local win_get_session = function (winid)
-  return vim.api.nvim_win_get_var(winid, "facilellm-sessionid")
+  local flag, sessionid = pcall(vim.api.nvim_win_get_var, winid, "facilellm-sessionid")
+  if flag then
+    return sessionid
+  end
 end
 
 

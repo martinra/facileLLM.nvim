@@ -187,7 +187,9 @@ end
 ---@return nil
 local touch_window = function (winid)
   local sessionid = ui_common.win_get_session(winid)
-  touch(sessionid)
+  if sessionid then
+    touch(sessionid)
+  end
 end
 
 ---@param sessionid number

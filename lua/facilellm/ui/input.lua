@@ -60,10 +60,13 @@ end
 
 ---@param sessionid number
 ---@param bufnr number
----@param conv_winid number
+---@param conv_winid number?
 ---@return number input_winid
 local create_window = function (sessionid, bufnr, conv_winid)
-  vim.api.nvim_set_current_win(conv_winid)
+  if conv_winid then
+    vim.api.nvim_set_current_win(conv_winid)
+  end
+
   vim.cmd("noau rightbelow split")
   local input_winid = vim.api.nvim_get_current_win()
 

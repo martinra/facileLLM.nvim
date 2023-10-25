@@ -31,7 +31,7 @@ local buf_get_namespace_highlight_role = function ()
 end
 
 ---@param conv Conversation
----@param render_state RenderHighlight
+---@param render_state RenderState
 ---@return nil
 local start_highlight_msg_receiving = function (conv, render_state)
   render_state.highlight_receiving = {

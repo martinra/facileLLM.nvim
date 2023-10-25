@@ -19,7 +19,6 @@ local add_context = function ()
   if not sessionid then
     return
   end
-  ---@cast sessionid number
 
   session.add_message(sessionid, "Context",
     {

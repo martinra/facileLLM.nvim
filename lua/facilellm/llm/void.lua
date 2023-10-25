@@ -23,9 +23,9 @@ R.send_word_by_word = function (conv, add_message, on_complete, lines, delay)
   end
   if #fst_line ~= 0 then
     local word = table.remove(fst_line, 1)
-    add_message("Void", word .. " ")
+    add_message("LLM", word .. " ")
   else
-    add_message("Void", "\n")
+    add_message("LLM", "\n")
     table.remove(lines, 1)
   end
 
@@ -52,7 +52,7 @@ R.send_response = function(conv, add_message, on_complete, lines, response_lines
       major_delay)
   else
     local line = table.remove(response_lines, 1)
-    add_message("Void", line .. "\n")
+    add_message("LLM", line .. "\n")
     vim.defer_fn(
       function ()
         R.send_response(conv, add_message, on_complete, lines, response_lines, major_delay, minor_delay)
@@ -68,7 +68,7 @@ end
 ---@return nil
 local response_to = function (conv, add_message, on_complete, opts)
   if #conv == 0 then
-    add_message("Void", "The void tried to hear your message, but there is nothing to be heard.")
+    add_message("LLM", "The void tried to hear your message, but there is nothing to be heard.")
     on_complete()
     return
   end

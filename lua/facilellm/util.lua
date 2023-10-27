@@ -23,11 +23,11 @@ local win_vsplit_modifier = function (relative, direction)
   end
 end
 
----@ return string[] | nil
+---@return string[] | nil
 local get_visual_selection = function ()
   local mode = vim.fn.mode()
-  local esckey = vim.api.nvim_replace_termcodes('<Esc>', true, true, true)
-  vim.api.nvim_feedkeys(esckey, 'nx', false)
+  local esckey = vim.api.nvim_replace_termcodes("<Esc>", true, true, true)
+  vim.api.nvim_feedkeys(esckey, "nx", false)
   local _, rs, cs = unpack(vim.fn.getpos("'<"))
   local _, re, ce = unpack(vim.fn.getpos("'>"))
 
@@ -45,8 +45,41 @@ local get_visual_selection = function ()
   end
 end
 
+---@param winid number
+---@param row_start number
+---@param row_end number
+---@return nil
+local create_fold = function (winid, row_start, row_end)
+  local winid_orig = vim.api.nvim_get_current_win()
+  vim.api.nvim_set_current_win(winid)
+  vim.cmd(row_start .. "," .. row_end .. "fo")
+  vim.api.nvim_set_current_win(winid_orig)
+end
+
+---@param winid number
+---@param row number
+---@return nil
+local delete_fold = function (winid, row)
+  local winid_orig = vim.api.nvim_get_current_win()
+  if winid_orig ~= winid then
+    vim.api.nvim_set_current_win(winid)
+  end
+
+  local cursor_orig = vim.api.nvim_win_get_cursor(winid)
+  vim.api.nvim_win_set_cursor(winid, {row,1})
+
+  vim.api.nvim_feedkeys("zd", "nx", false)
+
+  vim.api.nvim_win_set_cursor(winid, cursor_orig)
+  if winid_orig ~= winid then
+    vim.api.nvim_set_current_win(winid_orig)
+  end
+end
+
 
 return {
   win_vsplit_modifier  = win_vsplit_modifier,
   get_visual_selection = get_visual_selection,
+  create_fold          = create_fold,
+  delete_fold          = delete_fold,
 }

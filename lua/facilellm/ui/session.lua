@@ -268,6 +268,58 @@ local set_current_win_conversation_input = function (sessionid)
   end
 end
 
+---@param sessionid number
+---@return nil
+local fold_last_message = function (sessionid)
+  local conv = session.get_conversation(sessionid)
+  local render_state = get_render_state(sessionid)
+
+  for _,winid in pairs(vim.api.nvim_list_wins()) do
+    if ui_common.win_get_session(winid) == sessionid and ui_common.win_is_conversation(winid) then
+      ui_render.fold_last_message(conv, winid, render_state)
+    end
+  end
+end
+
+---@param winid number
+---@return nil
+local win_fold_last_message = function (winid)
+  local sessionid = ui_common.win_get_session(winid)
+  if not sessionid or not ui_common.win_is_conversation(winid) then
+    return
+  end
+
+  local conv = session.get_conversation(sessionid)
+  local render_state = get_render_state(sessionid)
+  ui_render.fold_last_message(conv, winid, render_state)
+end
+
+---@param sessionid number
+---@return nil
+local fold_context_messages = function (sessionid)
+  local conv = session.get_conversation(sessionid)
+  local render_state = get_render_state(sessionid)
+
+  for _,winid in pairs(vim.api.nvim_list_wins()) do
+    if ui_common.win_get_session(winid) == sessionid and ui_common.win_is_conversation(winid) then
+      ui_render.fold_context_messages(conv, winid, render_state)
+    end
+  end
+end
+
+---@param winid number
+---@return nil
+local win_fold_context_messages = function (winid)
+  local sessionid = ui_common.win_get_session(winid)
+  if not sessionid or not ui_common.win_is_conversation(winid) then
+    return
+  end
+
+  local conv = session.get_conversation(sessionid)
+  local render_state = get_render_state(sessionid)
+  ui_render.fold_context_messages(conv, winid, render_state)
+end
+
 
 return {
   create                             = create,
@@ -285,4 +337,8 @@ return {
   set_current_win_input              = set_current_win_input,
   set_current_win_conversation_input = set_current_win_conversation_input,
   render_conversation                = render_conversation,
+  fold_last_message                  = fold_last_message,
+  win_fold_last_message              = win_fold_last_message,
+  fold_context_messages              = fold_context_messages,
+  win_fold_context_messages          = win_fold_context_messages,
 }

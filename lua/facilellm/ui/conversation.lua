@@ -33,6 +33,9 @@ local create_window = function (sessionid, bufnr, direction)
   vim.cmd(string.format("noau %s vsplit", split_modifier))
   local winid = vim.api.nvim_get_current_win()
 
+  vim.wo.foldenable = true
+  vim.wo.foldmethod = "manual"
+
   vim.api.nvim_win_set_buf(winid, bufnr)
 
   return winid

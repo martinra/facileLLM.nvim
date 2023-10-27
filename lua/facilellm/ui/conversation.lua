@@ -17,6 +17,7 @@ local create_buffer = function (sessionid, name)
   vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
 
   ui_common.buf_set_session(bufnr, sessionid)
+  ui_common.buf_set_is_conversation(bufnr)
 
   return bufnr
 end

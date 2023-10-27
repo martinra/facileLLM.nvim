@@ -135,9 +135,6 @@ local create = function (sessionid, name)
   }
   session_uis[sessionid] = sess
 
-  vim.api.nvim_buf_set_var(sess.conv_bufnr, "facilellm_sessionid", sessionid)
-  vim.api.nvim_buf_set_var(sess.input_bufnr, "facilellm_sessionid", sessionid)
-
   vim.api.nvim_create_autocmd("WinClosed", {
     buffer = sess.conv_bufnr,
     callback = function()

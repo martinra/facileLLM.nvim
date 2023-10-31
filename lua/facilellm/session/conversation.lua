@@ -1,4 +1,4 @@
-local message = require("facilellm.conversation.message")
+local message = require("facilellm.session.message")
 
 
 ---@alias Conversation Message[]

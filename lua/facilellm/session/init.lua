@@ -1,4 +1,4 @@
-local conversation = require("facilellm.conversation")
+local conversation = require("facilellm.session.conversation")
 local llm = require("facilellm.llm")
 local util = require("facilellm.util")
 

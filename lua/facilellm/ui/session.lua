@@ -134,10 +134,10 @@ local create = function (sessionid, name)
     sess.conv_bufnr, sess.render_state)
 end
 
+---@param model_config? LLMConfig
 ---@return number
-local create_from_model = function()
-  -- TODO: allow for model selection
-  local model_config = llm.default_model_config()
+local create_from_model = function (model_config)
+  model_config = model_config or llm.default_model_config()
   local sessionid = session.create(model_config)
   create(sessionid, session.get_name(sessionid))
   return sessionid

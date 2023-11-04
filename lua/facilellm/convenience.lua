@@ -1,3 +1,4 @@
+local config = require("facilellm.config")
 local session = require("facilellm.session")
 local ui_select = require("facilellm.ui.select_session")
 local ui_session = require("facilellm.ui.session")
@@ -12,6 +13,12 @@ local show = function (sessionid)
 
   ui_select.touch(sessionid)
   ui_session.set_current_win_conversation_input(sessionid)
+end
+
+---@return nil
+local new_from_selection = function ()
+  ui_select.select_model(config.opts.models,
+    ui_session.set_current_win_conversation_input)
 end
 
 ---@return nil
@@ -35,5 +42,6 @@ end
 
 return {
   add_context = add_context,
+  new_from_selection = new_from_selection,
   show = show,
 }

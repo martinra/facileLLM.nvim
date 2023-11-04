@@ -11,6 +11,7 @@ local M = {}
 
 M.setup = config.setup
 M.show = convenience.show
+M.new_from_selection = convenience.new_from_selection
 M.add_context = convenience.add_context
 
 

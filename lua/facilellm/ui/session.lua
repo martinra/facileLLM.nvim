@@ -70,10 +70,11 @@ local render_conversation = function (sessionid)
   end
 end
 
----@param sessionid number
----@param name string
----@return nil
-local create = function (sessionid, name)
+---@param model_config LLMConfig
+---@return number sessionid
+local create = function (model_config)
+  local sessionid = session.create(model_config)
+  local name = session.get_name(sessionid)
 
   ---@return nil
   local on_complete_query = function ()
@@ -131,6 +132,8 @@ local create = function (sessionid, name)
 
   ui_render.conversation(session.get_conversation(sessionid),
     sess.conv_bufnr, sess.render_state)
+
+  return sessionid
 end
 
 ---@param sessionid number

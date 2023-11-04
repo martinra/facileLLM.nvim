@@ -9,9 +9,8 @@ local ui_session = require("facilellm.ui.session")
 ---@return number
 local create_from_model = function (model_config)
   model_config = model_config or llm.default_model_config()
-  local sessionid = session.create(model_config)
-  ui_session.create(sessionid, session.get_name(sessionid))
-  return sessionid
+  ---@cast model_config LLMConfig
+  return ui_session.create(model_config)
 end
 
 ---@return nil

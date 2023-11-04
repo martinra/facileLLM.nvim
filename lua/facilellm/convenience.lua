@@ -61,7 +61,7 @@ end
 
 ---@return nil
 local add_context = function ()
-  local sessionid = ui_session.get_most_recent()
+  local sessionid = ui_select.get_most_recent()
   if not sessionid then
     return
   end

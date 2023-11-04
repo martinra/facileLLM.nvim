@@ -250,7 +250,9 @@ local clear_conversation = function (msg_map, bufnr, render_state)
   end
   render_state.folded = folded_mapped
 
-  vim.api.nvim_buf_set_lines(bufnr, 0, -1, {})
+  vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {})
+  vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
 end
 
 ---@param conv FacileLLM.Conversation

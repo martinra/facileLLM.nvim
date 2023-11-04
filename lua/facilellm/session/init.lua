@@ -37,6 +37,24 @@ local create = function (model_config, name)
   local model = llm.dispatch(model_config.implementation)(model_config.opts)
   name = name or model_config.name or model.name
 
+  local suffices = {}
+  local nsuffices = 0
+  for _,sess in pairs(sessions) do
+    if string.sub(sess.name, 1, string.len(name)) == name then
+      local suffix = string.sub(sess.name, string.len(name)+1, string.len(sess.name))
+      suffix = string.match(suffix, "^()%s*$") and "" or string.match(suffix, "^%s*(.*%S)")
+      suffices[suffix] = true
+      nsuffices = nsuffices + 1
+    end
+  end
+  if nsuffices ~= 0 then
+    local new_suffix = 2
+    while suffices[tostring(new_suffix)] do
+      new_suffix = new_suffix + 1
+    end
+    name = name .. " " .. new_suffix
+  end
+
   ---@type Session
   local sess = {
     name = name,

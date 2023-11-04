@@ -228,6 +228,31 @@ local create_state = function ()
   }
 end
 
+---@param msg_map table<FacileLLM.MsgIndex, FacileLLM.MsgIndex>
+---@param bufnr BufNr
+---@param render_state FacileLLM.RenderState
+---@return nil
+local clear_conversation = function (msg_map, bufnr, render_state)
+  render_state.msg = 0
+  render_state.line = 0
+  render_state.char = 0
+  render_state.lines_total = 0
+
+  if render_state.highlight_receiving then
+    end_highlight_msg_receiving(bufnr, render_state)
+  end
+
+  local folded_mapped = {}
+  for mx,winids in pairs(render_state.folded) do
+    if msg_map[mx] then
+      folded_mapped[msg_map[mx]] = winids
+    end
+  end
+  render_state.folded = folded_mapped
+
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, {})
+end
+
 ---@param conv FacileLLM.Conversation
 ---@param bufnr BufNr
 ---@param render_state FacileLLM.RenderState
@@ -318,6 +343,7 @@ end
 return {
   create_state = create_state,
   render_conversation = render_conversation,
+  clear_conversation = clear_conversation,
   start_highlight_msg_receiving = start_highlight_msg_receiving,
   end_highlight_msg_receiving = end_highlight_msg_receiving,
   fold_message = fold_message,

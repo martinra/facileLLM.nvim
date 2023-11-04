@@ -57,6 +57,21 @@ local does_follow_conversation = function (sessionid, winid)
 end
 
 ---@param sessionid FacileLLM.SessionId
+---@param preserve_context boolean
+---@return nil
+local clear_conversation = function (sessionid, preserve_context)
+  local msg_map = session.clear_conversation(sessionid, preserve_context)
+  if msg_map == nil then
+    return false
+  end
+  local conv = session.get_conversation(sessionid)
+  local conv_bufnr = get_conv_bufnr(sessionid)
+  local render_state = get_render_state(sessionid)
+  ui_render.clear_conversation(msg_map, conv_bufnr, render_state)
+  ui_render.render_conversation(conv, conv_bufnr, render_state)
+end
+
+---@param sessionid FacileLLM.SessionId
 ---@return nil
 local render_conversation = function (sessionid)
   local conv = session.get_conversation(sessionid)
@@ -286,6 +301,7 @@ return {
   set_current_win_conversation       = set_current_win_conversation,
   set_current_win_input              = set_current_win_input,
   set_current_win_conversation_input = set_current_win_conversation_input,
+  clear_conversation                 = clear_conversation,
   render_conversation                = render_conversation,
   fold_last_message                  = fold_last_message,
   win_fold_last_message              = win_fold_last_message,

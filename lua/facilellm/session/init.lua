@@ -161,6 +161,34 @@ local unlock_conversation = function (sessionid)
 end
 
 ---@param sessionid FacileLLM.SessionId
+---@param preserve_context boolean
+---@return table<FacileLLM.MsgIndex,FacileLLM.MsgIndex>?
+local clear_conversation = function (sessionid, preserve_context)
+  if is_conversation_locked(sessionid) then
+    vim.notify("clearing conversation despite lock", vim.log.levels.WARN)
+    return
+  end
+
+  if not preserve_context then
+    sessions[sessionid].conversation = {}
+    return {}
+  else
+    local msg_map = {}
+    local new_conv = {}
+    local new_mx = 1
+    for mx,msg in ipairs(sessions[sessionid].conversation) do
+      if msg.role == "Context" then
+        new_conv[new_mx] = msg
+        msg_map[mx] = new_mx
+        new_mx = new_mx + 1
+      end
+    end
+    sessions[sessionid].conversation = new_conv
+    return msg_map
+  end
+end
+
+---@param sessionid FacileLLM.SessionId
 ---@param render_conversation function(FacileLLM.SessionId): nil
 ---@param on_complete function(): nil
 ---@return nil
@@ -210,5 +238,6 @@ return {
   is_conversation_locked = is_conversation_locked,
   lock_conversation      = lock_conversation,
   unlock_conversation    = unlock_conversation,
+  clear_conversation = clear_conversation,
   query_model            = query_model,
 }

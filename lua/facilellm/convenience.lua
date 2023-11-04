@@ -15,9 +15,15 @@ local create_from_model = function (model_config)
 end
 
 ---@return nil
-local new_from_selection = function ()
+local create_from_selection = function ()
   ui_select.select_model(config.opts.models,
-    ui_session.set_current_win_conversation_input)
+    function (model_config)
+      local sessionid = create_from_model(model_config)
+      ui_select.touch(sessionid)
+      ui_session.set_current_win_conversation_input(sessionid)
+    end
+  )
+
 end
 
 ---@param sessionid number?
@@ -52,7 +58,7 @@ end
 
 return {
   create_from_model = create_from_model,
-  new_from_selection = new_from_selection,
+  create_from_selection = create_from_selection,
   show = show,
   add_context = add_context,
 }

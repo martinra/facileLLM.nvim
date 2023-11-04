@@ -52,11 +52,8 @@ local select_model = function (models, callback)
       actions.select_default:replace(function ()
         actions.close(prompt_bufnr)
         ---@type LLMConfig model
-        local model = actions_state.get_selected_entry().value
-        touch(sessionid)
-        local convenience = require("facilellm.convenience")
-        local sessionid = convenience.create_from_model(model)
-        callback(sessionid)
+        local model_config = actions_state.get_selected_entry().value
+        callback(model_config)
       end)
       return true
     end,

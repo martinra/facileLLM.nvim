@@ -1,4 +1,3 @@
-local llm = require("facilellm.llm")
 local session = require("facilellm.session")
 local ui_common = require("facilellm.ui.common")
 local ui_conversation = require("facilellm.ui.conversation")
@@ -286,7 +285,6 @@ end
 return {
   create                             = create,
   delete                             = delete,
-  create_from_model                  = create_from_model,
   touch_window                       = touch_window,
   get_conv_bufnr                     = get_conv_bufnr,
   get_input_bufnr                    = get_input_bufnr,

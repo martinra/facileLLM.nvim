@@ -75,9 +75,9 @@ end
 local create_highlight_msg_receiving = function (bufnr, render_state, mx, msg)
   if render_state.highlight_receiving and render_state.highlight_receiving.msg == mx then
     local ns = buf_get_namespace_highlight_msg_receiving()
-    local row = render_state.lines_total
+    local row = render_state.lines_total - #msg.lines
     local col = 0
-    local end_row = render_state.lines_total + #msg.lines
+    local end_row = render_state.lines_total
     local end_col
     if #msg.lines == 0 then
       end_col = string.len(msg.role .. ":")
@@ -274,15 +274,15 @@ local render_conversation = function (conv, bufnr, render_state)
     vim.api.nvim_buf_set_lines(bufnr, -2, -1, false, {msg.role .. ":"})
     vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, msg.lines)
 
-    create_highlight_role(bufnr, 0, string.len(msg.role)+1)
-    create_highlight_msg_receiving(bufnr, render_state, mx, msg)
-    update_folds(conv, mx, render_state, false)
-
     render_state.lines_total = 1 + #msg.lines
 
     render_state.msg = 1
     render_state.line = #msg.lines
     render_state.char = msg.lines and string.len(msg.lines[#msg.lines])
+
+    create_highlight_role(bufnr, 0, string.len(msg.role)+1)
+    create_highlight_msg_receiving(bufnr, render_state, mx, msg)
+    update_folds(conv, mx, render_state, false)
 
   else
     local mx = render_state.msg
@@ -308,11 +308,11 @@ local render_conversation = function (conv, bufnr, render_state)
         render_state.lines_total = render_state.lines_total + #new_lines
       end
 
-      update_highlight_msg_receiving(bufnr, render_state, msg)
-      update_folds(conv, mx, render_state, true)
-
       render_state.line = #msg.lines
       render_state.char = msg.lines and string.len(msg.lines[#msg.lines])
+
+      update_highlight_msg_receiving(bufnr, render_state, msg)
+      update_folds(conv, mx, render_state, true)
     end
   end
 
@@ -324,21 +324,20 @@ local render_conversation = function (conv, bufnr, render_state)
     vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, {msg.role .. ":"})
     vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, msg.lines)
 
-    create_highlight_role(bufnr, render_state.lines_total, string.len(msg.role)+1)
+    local role_line = render_state.lines_total
+    render_state.lines_total = render_state.lines_total + 1 + #msg.lines
+
+    render_state.msg = mx
+    render_state.line = #msg.lines
+    local line = msg.lines[#msg.lines]
+    render_state.char = line and string.len(line) or 0
+
+    create_highlight_role(bufnr, role_line, string.len(msg.role)+1)
     create_highlight_msg_receiving(bufnr, render_state, mx, msg)
     update_folds(conv, mx, render_state, false)
-
-    render_state.lines_total = render_state.lines_total + 1 + #msg.lines
   end
 
   vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
-
-  -- Track last rendered part of the conversation.
-  render_state.msg = #conv
-  local msg = conv[render_state.msg]
-  render_state.line = #msg.lines
-  local line = msg.lines[render_state.line]
-  render_state.char = line and string.len(line) or 0
 end
 
 

@@ -73,6 +73,15 @@ local delete = function (sessionid)
   sessions[sessionid] = nil
 end
 
+---@return table<number,string>
+local get_session_names = function ()
+  local names = {}
+  for id,sess in pairs(sessions) do
+    names[id] = sess.name
+  end
+  return names
+end
+
 ---@return number? sessionid
 local get_some_session = function ()
   if #sessions == 0 then
@@ -187,6 +196,7 @@ end
 return {
   create                 = create,
   delete                 = delete,
+  get_session_names      = get_session_names,
   get_by_name            = get_by_name,
   get_some_session       = get_some_session,
   get_name               = get_name,

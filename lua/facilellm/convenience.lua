@@ -37,6 +37,28 @@ local show = function (sessionid)
   ui_session.set_current_win_conversation_input(sessionid)
 end
 
+---@param sessionid number?
+---@return nil
+local focus = function (sessionid)
+  sessionid = sessionid or ui_select.get_most_recent()
+  sessionid = sessionid or session.get_some_session()
+  if not sessionid then
+    return
+  end
+
+  ui_select.touch(sessionid)
+  ui_session.set_current_win_conversation_input(sessionid)
+end
+
+local focus_from_selection = function ()
+  ui_select.select_session(session.get_session_names(),
+    function (sessionid)
+      ui_select.touch(sessionid)
+      ui_session.set_current_win_conversation_input(sessionid)
+    end
+  )
+end
+
 ---@return nil
 local add_context = function ()
   local sessionid = ui_session.get_most_recent()
@@ -60,5 +82,7 @@ return {
   create_from_model = create_from_model,
   create_from_selection = create_from_selection,
   show = show,
+  focus = focus,
+  focus_from_selection = focus_from_selection,
   add_context = add_context,
 }

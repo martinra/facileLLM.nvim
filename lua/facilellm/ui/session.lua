@@ -4,6 +4,7 @@ local ui_common = require("facilellm.ui.common")
 local ui_conversation = require("facilellm.ui.conversation")
 local ui_input = require("facilellm.ui.input")
 local ui_render = require("facilellm.ui.render")
+local ui_select = require("facilellm.ui.select_session")
 
 
 ---@class SessionUI
@@ -15,34 +16,7 @@ local ui_render = require("facilellm.ui.render")
 
 ---@type SessionUI[]
 local session_uis = {}
----@type nil | number
-local recent_sessionid = nil
 
-
----@param sessionid number
----@return nil
-local touch = function (sessionid)
-  recent_sessionid = sessionid
-end
-
--- By most recent we mean the session that most recently was interacted with
--- as indicated by the touch command.
----@return nil | number sessionid
-local get_most_recent = function ()
-  return recent_sessionid
-end
-
----@return nil | number sessionid
-local select = function ()
-  if #session_uis == 0 then
-    return nil
-  else
-    for id,_ in pairs(session_uis) do
-      touch(id)
-      return id
-    end
-  end
-end
 
 ---@param sessionid number
 ---@return number bufnr
@@ -113,7 +87,7 @@ local create = function (sessionid, name)
   ---@param lines string[]
   ---@return nil
   local on_confirm_input = function (lines)
-    touch(sessionid)
+    ui_select.touch(sessionid)
     session.add_message(sessionid, "Input", lines)
     ui_render.start_highlight_msg_receiving(
       session.get_conversation(sessionid), get_render_state(sessionid))
@@ -174,18 +148,15 @@ end
 local delete = function (sessionid)
   vim.api.nvim_buf_delete(session_uis[sessionid].conv_bufnr, {force = true})
   vim.api.nvim_buf_delete(session_uis[sessionid].input_bufnr, {force = true})
-  if recent_sessionid == sessionid then
-    recent_sessionid = nil
-  end
+  ui_select.delete(sessionid)
 end
-
 
 ---@param winid number
 ---@return nil
 local touch_window = function (winid)
   local sessionid = ui_common.win_get_session(winid)
   if sessionid then
-    touch(sessionid)
+    ui_select.touch(sessionid)
   end
 end
 
@@ -325,9 +296,6 @@ return {
   create                             = create,
   delete                             = delete,
   create_from_model                  = create_from_model,
-  select                             = select,
-  get_most_recent                    = get_most_recent,
-  touch                              = touch,
   touch_window                       = touch_window,
   get_conv_bufnr                     = get_conv_bufnr,
   get_input_bufnr                    = get_input_bufnr,

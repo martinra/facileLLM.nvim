@@ -55,6 +55,17 @@ local delete = function (sessionid)
   sessions[sessionid] = nil
 end
 
+---@return number? sessionid
+local get_some_session = function ()
+  if #sessions == 0 then
+    return nil
+  else
+    for id,_ in pairs(sessions) do
+      return id
+    end
+  end
+end
+
 ---@param name string
 ---@return nil | number sessionid
 local get_by_name = function (name)
@@ -159,6 +170,7 @@ return {
   create                 = create,
   delete                 = delete,
   get_by_name            = get_by_name,
+  get_some_session       = get_some_session,
   get_name               = get_name,
   get_model              = get_model,
   get_conversation       = get_conversation,

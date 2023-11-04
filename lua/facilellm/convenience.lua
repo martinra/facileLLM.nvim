@@ -1,15 +1,16 @@
 local session = require("facilellm.session")
+local ui_select = require("facilellm.ui.select_session")
 local ui_session = require("facilellm.ui.session")
 
 
 ---@param sessionid number?
 ---@return nil
 local show = function (sessionid)
-  sessionid = sessionid or ui_session.get_most_recent()
-  sessionid = sessionid or ui_session.select()
+  sessionid = sessionid or ui_select.get_most_recent()
+  sessionid = sessionid or session.get_some_session()
   sessionid = sessionid or ui_session.create_from_model()
 
-  ui_session.touch(sessionid)
+  ui_select.touch(sessionid)
   ui_session.set_current_win_conversation_input(sessionid)
 end
 

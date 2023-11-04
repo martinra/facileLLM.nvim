@@ -144,15 +144,6 @@ local delete = function (sessionid)
   ui_select.delete(sessionid)
 end
 
----@param winid number
----@return nil
-local touch_window = function (winid)
-  local sessionid = ui_common.win_get_session(winid)
-  if sessionid then
-    ui_select.touch(sessionid)
-  end
-end
-
 ---@param sessionid number
 ---@return nil | number winid
 local get_some_conversation_window = function (sessionid)
@@ -288,7 +279,6 @@ end
 return {
   create                             = create,
   delete                             = delete,
-  touch_window                       = touch_window,
   get_conv_bufnr                     = get_conv_bufnr,
   get_input_bufnr                    = get_input_bufnr,
   follow_conversation                = follow_conversation,

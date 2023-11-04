@@ -1,3 +1,5 @@
+local ui_common = require("facilellm.ui.common")
+
 local actions = require("telescope.actions")
 local actions_state = require("telescope.actions.state")
 local sorters = require("telescope.sorters")
@@ -21,6 +23,15 @@ end
 ---@return nil
 local touch = function (sessionid)
   recent_sessionid = sessionid
+end
+
+---@param winid number
+---@return nil
+local touch_window = function (winid)
+  local sessionid = ui_common.win_get_session(winid)
+  if sessionid then
+    touch(sessionid)
+  end
 end
 
 -- By most recent we mean the session that most recently was interacted with
@@ -97,6 +108,7 @@ end
 return {
   delete = delete,
   touch = touch,
+  touch_window = touch_window,
   get_most_recent = get_most_recent,
   select_session = select_session,
   select_model = select_model,

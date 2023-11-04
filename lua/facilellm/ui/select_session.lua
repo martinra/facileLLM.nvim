@@ -53,9 +53,9 @@ local select_model = function (models, callback)
         actions.close(prompt_bufnr)
         ---@type LLMConfig model
         local model = actions_state.get_selected_entry().value
-        local ui_session = require("facilellm.ui.session")
-        local sessionid = ui_session.create_from_model(model)
         touch(sessionid)
+        local convenience = require("facilellm.convenience")
+        local sessionid = convenience.create_from_model(model)
         callback(sessionid)
       end)
       return true

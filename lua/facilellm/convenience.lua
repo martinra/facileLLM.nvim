@@ -1,24 +1,34 @@
 local config = require("facilellm.config")
+local llm = require("facilellm.llm")
 local session = require("facilellm.session")
 local ui_select = require("facilellm.ui.select_session")
 local ui_session = require("facilellm.ui.session")
 
 
----@param sessionid number?
----@return nil
-local show = function (sessionid)
-  sessionid = sessionid or ui_select.get_most_recent()
-  sessionid = sessionid or session.get_some_session()
-  sessionid = sessionid or ui_session.create_from_model()
-
-  ui_select.touch(sessionid)
-  ui_session.set_current_win_conversation_input(sessionid)
+---@param model_config? LLMConfig
+---@return number
+local create_from_model = function (model_config)
+  model_config = model_config or llm.default_model_config()
+  local sessionid = session.create(model_config)
+  ui_session.create(sessionid, session.get_name(sessionid))
+  return sessionid
 end
 
 ---@return nil
 local new_from_selection = function ()
   ui_select.select_model(config.opts.models,
     ui_session.set_current_win_conversation_input)
+end
+
+---@param sessionid number?
+---@return nil
+local show = function (sessionid)
+  sessionid = sessionid or ui_select.get_most_recent()
+  sessionid = sessionid or session.get_some_session()
+  sessionid = sessionid or create_from_model()
+
+  ui_select.touch(sessionid)
+  ui_session.set_current_win_conversation_input(sessionid)
 end
 
 ---@return nil
@@ -41,7 +51,8 @@ end
 
 
 return {
-  add_context = add_context,
+  create_from_model = create_from_model,
   new_from_selection = new_from_selection,
   show = show,
+  add_context = add_context,
 }

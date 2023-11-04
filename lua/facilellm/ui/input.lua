@@ -7,7 +7,7 @@ local buf_get_namespace_confirm_feedback = function ()
   return vim.api.nvim_create_namespace("facilellm-confirm-feedback")
 end
 
----@param bufnr number
+---@param bufnr BufNr
 ---@param on_confirm function(string[]): nil
 ---@return nil
 local set_confirm_hook = function (bufnr, on_confirm)
@@ -37,10 +37,10 @@ local set_confirm_hook = function (bufnr, on_confirm)
     })
 end
 
----@param sessionid number
+---@param sessionid FacileLLM.SessionId
 ---@param name string
 ---@param on_confirm function(string):nil
----@return number bufnr number of the newly created buffer
+---@return BufNr
 local create_buffer = function (sessionid, name, on_confirm)
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_name(bufnr, name)
@@ -58,10 +58,10 @@ local create_buffer = function (sessionid, name, on_confirm)
   return bufnr
 end
 
----@param sessionid number
----@param bufnr number
----@param conv_winid number?
----@return number input_winid
+---@param sessionid FacileLLM.SessionId
+---@param bufnr BufNr
+---@param conv_winid WinId?
+---@return WinId
 local create_window = function (sessionid, bufnr, conv_winid)
   if conv_winid then
     vim.api.nvim_set_current_win(conv_winid)
@@ -78,7 +78,7 @@ local create_window = function (sessionid, bufnr, conv_winid)
   return input_winid
 end
 
----@param bufnr number
+---@param bufnr BufNr
 ---@return nil
 local on_complete_query = function (bufnr)
   local nspc_confirm_feedback = buf_get_namespace_confirm_feedback()

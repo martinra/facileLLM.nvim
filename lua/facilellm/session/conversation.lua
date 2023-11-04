@@ -1,17 +1,18 @@
 local message = require("facilellm.session.message")
 
 
----@alias Conversation Message[]
+---@alias FacileLLM.Conversation FacileLLM.Message[]
+---@alias FacileLLM.MsgIndex number
 
 
----@param initial nil | Conversation
----@return Conversation
+---@param initial FacileLLM.Conversation?
+---@return FacileLLM.Conversation
 local create = function (initial)
   return initial or {}
 end
 
----@param conversation Conversation
----@param role nil | string
+---@param conversation FacileLLM.Conversation
+---@param role FacileLLM.MsgRole
 ---@param content string | string[]
 ---@return nil
 local add_message = function (conversation, role, content)

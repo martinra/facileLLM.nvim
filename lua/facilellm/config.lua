@@ -1,20 +1,20 @@
----@class FacileLLMConfig
+---@class FacileLLM.Config
 ---@field default_model string | number Name or index of the default model.
----@field models LLMConfig[]
----@field layout LayoutConfig
+---@field models FacileLLM.LLMConfig[]
+---@field layout FacileLLM.LayoutConfig
 
----@class LLMConfig
+---@class FacileLLM.LLMConfig
 ---@field name string Name of the model.
----@field implementation string Name of an implementation. Must be accepted by
+---@field implementation FacileLLM.LLMImplementation Name of an implementation. Must be accepted by
 ---    the function facilelll.llm.dispatch.
 ---@field opts table Options that are forwarded to the implementation.
----@field initial_conversation Conversation 
+---@field initial_conversation FacileLLM.Conversation 
 
----@class LayoutConfig
+---@class FacileLLM.LayoutConfig
 ---@field relative string Relative to what should the conversation window be opened?
 
 
----@return FacileLLMConfig
+---@return FacileLLM.Config
 local default_opts = function ()
   return {
     default_model = "OpenAI GPT 3.5-Turbo",
@@ -34,7 +34,7 @@ local default_opts = function ()
 end
 
 ---@param opts table
----@return nil | string
+---@return string?
 local validate_facilellm_config = function (opts)
   vim.validate({
     opts = {opts, "t"},
@@ -69,7 +69,7 @@ end
 
 
 local M = {
-  ---@type FacileLLMConfig
+  ---@type FacileLLM.Config
   opts = default_opts(),
 }
 

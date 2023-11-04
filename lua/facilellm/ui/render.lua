@@ -1,16 +1,15 @@
 local util = require("facilellm.util")
 
-
----@class RenderState
----@field msg number index of the last rendered message
+---@class FacileLLM.RenderState
+---@field msg FacileLLM.MsgIndex index of the last rendered message
 ---@field line number index of the last rendered line
 ---@field char number index of the last rendered character
 ---@field lines_total number total number of lines rendered
----@field highlight_receiving RenderHighlight?
----@field folded table table of folded messages
+---@field highlight_receiving FacileLLM.RenderHighlight?
+---@field folded table<FacileLLM.MsgIndex,WinId[]> table of folded messages
 
----@class RenderHighlight
----@field msg number
+---@class FacileLLM.RenderHighlight
+---@field msg FacileLLM.MsgIndex
 ---@field extmark number?
 
 
@@ -34,8 +33,8 @@ local buf_get_namespace_highlight_role = function ()
   return vim.api.nvim_create_namespace("facilellm-highlight-role")
 end
 
----@param conv Conversation
----@param render_state RenderState
+---@param conv FacileLLM.Conversation
+---@param render_state FacileLLM.RenderState
 ---@return nil
 local start_highlight_msg_receiving = function (conv, render_state)
   render_state.highlight_receiving = {
@@ -44,8 +43,8 @@ local start_highlight_msg_receiving = function (conv, render_state)
   }
 end
 
----@param bufnr number
----@param render_state RenderState
+---@param bufnr BufNr
+---@param render_state FacileLLM.RenderState
 ---@return nil
 local end_highlight_msg_receiving = function (bufnr, render_state)
   render_state.highlight_receiving = nil
@@ -53,7 +52,7 @@ local end_highlight_msg_receiving = function (bufnr, render_state)
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
 end
 
----@param bufnr number
+---@param bufnr BufNr
 ---@param row number
 ---@param len number
 ---@return nil
@@ -68,10 +67,10 @@ local create_highlight_role = function (bufnr, row, len)
     })
 end
 
----@param bufnr number
----@param render_state RenderState
----@param mx number message index
----@param msg Message
+---@param bufnr BufNr
+---@param render_state FacileLLM.RenderState
+---@param mx FacileLLM.MsgIndex
+---@param msg FacileLLM.Message
 ---@return nil
 local create_highlight_msg_receiving = function (bufnr, render_state, mx, msg)
   if render_state.highlight_receiving and render_state.highlight_receiving.msg == mx then
@@ -97,9 +96,9 @@ local create_highlight_msg_receiving = function (bufnr, render_state, mx, msg)
   end
 end
 
----@param bufnr number
----@param render_state RenderState
----@param msg Message
+---@param bufnr BufNr
+---@param render_state FacileLLM.RenderState
+---@param msg FacileLLM.Message
 ---@return nil
 local update_highlight_msg_receiving = function (bufnr, render_state, msg)
   if render_state.highlight_receiving and render_state.highlight_receiving.extmark then
@@ -120,9 +119,9 @@ local update_highlight_msg_receiving = function (bufnr, render_state, msg)
   end
 end
 
----@param conv Conversation
----@param mx number
----@param render_state RenderState?
+---@param conv FacileLLM.Conversation
+---@param mx FacileLLM.MsgIndex
+---@param render_state FacileLLM.RenderState?
 ---@return {[1]: number, [2]: number}?
 local fold_message_range = function (conv, mx, render_state)
   if render_state and render_state.msg < mx then
@@ -144,10 +143,10 @@ local fold_message_range = function (conv, mx, render_state)
   return {s,e}
 end
 
----@param conv Conversation
----@param mx number
----@param winid number
----@param render_state RenderState
+---@param conv FacileLLM.Conversation
+---@param mx FacileLLM.MsgIndex
+---@param winid WinId
+---@param render_state FacileLLM.RenderState
 ---@return nil
 local fold_message = function (conv, mx, winid, render_state)
   if mx < #conv then
@@ -177,17 +176,17 @@ local fold_message = function (conv, mx, winid, render_state)
   end
 end
 
----@param conv Conversation
----@param winid number
----@param render_state RenderState
+---@param conv FacileLLM.Conversation
+---@param winid WinId
+---@param render_state FacileLLM.RenderState
 ---@return nil
 local fold_last_message = function (conv, winid, render_state)
   fold_message(conv, #conv, winid, render_state)
 end
 
----@param conv Conversation
----@param winid number
----@param render_state RenderState
+---@param conv FacileLLM.Conversation
+---@param winid WinId
+---@param render_state FacileLLM.RenderState
 ---@return nil
 local fold_context_messages = function (conv, winid, render_state)
   for mx = 1,#conv do
@@ -197,9 +196,9 @@ local fold_context_messages = function (conv, winid, render_state)
   end
 end
 
----@param conv Conversation
----@param mx number
----@param render_state RenderState
+---@param conv FacileLLM.Conversation
+---@param mx FacileLLM.MsgIndex
+---@param render_state FacileLLM.RenderState
 ---@param delete boolean
 ---@return nil
 local update_folds = function (conv, mx, render_state, delete)
@@ -217,7 +216,7 @@ local update_folds = function (conv, mx, render_state, delete)
   end
 end
 
----@return table
+---@return FacileLLM.RenderState
 local create_state = function ()
   return {
     msg = 0,
@@ -229,11 +228,11 @@ local create_state = function ()
   }
 end
 
----@param conv Conversation
----@param bufnr number
----@param render_state RenderState
+---@param conv FacileLLM.Conversation
+---@param bufnr BufNr
+---@param render_state FacileLLM.RenderState
 ---@return nil
-local conversation = function (conv, bufnr, render_state)
+local render_conversation = function (conv, bufnr, render_state)
   if #conv == 0 then
     return
   end
@@ -318,7 +317,7 @@ end
 
 return {
   create_state = create_state,
-  conversation = conversation,
+  render_conversation = render_conversation,
   start_highlight_msg_receiving = start_highlight_msg_receiving,
   end_highlight_msg_receiving = end_highlight_msg_receiving,
   fold_message = fold_message,

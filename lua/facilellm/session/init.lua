@@ -2,17 +2,20 @@ local conversation = require("facilellm.session.conversation")
 local llm = require("facilellm.llm")
 local util = require("facilellm.util")
 
----@class Session
+
+---@alias FacileLLM.SessionId number
+
+---@class FacileLLM.Session
 ---@field name string
----@field model LLM
----@field conversation Conversation
+---@field model FacileLLM.LLM
+---@field conversation FacileLLM.Conversation
 ---@field conversation_locked boolean
 
 
----@type table<number,Session> Table of sessions by their id
+---@type table<FacileLLM.SessionId,FacileLLM.Session> Table of sessions by their id
 local sessions = {}
 
----@return number
+---@return FacileLLM.SessionId
 local new_sessionid = function ()
  while true do
     local newid = math.random(10000)
@@ -29,9 +32,9 @@ local new_sessionid = function ()
   end
 end
 
----@param model_config LLMConfig
----@param name? string
----@return number sessionid of the newly created session
+---@param model_config FacileLLM.LLMConfig
+---@param name string?
+---@return FacileLLM.SessionId
 local create = function (model_config, name)
   local sessionid = new_sessionid()
   local model = llm.dispatch(model_config.implementation)(model_config.opts)
@@ -55,7 +58,7 @@ local create = function (model_config, name)
     name = name .. " " .. new_suffix
   end
 
-  ---@type Session
+  ---@type FacileLLM.Session
   local sess = {
     name = name,
     model = model,
@@ -67,13 +70,13 @@ local create = function (model_config, name)
   return sessionid
 end
 
----@param sessionid number
+---@param sessionid FacileLLM.SessionId
 ---@return nil
 local delete = function (sessionid)
   sessions[sessionid] = nil
 end
 
----@return table<number,string>
+---@return table<FacileLLM.SessionId,string>
 local get_session_names = function ()
   local names = {}
   for id,sess in pairs(sessions) do
@@ -82,7 +85,7 @@ local get_session_names = function ()
   return names
 end
 
----@return number? sessionid
+---@return FacileLLM.SessionId?
 local get_some_session = function ()
   if #sessions == 0 then
     return nil
@@ -94,7 +97,7 @@ local get_some_session = function ()
 end
 
 ---@param name string
----@return nil | number sessionid
+---@return FacileLLM.SessionId?
 local get_by_name = function (name)
   for id,session in ipairs(sessions) do
     if session.name == name then
@@ -103,34 +106,34 @@ local get_by_name = function (name)
   end
 end
 
----@param sessionid number
+---@param sessionid FacileLLM.SessionId
 ---@return string
 local get_name = function (sessionid)
   return sessions[sessionid].name
 end
 
----@param sessionid number
----@return LLM
+---@param sessionid FacileLLM.SessionId
+---@return FacileLLM.LLM
 local get_model = function (sessionid)
   return sessions[sessionid].model
 end
 
----@param sessionid number
----@return Conversation
+---@param sessionid FacileLLM.SessionId
+---@return FacileLLM.Conversation
 local get_conversation = function (sessionid)
   return sessions[sessionid].conversation
 end
 
----@param sessionid number
----@param role string
+---@param sessionid FacileLLM.SessionId
+---@param role FacileLLM.MsgRole
 ---@param content string | string[]
 ---@return nil
 local add_message = function (sessionid, role, content)
   conversation.add_message(get_conversation(sessionid), role, content)
 end
 
----@param sessionid number
----@param role string
+---@param sessionid FacileLLM.SessionId
+---@param role FacileLLM.MsgRole
 ---@return nil
 local add_message_selection = function (sessionid, role)
   local lines = util.get_visual_selection()
@@ -139,26 +142,26 @@ local add_message_selection = function (sessionid, role)
   end
 end
 
----@param sessionid number
+---@param sessionid FacileLLM.SessionId
 ---@return boolean
 local is_conversation_locked = function (sessionid)
   return sessions[sessionid].conversation_locked
 end
 
----@param sessionid number
+---@param sessionid FacileLLM.SessionId
 ---@return nil
 local lock_conversation = function (sessionid)
   sessions[sessionid].conversation_locked = true
 end
 
----@param sessionid number
+---@param sessionid FacileLLM.SessionId
 ---@return nil
 local unlock_conversation = function (sessionid)
   sessions[sessionid].conversation_locked = false
 end
 
----@param sessionid number
----@param render_conversation function(number): nil
+---@param sessionid FacileLLM.SessionId
+---@param render_conversation function(FacileLLM.SessionId): nil
 ---@param on_complete function(): nil
 ---@return nil
 local query_model = function (sessionid, render_conversation, on_complete)
@@ -167,7 +170,7 @@ local query_model = function (sessionid, render_conversation, on_complete)
     return
   end
 
-  ---@param role string
+  ---@param role FacileLLM.MsgRole
   ---@param content string | string[]
   ---@return nil
   local add_message_wrapped = function (role, content)

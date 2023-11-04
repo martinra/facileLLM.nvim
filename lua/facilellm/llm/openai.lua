@@ -2,20 +2,21 @@
 
 local job = require("plenary.job")
 
+---@alias FacileLLM.OpenAI.MsgRole ("system"| "assistant"| "user")
 
----@class OpenAIMessage
----@field role ("system"| "assistant"| "user")
+---@class FacileLLM.OpenAI.Message
+---@field role FacileLLM.OpenAI.MsgRole
 ---@field content string
 
----@alias OpenAIConversation OpenAIMessage[]
+---@alias OpenAIConversation FacileLLM.OpenAI.Message[]
 
----@class OpenAIStdOutRecord
+---@class FacileLLM.OpenAI.StdOutRecord
 ---@field lines string[]
 ---@field json_records table[] Start and end position of a valid json recond in lines
 
 
----@param role string
----@return string
+---@param role FacileLLM.MsgRole
+---@return FacileLLM.OpenAI.MsgRole
 local convert_role_to_openai = function (role)
   if role == "Context" then
     return "system"
@@ -24,12 +25,12 @@ local convert_role_to_openai = function (role)
   elseif role == "Input" then
     return "user"
   else
-    return role
+    error("unknown role " .. role)
   end
 end
 
----@param role string
----@return string
+---@param role FacileLLM.OpenAI.MsgRole
+---@return FacileLLM.MsgRole
 local convert_role_from_openai = function (role)
   if role == "system" then
     return "Context"
@@ -38,11 +39,11 @@ local convert_role_from_openai = function (role)
   elseif role == "user" then
     return "Input"
   else
-    return role
+    error("unknown role " .. role)
   end
 end
 
----@param stdout_record OpenAIStdOutRecord
+---@param stdout_record FacileLLM.OpenAI.StdOutRecord
 ---@param data string
 local append_to_stdout_record = function (stdout_record, data)
   if string.len(data) == 0 then
@@ -62,7 +63,7 @@ local append_to_stdout_record = function (stdout_record, data)
   end
 end
 
----@param stdout_record OpenAIStdOutRecord
+---@param stdout_record FacileLLM.OpenAI.StdOutRecord
 ---@return nil | table
 local parse_json_record = function (stdout_record)
   local concat_lines = ""
@@ -78,8 +79,8 @@ local parse_json_record = function (stdout_record)
   end
 end
 
----@param stdout_record OpenAIStdOutRecord
----@return table[] A list of the newly decoded JSON records.
+---@param stdout_record FacileLLM.OpenAI.StdOutRecord
+---@return table[] records A list of the newly decoded JSON records.
 local parse_new_json_records = function (stdout_record)
   local new_records = {}
   while true do
@@ -96,20 +97,20 @@ local parse_new_json_records = function (stdout_record)
   return new_records
 end
 
----@param stdout_record OpenAIStdOutRecord
----@return nil | table The last valid JSON entries in the record.
+---@param stdout_record FacileLLM.OpenAI.StdOutRecord
+---@return table? record The last valid JSON entries in the record.
 local get_last_json_record = function (stdout_record)
   parse_new_json_records(stdout_record)
   return stdout_record.json_records[#stdout_record.json_records]
 end
 
----@param conversation Conversation
+---@param conversation FacileLLM.Conversation
 ---@param add_message function
 ---@param on_complete function
 ---@param opts table
 ---@return nil
 local response_to = function (conversation, add_message, on_complete, opts)
-  ---@type OpenAIStdOutRecord
+  ---@type FacileLLM.OpenAI.StdOutRecord
   local stdout_record = {
     lines = {},
     json_records = {},
@@ -188,7 +189,7 @@ local default_opts = function ()
 end
 
 ---@param opts table
----@return LLM
+---@return FacileLLM.LLM
 local create = function (opts)
   opts = opts or {}
   opts = vim.tbl_extend("force", default_opts(), opts)
@@ -196,7 +197,7 @@ local create = function (opts)
   -- We expose name and model parameters to the caller for later
   -- modification.
 
-  ---@type LLM
+  ---@type FacileLLM.LLM
   local llm = {
     name = opts.name,
     params = opts.params,

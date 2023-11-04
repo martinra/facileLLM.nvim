@@ -61,7 +61,7 @@ R.send_response = function(conv, add_message, on_complete, lines, response_lines
   end
 end
 
----@param conv Conversation
+---@param conv FacileLLM.Conversation
 ---@param add_message function
 ---@param on_complete function
 ---@param opts table
@@ -98,12 +98,12 @@ local default_opts = function ()
 end
 
 ---@param opts table
----@return LLM
+---@return FacileLLM.LLM
 local create = function (opts)
   opts = opts or {}
   opts = vim.tbl_extend("force", default_opts(), opts)
 
-  ---@type LLM
+  ---@type FacileLLM.LLM
   local llm = {
     name = opts.name,
     params = opts.params,

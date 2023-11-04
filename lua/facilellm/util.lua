@@ -23,7 +23,7 @@ local win_vsplit_modifier = function (relative, direction)
   end
 end
 
----@return string[] | nil
+---@return string[]?
 local get_visual_selection = function ()
   local mode = vim.fn.mode()
   local esckey = vim.api.nvim_replace_termcodes("<Esc>", true, true, true)
@@ -45,7 +45,7 @@ local get_visual_selection = function ()
   end
 end
 
----@param winid number
+---@param winid WinId
 ---@param row_start number
 ---@param row_end number
 ---@return nil
@@ -56,7 +56,7 @@ local create_fold = function (winid, row_start, row_end)
   vim.api.nvim_set_current_win(winid_orig)
 end
 
----@param winid number
+---@param winid WinId
 ---@param row number
 ---@return nil
 local delete_fold = function (winid, row)

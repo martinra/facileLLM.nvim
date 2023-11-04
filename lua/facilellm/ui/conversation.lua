@@ -3,9 +3,9 @@ local ui_common = require("facilellm.ui.common")
 local util = require("facilellm.util")
 
 
----@param sessionid number
+---@param sessionid FacileLLM.SessionId
 ---@param name string
----@return number bufnr number of the newly created buffer
+---@return BufNr
 local create_buffer = function (sessionid, name)
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_name(bufnr, name)
@@ -22,10 +22,10 @@ local create_buffer = function (sessionid, name)
   return bufnr
 end
 
----@param sessionid number
----@param bufnr number
+---@param sessionid FacileLLM.SessionId
+---@param bufnr BufNr
 ---@param direction string Will be parsed by util.win_vsplit_modifier.
----@return number winid
+---@return WinId
 local create_window = function (sessionid, bufnr, direction)
   direction = direction or "right"
   local split_modifier = util.win_vsplit_modifier(
@@ -41,15 +41,15 @@ local create_window = function (sessionid, bufnr, direction)
   return winid
 end
 
----@param bufnr number
----@param winid number
+---@param bufnr BufNr
+---@param winid WinId
 ---@return nil
 local follow = function (bufnr, winid)
   local nlines = vim.api.nvim_buf_line_count(bufnr)
   vim.api.nvim_win_set_cursor(winid, {nlines, 0})
 end
 
----@param bufnr number
+---@param bufnr BufNr
 ---@return nil
 local on_complete_query = function (bufnr)
 end

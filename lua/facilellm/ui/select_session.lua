@@ -7,11 +7,11 @@ local finders = require("telescope.finders")
 local pickers = require("telescope.pickers")
 
 
----@type nil | number
+---@type FacileLLM.SessionId?
 local recent_sessionid = nil
 
 
----@param sessionid number
+---@param sessionid FacileLLM.SessionId
 ---@return nil
 local delete = function (sessionid)
   if recent_sessionid == sessionid then
@@ -19,13 +19,13 @@ local delete = function (sessionid)
   end
 end
 
----@param sessionid number
+---@param sessionid FacileLLM.SessionId
 ---@return nil
 local touch = function (sessionid)
   recent_sessionid = sessionid
 end
 
----@param winid number
+---@param winid WinId
 ---@return nil
 local touch_window = function (winid)
   local sessionid = ui_common.win_get_session(winid)
@@ -36,17 +36,17 @@ end
 
 -- By most recent we mean the session that most recently was interacted with
 -- as indicated by the touch command.
----@return nil | number sessionid
+---@return FacileLLM.SessionId?
 local get_most_recent = function ()
   return recent_sessionid
 end
 
----@param sessions table<number,string>
----@param callback function(number): nil
+---@param session_names table<FacileLLM.SessionId, string>
+---@param callback function(FacileLLM.SessionId): nil
 ---@return nil
-local select_session = function (sessions, callback)
+local select_session = function (session_names, callback)
   local sessionids = {}
-  for id,_ in pairs(sessions) do
+  for id,_ in pairs(session_names) do
     table.insert(sessionids,id)
   end
 
@@ -57,8 +57,8 @@ local select_session = function (sessions, callback)
       entry_maker = function(sessionid)
         return {
           value   = sessionid,
-          display = sessions[sessionid],
-          ordinal = sessions[sessionid],
+          display = session_names[sessionid],
+          ordinal = session_names[sessionid],
         }
       end
     },
@@ -75,8 +75,8 @@ local select_session = function (sessions, callback)
   }):find()
 end
 
----@param models LLMConfig[]
----@param callback function(number): nil
+---@param models FacileLLM.LLMConfig[]
+---@param callback function(FacileLLM.LLMConfig): nil
 ---@return nil
 local select_model = function (models, callback)
   pickers.new({}, {
@@ -95,7 +95,7 @@ local select_model = function (models, callback)
     attach_mappings = function (prompt_bufnr)
       actions.select_default:replace(function ()
         actions.close(prompt_bufnr)
-        ---@type LLMConfig model
+        ---@type FacileLLM.LLMConfig model
         local model_config = actions_state.get_selected_entry().value
         callback(model_config)
       end)

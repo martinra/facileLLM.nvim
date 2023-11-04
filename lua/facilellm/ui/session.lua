@@ -6,63 +6,63 @@ local ui_render = require("facilellm.ui.render")
 local ui_select = require("facilellm.ui.select_session")
 
 
----@class SessionUI
----@field conv_bufnr number
----@field input_bufnr number
----@field render_state RenderState
----@field follow_conversation_flags table<number,boolean>
+---@class FacileLLM.SessionUI
+---@field conv_bufnr BufNr
+---@field input_bufnr BufNr
+---@field render_state FacileLLM.RenderState
+---@field follow_conversation_flags table<WinId,boolean>
 
 
----@type SessionUI[]
+---@type FacileLLM.SessionUI[]
 local session_uis = {}
 
 
----@param sessionid number
----@return number bufnr
+---@param sessionid FacileLLM.SessionId
+---@return BufNr
 local get_conv_bufnr = function (sessionid)
   return session_uis[sessionid].conv_bufnr
 end
 
----@param sessionid number
----@return number bufnr
+---@param sessionid FacileLLM.SessionId
+---@return BufNr
 local get_input_bufnr = function (sessionid)
   return session_uis[sessionid].input_bufnr
 end
 
----@param sessionid number
----@return RenderState
+---@param sessionid FacileLLM.SessionId
+---@return FacileLLM.RenderState
 local get_render_state = function (sessionid)
   return session_uis[sessionid].render_state
 end
 
----@param sessionid number
----@param winid number
+---@param sessionid FacileLLM.SessionId
+---@param winid WinId
 ---@return nil
 local follow_conversation = function (sessionid, winid)
   session_uis[sessionid].follow_conversation_flags[winid] = true
 end
 
----@param sessionid number
----@param winid number
+---@param sessionid FacileLLM.SessionId
+---@param winid WinId
 ---@return nil
 local unfollow_conversation = function (sessionid, winid)
   session_uis[sessionid].follow_conversation_flags[winid] = false
 end
 
----@param sessionid number
----@param winid number
+---@param sessionid FacileLLM.SessionId
+---@param winid WinId
 ---@return boolean
 local does_follow_conversation = function (sessionid, winid)
   return session_uis[sessionid].follow_conversation_flags[winid]
 end
 
----@param sessionid number
+---@param sessionid FacileLLM.SessionId
 ---@return nil
 local render_conversation = function (sessionid)
   local conv = session.get_conversation(sessionid)
   local bufnr = get_conv_bufnr(sessionid)
   local render_state = get_render_state(sessionid)
-  ui_render.conversation(conv, bufnr, render_state)
+  ui_render.render_conversation(conv, bufnr, render_state)
   for _,winid in pairs(vim.api.nvim_list_wins()) do
     if does_follow_conversation(sessionid, winid) then
       ui_conversation.follow(bufnr, winid)
@@ -70,8 +70,8 @@ local render_conversation = function (sessionid)
   end
 end
 
----@param model_config LLMConfig
----@return number sessionid
+---@param model_config FacileLLM.LLMConfig
+---@return FacileLLM.SessionId
 local create = function (model_config)
   local sessionid = session.create(model_config)
   local name = session.get_name(sessionid)
@@ -130,13 +130,13 @@ local create = function (model_config)
     end
   })
 
-  ui_render.conversation(session.get_conversation(sessionid),
+  ui_render.render_conversation(session.get_conversation(sessionid),
     sess.conv_bufnr, sess.render_state)
 
   return sessionid
 end
 
----@param sessionid number
+---@param sessionid FacileLLM.SessionId
 ---@return nil
 local delete = function (sessionid)
   vim.api.nvim_buf_delete(session_uis[sessionid].conv_bufnr, {force = true})
@@ -144,8 +144,8 @@ local delete = function (sessionid)
   ui_select.delete(sessionid)
 end
 
----@param sessionid number
----@return nil | number winid
+---@param sessionid FacileLLM.SessionId
+---@return WinId?
 local get_some_conversation_window = function (sessionid)
   local bufnr = get_conv_bufnr(sessionid)
   for _,winid in pairs(vim.api.nvim_tabpage_list_wins(0)) do
@@ -155,8 +155,8 @@ local get_some_conversation_window = function (sessionid)
   end
 end
 
----@param sessionid number
----@return nil | number winid
+---@param sessionid FacileLLM.SessionId
+---@return WinId?
 local get_some_input_window = function (sessionid)
   local bufnr = get_input_bufnr(sessionid)
   for _,winid in pairs(vim.api.nvim_tabpage_list_wins(0)) do
@@ -166,8 +166,8 @@ local get_some_input_window = function (sessionid)
   end
 end
 
----@param sessionid number
----@return number
+---@param sessionid FacileLLM.SessionId
+---@return WinId
 local create_conversation_win = function (sessionid)
   local bufnr = get_conv_bufnr(sessionid)
   local conv_winid = ui_conversation.create_window(sessionid, bufnr, "right")
@@ -175,16 +175,16 @@ local create_conversation_win = function (sessionid)
   return conv_winid
 end
 
----@param sessionid number
----@param conv_winid number?
----@return number
+---@param sessionid FacileLLM.SessionId
+---@param conv_winid WinId?
+---@return WinId
 local create_input_win = function (sessionid, conv_winid)
   local bufnr = get_input_bufnr(sessionid)
   return ui_input.create_window(sessionid, bufnr, conv_winid)
 end
 
----@param sessionid number
----@return number
+---@param sessionid FacileLLM.SessionId
+---@return WinId
 local set_current_win_conversation = function (sessionid)
   local conv_winid = get_some_conversation_window(sessionid)
   if conv_winid then
@@ -195,8 +195,8 @@ local set_current_win_conversation = function (sessionid)
   end
 end
 
----@param sessionid number
----@return number
+---@param sessionid FacileLLM.SessionId
+---@return WinId
 local set_current_win_input = function (sessionid)
   local input_winid = get_some_input_window(sessionid)
   if input_winid then
@@ -207,8 +207,8 @@ local set_current_win_input = function (sessionid)
   end
 end
 
----@param sessionid number
----@return number
+---@param sessionid FacileLLM.SessionId
+---@return WinId
 local set_current_win_conversation_input = function (sessionid)
   local input_winid = get_some_input_window(sessionid)
   if input_winid then
@@ -223,7 +223,7 @@ local set_current_win_conversation_input = function (sessionid)
   end
 end
 
----@param sessionid number
+---@param sessionid FacileLLM.SessionId
 ---@return nil
 local fold_last_message = function (sessionid)
   local conv = session.get_conversation(sessionid)
@@ -236,7 +236,7 @@ local fold_last_message = function (sessionid)
   end
 end
 
----@param winid number
+---@param winid WinId
 ---@return nil
 local win_fold_last_message = function (winid)
   local sessionid = ui_common.win_get_session(winid)
@@ -249,7 +249,7 @@ local win_fold_last_message = function (winid)
   ui_render.fold_last_message(conv, winid, render_state)
 end
 
----@param sessionid number
+---@param sessionid FacileLLM.SessionId
 ---@return nil
 local fold_context_messages = function (sessionid)
   local conv = session.get_conversation(sessionid)
@@ -262,7 +262,7 @@ local fold_context_messages = function (sessionid)
   end
 end
 
----@param winid number
+---@param winid WinId
 ---@return nil
 local win_fold_context_messages = function (winid)
   local sessionid = ui_common.win_get_session(winid)

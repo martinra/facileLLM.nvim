@@ -5,11 +5,11 @@ local ui_select = require("facilellm.ui.select_session")
 local ui_session = require("facilellm.ui.session")
 
 
----@param model_config? LLMConfig
----@return number
+---@param model_config? FacileLLM.LLMConfig
+---@return FacileLLM.SessionId
 local create_from_model = function (model_config)
   model_config = model_config or llm.default_model_config()
-  ---@cast model_config LLMConfig
+  ---@cast model_config FacileLLM.LLMConfig
   return ui_session.create(model_config)
 end
 
@@ -25,7 +25,7 @@ local create_from_selection = function ()
 
 end
 
----@param sessionid number?
+---@param sessionid FacileLLM.SessionId?
 ---@return nil
 local show = function (sessionid)
   sessionid = sessionid or ui_select.get_most_recent()
@@ -36,7 +36,7 @@ local show = function (sessionid)
   ui_session.set_current_win_conversation_input(sessionid)
 end
 
----@param sessionid number?
+---@param sessionid FacileLLM.SessionId?
 ---@return nil
 local focus = function (sessionid)
   sessionid = sessionid or ui_select.get_most_recent()
@@ -49,6 +49,7 @@ local focus = function (sessionid)
   ui_session.set_current_win_conversation_input(sessionid)
 end
 
+---@return nil
 local focus_from_selection = function ()
   ui_select.select_session(session.get_session_names(),
     function (sessionid)

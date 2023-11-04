@@ -1,14 +1,16 @@
 local config = require("facilellm.config")
 
 
----@class LLM
+---@class FacileLLM.LLM
 ---@field name string
 ---@field params table
----@field response_to function(conv: string, add_msg: function, on_cmpl: function, opt:table)
+---@field response_to function(conv: Conversation, add_msg: function, on_cmpl: function, opt:table)
+
+---@alias FacileLLM.LLMImplementation ("OpenAI API"| "The Void Mock LLM")
 
 
----@param implementation string
----@return function(opts: table): LLM
+---@param implementation FacileLLM.LLMImplementation
+---@return function(opts: table): FacileLLM.LLM
 local dispatch = function (implementation)
   if implementation == "OpenAI API" then
     return require("facilellm.llm.openai").create
@@ -19,7 +21,7 @@ local dispatch = function (implementation)
   end
 end
 
----@return LLMConfig
+---@return FacileLLM.LLMConfig
 local default_model_config = function ()
   local default_model = config.opts.default_model
   local models = config.opts.models

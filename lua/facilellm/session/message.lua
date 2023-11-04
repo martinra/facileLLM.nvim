@@ -1,15 +1,16 @@
----@class Message
----@field role ("Context"| "Input"| "LLM")
+-- Possible roles in a Message need to be provided/translated
+-- by a model, we do not check them. The default role for
+-- input is "Input".
+---@alias FacileLLM.MsgRole ("Context"| "Input"| "LLM")
+
+---@class FacileLLM.Message
+---@field role FacileLLM.MsgRole
 ---@field lines string[]
 
--- Possible roles in a Message need to be provided/translated by
--- a model, we do not check them. The default role for input is
--- "Input".
 
-
----@param role string
+---@param role FacileLLM.MsgRole
 ---@param content string | string[]
----@return Message
+---@return FacileLLM.Message
 local create = function (role, content)
   local lines = {}
   if type(content) == "string" then
@@ -18,7 +19,7 @@ local create = function (role, content)
     lines = content
   end
 
-  ---@type Message
+  ---@type FacileLLM.Message
   local msg = {
     role = role,
     lines = lines,
@@ -26,7 +27,7 @@ local create = function (role, content)
   return msg
 end
 
----@param msg Message
+---@param msg FacileLLM.Message
 ---@param content string
 ---@return nil
 local append = function (msg, content)
@@ -40,7 +41,7 @@ local append = function (msg, content)
   end
 end
 
----@param msg Message
+---@param msg FacileLLM.Message
 ---@param lines string[]
 ---@return nil
 local append_lines = function (msg, lines)

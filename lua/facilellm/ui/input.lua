@@ -59,11 +59,10 @@ local create_buffer = function (sessionid, name, on_confirm)
   return bufnr
 end
 
----@param sessionid FacileLLM.SessionId
 ---@param bufnr BufNr
 ---@param conv_winid WinId?
 ---@return WinId
-local create_window = function (sessionid, bufnr, conv_winid)
+local create_window = function (bufnr, conv_winid)
   if conv_winid then
     vim.api.nvim_set_current_win(conv_winid)
   end

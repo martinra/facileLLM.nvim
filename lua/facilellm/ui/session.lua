@@ -186,7 +186,7 @@ end
 ---@return WinId
 local create_conversation_win = function (sessionid)
   local bufnr = get_conv_bufnr(sessionid)
-  local conv_winid = ui_conversation.create_window(sessionid, bufnr, "right")
+  local conv_winid = ui_conversation.create_window(bufnr, "right")
   follow_conversation(sessionid, conv_winid)
   return conv_winid
 end
@@ -196,7 +196,7 @@ end
 ---@return WinId
 local create_input_win = function (sessionid, conv_winid)
   local bufnr = get_input_bufnr(sessionid)
-  return ui_input.create_window(sessionid, bufnr, conv_winid)
+  return ui_input.create_window(bufnr, conv_winid)
 end
 
 ---@param sessionid FacileLLM.SessionId

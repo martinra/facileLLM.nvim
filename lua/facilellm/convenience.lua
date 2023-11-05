@@ -22,7 +22,15 @@ local create_from_selection = function ()
       ui_session.set_current_win_conversation_input(sessionid)
     end
   )
+end
 
+---@return nil
+local delete_from_selection = function ()
+  ui_select.select_session(session.get_session_names(),
+    function (sessionid)
+      ui_session.delete(sessionid)
+    end
+  )
 end
 
 ---@param sessionid FacileLLM.SessionId?
@@ -80,6 +88,7 @@ end
 return {
   create_from_model = create_from_model,
   create_from_selection = create_from_selection,
+  delete_from_selection = delete_from_selection,
   show = show,
   focus = focus,
   focus_from_selection = focus_from_selection,

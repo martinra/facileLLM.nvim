@@ -84,6 +84,20 @@ local render_conversation = function (sessionid)
   end
 end
 
+---@param sessionid FacileLLM.SessionId
+---@return nil
+local delete = function (sessionid)
+  ui_select.delete(sessionid)
+  for _,winid in pairs(vim.api.nvim_list_wins()) do
+    if ui_common.win_get_session(winid) == sessionid then
+      vim.api.nvim_win_close(winid, true)
+    end
+  end
+  vim.api.nvim_buf_delete(session_uis[sessionid].conv_bufnr, {force = true})
+  vim.api.nvim_buf_delete(session_uis[sessionid].input_bufnr, {force = true})
+  session.delete(sessionid)
+end
+
 ---@param model_config FacileLLM.LLMConfig
 ---@return FacileLLM.SessionId
 local create = function (model_config)
@@ -171,13 +185,6 @@ local create = function (model_config)
   return sessionid
 end
 
----@param sessionid FacileLLM.SessionId
----@return nil
-local delete = function (sessionid)
-  vim.api.nvim_buf_delete(session_uis[sessionid].conv_bufnr, {force = true})
-  vim.api.nvim_buf_delete(session_uis[sessionid].input_bufnr, {force = true})
-  ui_select.delete(sessionid)
-end
 
 ---@param sessionid FacileLLM.SessionId
 ---@return WinId?

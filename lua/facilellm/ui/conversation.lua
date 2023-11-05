@@ -60,9 +60,9 @@ local follow = function (bufnr, winid)
   vim.api.nvim_win_set_cursor(winid, {nlines, 0})
 end
 
----@param bufnr BufNr
+---@param _ BufNr
 ---@return nil
-local on_complete_query = function (bufnr)
+local on_complete_query = function (_)
 end
 
 

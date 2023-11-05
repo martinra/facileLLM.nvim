@@ -16,17 +16,38 @@ local ui_select = require("facilellm.ui.select_session")
 ---@type FacileLLM.SessionUI[]
 local session_uis = {}
 
-
 ---@param sessionid FacileLLM.SessionId
 ---@return BufNr
-local get_conv_bufnr = function (sessionid)
+local get_conversation_buffer = function (sessionid)
   return session_uis[sessionid].conv_bufnr
 end
 
 ---@param sessionid FacileLLM.SessionId
 ---@return BufNr
-local get_input_bufnr = function (sessionid)
+local get_input_buffer = function (sessionid)
   return session_uis[sessionid].input_bufnr
+end
+
+---@param sessionid FacileLLM.SessionId
+---@return WinId?
+local get_some_conversation_window = function (sessionid)
+  local bufnr = get_conversation_buffer(sessionid)
+  for _,winid in pairs(vim.api.nvim_tabpage_list_wins(0)) do
+    if vim.api.nvim_win_get_buf(winid) == bufnr then
+      return winid
+    end
+  end
+end
+
+---@param sessionid FacileLLM.SessionId
+---@return WinId?
+local get_some_input_window = function (sessionid)
+  local bufnr = get_input_buffer(sessionid)
+  for _,winid in pairs(vim.api.nvim_tabpage_list_wins(0)) do
+    if vim.api.nvim_win_get_buf(winid) == bufnr then
+      return winid
+    end
+  end
 end
 
 ---@param sessionid FacileLLM.SessionId
@@ -64,7 +85,7 @@ local clear_conversation = function (sessionid, preserve_context)
     return
   end
   local conv = session.get_conversation(sessionid)
-  local conv_bufnr = get_conv_bufnr(sessionid)
+  local conv_bufnr = get_conversation_buffer(sessionid)
   local render_state = get_render_state(sessionid)
   ui_render.clear_conversation(conv_bufnr, render_state)
   ui_render.render_conversation(conv, conv_bufnr, render_state)
@@ -74,7 +95,7 @@ end
 ---@return nil
 local render_conversation = function (sessionid)
   local conv = session.get_conversation(sessionid)
-  local bufnr = get_conv_bufnr(sessionid)
+  local bufnr = get_conversation_buffer(sessionid)
   local render_state = get_render_state(sessionid)
   ui_render.render_conversation(conv, bufnr, render_state)
   for _,winid in pairs(vim.api.nvim_list_wins()) do
@@ -101,8 +122,8 @@ end
 ---@param sessionid FacileLLM.SessionId
 ---@return nil
 local set_keymaps = function (sessionid)
-  local conv_bufnr = get_conv_bufnr(sessionid)
-  local input_bufnr = get_input_bufnr(sessionid)
+  local conv_bufnr = get_conversation_buffer(sessionid)
+  local input_bufnr = get_input_buffer(sessionid)
 
   vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-c>", "",
     { callback = function ()
@@ -146,10 +167,10 @@ local create = function (model_config)
 
   ---@return nil
   local on_complete_query = function ()
-    local bufnr = get_conv_bufnr(sessionid)
+    local bufnr = get_conversation_buffer(sessionid)
     ui_render.end_highlight_msg_receiving(bufnr, get_render_state(sessionid))
     ui_conversation.on_complete_query(bufnr)
-    ui_input.on_complete_query(get_input_bufnr(sessionid))
+    ui_input.on_complete_query(get_input_buffer(sessionid))
   end
 
   ---@param lines string[]
@@ -206,33 +227,10 @@ local create = function (model_config)
   return sessionid
 end
 
-
----@param sessionid FacileLLM.SessionId
----@return WinId?
-local get_some_conversation_window = function (sessionid)
-  local bufnr = get_conv_bufnr(sessionid)
-  for _,winid in pairs(vim.api.nvim_tabpage_list_wins(0)) do
-    if vim.api.nvim_win_get_buf(winid) == bufnr then
-      return winid
-    end
-  end
-end
-
----@param sessionid FacileLLM.SessionId
----@return WinId?
-local get_some_input_window = function (sessionid)
-  local bufnr = get_input_bufnr(sessionid)
-  for _,winid in pairs(vim.api.nvim_tabpage_list_wins(0)) do
-    if vim.api.nvim_win_get_buf(winid) == bufnr then
-      return winid
-    end
-  end
-end
-
 ---@param sessionid FacileLLM.SessionId
 ---@return WinId
 local create_conversation_win = function (sessionid)
-  local bufnr = get_conv_bufnr(sessionid)
+  local bufnr = get_conversation_buffer(sessionid)
   local conv_winid = ui_conversation.create_window(bufnr, "right")
   follow_conversation(sessionid, conv_winid)
   return conv_winid
@@ -242,7 +240,7 @@ end
 ---@param conv_winid WinId?
 ---@return WinId
 local create_input_win = function (sessionid, conv_winid)
-  local bufnr = get_input_bufnr(sessionid)
+  local bufnr = get_input_buffer(sessionid)
   return ui_input.create_window(bufnr, conv_winid)
 end
 
@@ -309,8 +307,10 @@ end
 return {
   create                             = create,
   delete                             = delete,
-  get_conv_bufnr                     = get_conv_bufnr,
-  get_input_bufnr                    = get_input_bufnr,
+  get_conversation_buffer            = get_conversation_buffer,
+  get_input_buffer                   = get_input_buffer,
+  get_some_conversation_window       = get_some_conversation_window,
+  get_some_input_window              = get_some_input_window,
   follow_conversation                = follow_conversation,
   unfollow_conversation              = unfollow_conversation,
   set_current_win_conversation       = set_current_win_conversation,

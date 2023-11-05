@@ -15,6 +15,7 @@ local set_confirm_hook = function (bufnr, on_confirm)
   vim.api.nvim_buf_set_keymap(bufnr, "n", "<Enter>", "",
     { callback = function ()
         local sessionid = ui_common.buf_get_session(bufnr)
+        ---@cast sessionid FacileLLM.SessionId
         if session.is_conversation_locked(sessionid) then
           local nspc_confirm_feedback = buf_get_namespace_confirm_feedback()
           if feedback_extmark == nil then

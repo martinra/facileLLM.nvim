@@ -74,7 +74,6 @@ local add_context = function ()
   session.add_message_selection(sessionid, "Context")
   session.add_message(sessionid, "Context", {'"""'} )
   ui_session.render_conversation(sessionid)
-  ui_session.fold_last_message(sessionid)
 end
 
 

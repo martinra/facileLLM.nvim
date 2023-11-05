@@ -1,12 +1,9 @@
-local util = require("facilellm.util")
-
 ---@class FacileLLM.RenderState
 ---@field msg FacileLLM.MsgIndex index of the last rendered message
 ---@field line number index of the last rendered line
 ---@field char number index of the last rendered character
 ---@field lines_total number total number of lines rendered
 ---@field highlight_receiving FacileLLM.RenderHighlight?
----@field folded table<FacileLLM.MsgIndex,WinId[]> table of folded messages
 
 ---@class FacileLLM.RenderHighlight
 ---@field msg FacileLLM.MsgIndex
@@ -119,103 +116,6 @@ local update_highlight_msg_receiving = function (bufnr, render_state, msg)
   end
 end
 
----@param conv FacileLLM.Conversation
----@param mx FacileLLM.MsgIndex
----@param render_state FacileLLM.RenderState?
----@return {[1]: number, [2]: number}?
-local fold_message_range = function (conv, mx, render_state)
-  if render_state and render_state.msg < mx then
-    return
-  end
-
-  local s = 1
-  for mxx = 1,mx-1 do
-    s = s + 1 + #conv[mxx].lines
-  end
-
-  local e
-  if render_state and render_state.msg == mx then
-    e = s + render_state.line
-  else
-    e = s + #conv[mx].lines
-  end
-
-  return {s,e}
-end
-
----@param conv FacileLLM.Conversation
----@param mx FacileLLM.MsgIndex
----@param winid WinId
----@param render_state FacileLLM.RenderState
----@return nil
-local fold_message = function (conv, mx, winid, render_state)
-  if mx < #conv then
-    return
-  end
-
-  if not render_state.folded[mx] then
-    render_state.folded[mx] = { winid }
-    local fse = fold_message_range(conv, mx, render_state)
-    if fse then
-      local fs,fe = unpack(fse)
-      util.create_fold(winid, fs, fe)
-    end
-  else
-    for _,winid_folded in ipairs(render_state.folded[mx]) do
-      if winid_folded == winid then
-        local fse = fold_message_range(conv, mx, render_state)
-        if fse then
-          local fs,fe = unpack(fse)
-          util.delete_fold(winid, fs)
-          util.create_fold(winid, fs, fe)
-        end
-        return
-      end
-    end
-    table.insert(render_state.folded[mx], winid)
-  end
-end
-
----@param conv FacileLLM.Conversation
----@param winid WinId
----@param render_state FacileLLM.RenderState
----@return nil
-local fold_last_message = function (conv, winid, render_state)
-  fold_message(conv, #conv, winid, render_state)
-end
-
----@param conv FacileLLM.Conversation
----@param winid WinId
----@param render_state FacileLLM.RenderState
----@return nil
-local fold_context_messages = function (conv, winid, render_state)
-  for mx = 1,#conv do
-    if conv[mx].role == "Context" then
-      fold_message(conv, mx, winid, render_state)
-    end
-  end
-end
-
----@param conv FacileLLM.Conversation
----@param mx FacileLLM.MsgIndex
----@param render_state FacileLLM.RenderState
----@param delete boolean
----@return nil
-local update_folds = function (conv, mx, render_state, delete)
-  if render_state.folded[mx] then
-    for _,winid in ipairs(render_state.folded[mx]) do
-      local fse = fold_message_range(conv, mx, render_state)
-      if fse then
-        local fs,fe = unpack(fse)
-        if delete then
-          util.delete_fold(winid, fs)
-        end
-        util.create_fold(winid, fs, fe)
-      end
-    end
-  end
-end
-
 ---@return FacileLLM.RenderState
 local create_state = function ()
   return {
@@ -224,15 +124,13 @@ local create_state = function ()
     char = 0,
     lines_total = 0,
     highlight_receiving = nil,
-    folded = {},
   }
 end
 
----@param msg_map table<FacileLLM.MsgIndex, FacileLLM.MsgIndex>
 ---@param bufnr BufNr
 ---@param render_state FacileLLM.RenderState
 ---@return nil
-local clear_conversation = function (msg_map, bufnr, render_state)
+local clear_conversation = function (bufnr, render_state)
   render_state.msg = 0
   render_state.line = 0
   render_state.char = 0
@@ -241,14 +139,6 @@ local clear_conversation = function (msg_map, bufnr, render_state)
   if render_state.highlight_receiving then
     end_highlight_msg_receiving(bufnr, render_state)
   end
-
-  local folded_mapped = {}
-  for mx,winids in pairs(render_state.folded) do
-    if msg_map[mx] then
-      folded_mapped[msg_map[mx]] = winids
-    end
-  end
-  render_state.folded = folded_mapped
 
   vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {})
@@ -282,7 +172,6 @@ local render_conversation = function (conv, bufnr, render_state)
 
     create_highlight_role(bufnr, 0, string.len(msg.role)+1)
     create_highlight_msg_receiving(bufnr, render_state, mx, msg)
-    update_folds(conv, mx, render_state, false)
 
   else
     local mx = render_state.msg
@@ -312,7 +201,6 @@ local render_conversation = function (conv, bufnr, render_state)
       render_state.char = msg.lines and string.len(msg.lines[#msg.lines])
 
       update_highlight_msg_receiving(bufnr, render_state, msg)
-      update_folds(conv, mx, render_state, true)
     end
   end
 
@@ -334,7 +222,6 @@ local render_conversation = function (conv, bufnr, render_state)
 
     create_highlight_role(bufnr, role_line, string.len(msg.role)+1)
     create_highlight_msg_receiving(bufnr, render_state, mx, msg)
-    update_folds(conv, mx, render_state, false)
   end
 
   vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
@@ -347,7 +234,4 @@ return {
   clear_conversation = clear_conversation,
   start_highlight_msg_receiving = start_highlight_msg_receiving,
   end_highlight_msg_receiving = end_highlight_msg_receiving,
-  fold_message = fold_message,
-  fold_last_message = fold_last_message,
-  fold_context_messages = fold_context_messages,
 }

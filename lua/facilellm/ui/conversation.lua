@@ -22,19 +22,30 @@ local create_buffer = function (sessionid, name)
   return bufnr
 end
 
----@param sessionid FacileLLM.SessionId
+---@param winid WinId
+---@return nil
+local fold_context_messages = function (winid)
+  local foldexpr = ""
+  foldexpr = foldexpr .. "getline(v:lnum)=~'^Context:$'"
+  foldexpr = foldexpr .. "?'>1':("
+  foldexpr = foldexpr .. "getline(v:lnum+1)=~'^\\a*:$'"
+  foldexpr = foldexpr .. ")?'<1':'='"
+  vim.api.nvim_win_set_option(winid, "foldenable", true)
+  vim.api.nvim_win_set_option(winid, "foldmethod", "expr")
+  vim.api.nvim_win_set_option(winid, "foldexpr", foldexpr)
+end
+
 ---@param bufnr BufNr
 ---@param direction string Will be parsed by util.win_vsplit_modifier.
 ---@return WinId
-local create_window = function (sessionid, bufnr, direction)
+local create_window = function (bufnr, direction)
   direction = direction or "right"
   local split_modifier = util.win_vsplit_modifier(
                            config.opts.layout.relative, direction)
   vim.cmd(string.format("noau %s vsplit", split_modifier))
   local winid = vim.api.nvim_get_current_win()
 
-  vim.wo.foldenable = true
-  vim.wo.foldmethod = "manual"
+  fold_context_messages(winid)
 
   vim.api.nvim_win_set_buf(winid, bufnr)
 

@@ -68,6 +68,7 @@ local clear_conversation = function (sessionid, preserve_context)
   local conv_bufnr = get_conv_bufnr(sessionid)
   local render_state = get_render_state(sessionid)
   ui_render.clear_conversation(msg_map, conv_bufnr, render_state)
+  ui_render.clear_conversation(conv_bufnr, render_state)
   ui_render.render_conversation(conv, conv_bufnr, render_state)
 end
 
@@ -240,39 +241,10 @@ end
 
 ---@param sessionid FacileLLM.SessionId
 ---@return nil
-local fold_last_message = function (sessionid)
-  local conv = session.get_conversation(sessionid)
-  local render_state = get_render_state(sessionid)
-
-  for _,winid in pairs(vim.api.nvim_list_wins()) do
-    if ui_common.win_get_session(winid) == sessionid and ui_common.win_is_conversation(winid) then
-      ui_render.fold_last_message(conv, winid, render_state)
-    end
-  end
-end
-
----@param winid WinId
----@return nil
-local win_fold_last_message = function (winid)
-  local sessionid = ui_common.win_get_session(winid)
-  if not sessionid or not ui_common.win_is_conversation(winid) then
-    return
-  end
-
-  local conv = session.get_conversation(sessionid)
-  local render_state = get_render_state(sessionid)
-  ui_render.fold_last_message(conv, winid, render_state)
-end
-
----@param sessionid FacileLLM.SessionId
----@return nil
 local fold_context_messages = function (sessionid)
-  local conv = session.get_conversation(sessionid)
-  local render_state = get_render_state(sessionid)
-
   for _,winid in pairs(vim.api.nvim_list_wins()) do
     if ui_common.win_get_session(winid) == sessionid and ui_common.win_is_conversation(winid) then
-      ui_render.fold_context_messages(conv, winid, render_state)
+      ui_conversation.fold_context_messages(winid)
     end
   end
 end
@@ -281,13 +253,9 @@ end
 ---@return nil
 local win_fold_context_messages = function (winid)
   local sessionid = ui_common.win_get_session(winid)
-  if not sessionid or not ui_common.win_is_conversation(winid) then
-    return
+  if sessionid and ui_common.win_is_conversation(winid) then
+    ui_conversation.fold_context_messages(winid)
   end
-
-  local conv = session.get_conversation(sessionid)
-  local render_state = get_render_state(sessionid)
-  ui_render.fold_context_messages(conv, winid, render_state)
 end
 
 
@@ -303,8 +271,6 @@ return {
   set_current_win_conversation_input = set_current_win_conversation_input,
   clear_conversation                 = clear_conversation,
   render_conversation                = render_conversation,
-  fold_last_message                  = fold_last_message,
-  win_fold_last_message              = win_fold_last_message,
   fold_context_messages              = fold_context_messages,
   win_fold_context_messages          = win_fold_context_messages,
 }

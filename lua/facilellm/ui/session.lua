@@ -98,6 +98,46 @@ local delete = function (sessionid)
   session.delete(sessionid)
 end
 
+---@param sessionid FacileLLM.SessionId
+---@return nil
+local set_keymaps = function (sessionid)
+  local conv_bufnr = get_conv_bufnr(sessionid)
+  local input_bufnr = get_input_bufnr(sessionid)
+
+  vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-c>", "",
+    { callback = function ()
+        clear_conversation(sessionid, true)
+      end,
+    })
+  vim.api.nvim_buf_set_keymap(input_bufnr, "n", "<C-c>", "",
+    { callback = function ()
+        clear_conversation(sessionid, true)
+      end,
+    })
+
+  vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-n>", "",
+    { callback = function ()
+        clear_conversation(sessionid, false)
+      end,
+    })
+  vim.api.nvim_buf_set_keymap(input_bufnr, "n", "<C-n>", "",
+    { callback = function ()
+        clear_conversation(sessionid, false)
+      end,
+    })
+
+  vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-d>", "",
+    { callback = function ()
+        delete(sessionid)
+      end,
+    })
+  vim.api.nvim_buf_set_keymap(input_bufnr, "n", "<C-d>", "",
+    { callback = function ()
+        delete(sessionid)
+      end,
+    })
+end
+
 ---@param model_config FacileLLM.LLMConfig
 ---@return FacileLLM.SessionId
 local create = function (model_config)
@@ -136,27 +176,8 @@ local create = function (model_config)
     input_conv_winid = nil,
   }
   session_uis[sessionid] = sess
-
-  vim.api.nvim_buf_set_keymap(sess.conv_bufnr, "n", "<C-c>", "",
-    { callback = function ()
-        clear_conversation(sessionid, true)
-      end,
-    })
-  vim.api.nvim_buf_set_keymap(sess.input_bufnr, "n", "<C-c>", "",
-    { callback = function ()
-        clear_conversation(sessionid, true)
-      end,
-    })
-  vim.api.nvim_buf_set_keymap(sess.conv_bufnr, "n", "<C-n>", "",
-    { callback = function ()
-        clear_conversation(sessionid, false)
-      end,
-    })
-  vim.api.nvim_buf_set_keymap(sess.input_bufnr, "n", "<C-n>", "",
-    { callback = function ()
-        clear_conversation(sessionid, false)
-      end,
-    })
+  
+  set_keymaps(sessionid)
 
   vim.api.nvim_create_autocmd("WinClosed", {
     buffer = sess.conv_bufnr,

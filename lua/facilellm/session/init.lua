@@ -172,7 +172,7 @@ local clear_conversation = function (sessionid, preserve_context)
 
   if not preserve_context then
     sessions[sessionid].conversation = {}
-    return false
+    return true
   else
     local context_lines = {}
     for _,msg in ipairs(sessions[sessionid].conversation) do

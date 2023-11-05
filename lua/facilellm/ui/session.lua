@@ -133,6 +133,17 @@ local create = function (model_config)
         clear_conversation(sessionid, true)
       end,
     })
+  vim.api.nvim_buf_set_keymap(sess.conv_bufnr, "n", "<C-n>", "",
+    { callback = function ()
+        clear_conversation(sessionid, false)
+      end,
+    })
+  vim.api.nvim_buf_set_keymap(sess.input_bufnr, "n", "<C-n>", "",
+    { callback = function ()
+        clear_conversation(sessionid, false)
+      end,
+    })
+
   vim.api.nvim_create_autocmd("WinClosed", {
     buffer = sess.conv_bufnr,
     callback = function()

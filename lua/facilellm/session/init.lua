@@ -1,5 +1,6 @@
 local conversation = require("facilellm.session.conversation")
 local llm = require("facilellm.llm")
+local message = require("facilellm.session.message")
 local util = require("facilellm.util")
 
 
@@ -162,29 +163,32 @@ end
 
 ---@param sessionid FacileLLM.SessionId
 ---@param preserve_context boolean
----@return table<FacileLLM.MsgIndex,FacileLLM.MsgIndex>?
+---@return boolean
 local clear_conversation = function (sessionid, preserve_context)
   if is_conversation_locked(sessionid) then
     vim.notify("clearing conversation despite lock", vim.log.levels.WARN)
-    return
+    return false
   end
 
   if not preserve_context then
     sessions[sessionid].conversation = {}
-    return {}
+    return false
   else
-    local msg_map = {}
-    local new_conv = {}
-    local new_mx = 1
-    for mx,msg in ipairs(sessions[sessionid].conversation) do
+    local context_lines = {}
+    for _,msg in ipairs(sessions[sessionid].conversation) do
       if msg.role == "Context" then
-        new_conv[new_mx] = msg
-        msg_map[mx] = new_mx
-        new_mx = new_mx + 1
+        for _,line in ipairs(msg.lines) do
+          table.insert(context_lines, line)
+        end
       end
     end
-    sessions[sessionid].conversation = new_conv
-    return msg_map
+    if #context_lines == 0 then
+      sessions[sessionid].conversation = conversation.create()
+    else
+      local context_msg = message.create("Context", context_lines)
+      sessions[sessionid].conversation = conversation.create({ context_msg })
+    end
+    return true
   end
 end
 

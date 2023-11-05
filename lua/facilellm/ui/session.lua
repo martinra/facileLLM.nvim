@@ -60,14 +60,12 @@ end
 ---@param preserve_context boolean
 ---@return nil
 local clear_conversation = function (sessionid, preserve_context)
-  local msg_map = session.clear_conversation(sessionid, preserve_context)
-  if msg_map == nil then
-    return false
+  if not session.clear_conversation(sessionid, preserve_context) then
+    return
   end
   local conv = session.get_conversation(sessionid)
   local conv_bufnr = get_conv_bufnr(sessionid)
   local render_state = get_render_state(sessionid)
-  ui_render.clear_conversation(msg_map, conv_bufnr, render_state)
   ui_render.clear_conversation(conv_bufnr, render_state)
   ui_render.render_conversation(conv, conv_bufnr, render_state)
 end

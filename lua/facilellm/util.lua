@@ -51,9 +51,13 @@ end
 ---@return nil
 local create_fold = function (winid, row_start, row_end)
   local winid_orig = vim.api.nvim_get_current_win()
-  vim.api.nvim_set_current_win(winid)
+  if winid ~= winid_orig then
+    vim.api.nvim_set_current_win(winid)
+  end
   vim.cmd(row_start .. "," .. row_end .. "fo")
-  vim.api.nvim_set_current_win(winid_orig)
+  if winid ~= winid_orig then
+    vim.api.nvim_set_current_win(winid_orig)
+  end
 end
 
 ---@param winid WinId

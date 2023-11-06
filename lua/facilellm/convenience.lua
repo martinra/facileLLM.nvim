@@ -33,6 +33,15 @@ local delete_from_selection = function ()
   )
 end
 
+---@return nil
+local rename_from_selection = function ()
+  ui_select.select_session(session.get_session_names(),
+    function (sessionid)
+      ui_session.rename(sessionid)
+    end
+  )
+end
+
 ---@param sessionid FacileLLM.SessionId?
 ---@return nil
 local show = function (sessionid)
@@ -89,6 +98,7 @@ return {
   create_from_model = create_from_model,
   create_from_selection = create_from_selection,
   delete_from_selection = delete_from_selection,
+  rename_from_selection = rename_from_selection,
   show = show,
   focus = focus,
   focus_from_selection = focus_from_selection,

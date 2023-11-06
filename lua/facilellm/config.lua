@@ -14,6 +14,18 @@
 ---@field relative string Relative to what should the conversation window be opened?
 
 
+---@return nil
+local set_global_keymaps = function ()
+  local facilellm = require("facilellm")
+
+  vim.keymap.set('n', '<leader>ais', facilellm.show,                  {silent = true})
+  vim.keymap.set('v', '<leader>aic', facilellm.add_context,           {silent = true})
+  vim.keymap.set('n', '<leader>aim', facilellm.create_from_selection, {silent = true})
+  vim.keymap.set('n', '<leader>aid', facilellm.delete_from_selection, {silent = true})
+  vim.keymap.set('n', '<leader>aif', facilellm.focus_from_selection,  {silent = true})
+  vim.keymap.set('n', '<leader>air', facilellm.rename_from_selection, {silent = true})
+end
+
 ---@return FacileLLM.Config
 local default_opts = function ()
   return {
@@ -85,6 +97,8 @@ M.setup = function (opts)
 
   vim.api.nvim_set_hl(0, "FacileLLMMsgReceiving", {link = "DiffAdd"})
   vim.api.nvim_set_hl(0, "FacileLLMRole", {link = "markdownH1"})
+
+  set_global_keymaps()
 end
 
 

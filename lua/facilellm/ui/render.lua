@@ -72,9 +72,9 @@ end
 local create_highlight_msg_receiving = function (bufnr, render_state, mx, msg)
   if render_state.highlight_receiving and render_state.highlight_receiving.msg == mx then
     local ns = buf_get_namespace_highlight_msg_receiving()
-    local row = render_state.lines_total - #msg.lines
+    local row = render_state.lines_total - #msg.lines - 1
     local col = 0
-    local end_row = render_state.lines_total
+    local end_row = render_state.lines_total - 1
     local end_col
     if #msg.lines == 0 then
       end_col = string.len(msg.role .. ":")

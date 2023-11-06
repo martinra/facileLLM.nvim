@@ -141,6 +141,8 @@ local delete = function (sessionid)
   session.delete(sessionid)
 end
 
+---@param sessionid FacileLLM.SessionId
+---@return nil
 local rename = function (sessionid)
   local cur_name = session.get_name(sessionid)
   vim.ui.input({prompt = "Rename Session " .. cur_name .. ": "},

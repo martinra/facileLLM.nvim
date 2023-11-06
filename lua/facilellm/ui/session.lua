@@ -16,6 +16,7 @@ local ui_select = require("facilellm.ui.select_session")
 ---@type FacileLLM.SessionUI[]
 local session_uis = {}
 
+
 ---@param sessionid FacileLLM.SessionId
 ---@return BufNr
 local get_conversation_buffer = function (sessionid)
@@ -54,6 +55,18 @@ end
 ---@return FacileLLM.RenderState
 local get_render_state = function (sessionid)
   return session_uis[sessionid].render_state
+end
+
+---@param name string
+---@return string
+local conversation_buffer_name = function (name)
+  return "facileLLM " .. name
+end
+
+---@param name string
+---@return string
+local input_buffer_name = function (name)
+  return "facileLLM Input " .. name
 end
 
 ---@param sessionid FacileLLM.SessionId
@@ -103,6 +116,15 @@ local render_conversation = function (sessionid)
       ui_conversation.follow(bufnr, winid)
     end
   end
+end
+
+---@param sessionid FacileLLM.SessionId
+---@param name string
+---@return nil
+local set_name = function (sessionid, name)
+  name = session.set_name(sessionid, name)
+  vim.api.nvim_buf_set_name(get_conversation_buffer(sessionid), conversation_buffer_name(name))
+  vim.api.nvim_buf_set_name(get_input_buffer(sessionid), input_buffer_name(name))
 end
 
 ---@param sessionid FacileLLM.SessionId
@@ -188,8 +210,9 @@ local create = function (model_config)
   end
 
   local sess = {
-    conv_bufnr = ui_conversation.create_buffer(sessionid, "facileLLM " .. name),
-    input_bufnr = ui_input.create_buffer(sessionid, "facileLLM Input " .. name, on_confirm_input),
+    conv_bufnr = ui_conversation.create_buffer(sessionid, conversation_buffer_name(name)),
+    input_bufnr = ui_input.create_buffer(sessionid, input_buffer_name(name),
+                                         on_confirm_input),
     render_state = ui_render.create_state(),
     conversation_winids = {},
     follow_conversation_flags = {},
@@ -197,7 +220,7 @@ local create = function (model_config)
     input_conv_winid = nil,
   }
   session_uis[sessionid] = sess
-  
+
   set_keymaps(sessionid)
 
   vim.api.nvim_create_autocmd("WinClosed", {

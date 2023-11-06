@@ -84,6 +84,15 @@ local delete = function (sessionid)
   sessions[sessionid] = nil
 end
 
+---@param sessionid FacileLLM.SessionId
+---@param name string
+---@return string
+local set_name = function (sessionid, name)
+  name = unique_name_variant(name)
+  sessions[sessionid].name = name
+  return name
+end
+
 ---@return table<FacileLLM.SessionId,string>
 local get_session_names = function ()
   local names = {}
@@ -238,6 +247,7 @@ end
 return {
   create                 = create,
   delete                 = delete,
+  set_name               = set_name,
   get_session_names      = get_session_names,
   get_by_name            = get_by_name,
   get_some_session       = get_some_session,

@@ -141,6 +141,15 @@ local delete = function (sessionid)
   session.delete(sessionid)
 end
 
+local rename = function (sessionid)
+  local cur_name = session.get_name(sessionid)
+  vim.ui.input({prompt = "Rename Session " .. cur_name .. ": "},
+    function (name)
+      set_name(sessionid, name)
+    end
+  )
+end
+
 ---@param sessionid FacileLLM.SessionId
 ---@return nil
 local set_keymaps = function (sessionid)
@@ -177,6 +186,17 @@ local set_keymaps = function (sessionid)
   vim.api.nvim_buf_set_keymap(input_bufnr, "n", "<C-d>", "",
     { callback = function ()
         delete(sessionid)
+      end,
+    })
+
+  vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-r>", "",
+    { callback = function ()
+        rename(sessionid)
+      end,
+    })
+  vim.api.nvim_buf_set_keymap(input_bufnr, "n", "<C-r>", "",
+    { callback = function ()
+        rename(sessionid)
       end,
     })
 end
@@ -330,6 +350,7 @@ end
 return {
   create                             = create,
   delete                             = delete,
+  rename                             = rename,
   get_conversation_buffer            = get_conversation_buffer,
   get_input_buffer                   = get_input_buffer,
   get_some_conversation_window       = get_some_conversation_window,

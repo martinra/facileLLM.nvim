@@ -33,14 +33,9 @@ local new_sessionid = function ()
   end
 end
 
----@param model_config FacileLLM.LLMConfig
----@param name string?
----@return FacileLLM.SessionId
-local create = function (model_config, name)
-  local sessionid = new_sessionid()
-  local model = llm.dispatch(model_config.implementation)(model_config.opts)
-  name = name or model_config.name or model.name
-
+---@param name string
+---@return string
+local unique_name_variant = function (name)
   local suffices = {}
   local nsuffices = 0
   for _,sess in pairs(sessions) do
@@ -58,6 +53,18 @@ local create = function (model_config, name)
     end
     name = name .. " " .. new_suffix
   end
+
+  return name
+end
+
+---@param model_config FacileLLM.LLMConfig
+---@param name string?
+---@return FacileLLM.SessionId
+local create = function (model_config, name)
+  local sessionid = new_sessionid()
+  local model = llm.dispatch(model_config.implementation)(model_config.opts)
+  name = name or model_config.name or model.name
+  name = unique_name_variant(name)
 
   ---@type FacileLLM.Session
   local sess = {

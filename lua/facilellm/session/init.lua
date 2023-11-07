@@ -37,17 +37,32 @@ end
 ---@return string
 local unique_name_variant = function (name)
   local suffices = {}
-  local nsuffices = 0
+
+  local name_suffix_find = string.find(name, "%s*%d+%s*$")
+  local name_stem, name_suffix
+  if name_suffix_find then
+    name_stem = string.sub(name, 1, name_suffix_find-1)
+    name_suffix = string.sub(name, name_suffix_find, string.len(name))
+    name_suffix = string.match(name_suffix, "^()%s*$") and "" or string.match(name_suffix, "^%s*(.*%S)")
+    suffices[name_suffix] = true
+  else
+    name_stem = name
+    name_suffix = nil
+    suffices["1"] = true
+  end
+
+  local nmb_sess_suffices = 0
   for _,sess in pairs(sessions) do
-    if string.sub(sess.name, 1, string.len(name)) == name then
-      local suffix = string.sub(sess.name, string.len(name)+1, string.len(sess.name))
+    if string.sub(sess.name, 1, string.len(name_stem)) == name_stem then
+      local suffix = string.sub(sess.name, string.len(name_stem)+1, string.len(sess.name))
       suffix = string.match(suffix, "^()%s*$") and "" or string.match(suffix, "^%s*(.*%S)")
       suffices[suffix] = true
-      nsuffices = nsuffices + 1
+      nmb_sess_suffices = nmb_sess_suffices + 1
     end
   end
-  if nsuffices ~= 0 then
-    local new_suffix = 2
+
+  if nmb_sess_suffices ~= 0 then
+    local new_suffix = name_suffix and tonumber(name_suffix) or 1
     while suffices[tostring(new_suffix)] do
       new_suffix = new_suffix + 1
     end

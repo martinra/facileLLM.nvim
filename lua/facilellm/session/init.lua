@@ -11,6 +11,7 @@ local util = require("facilellm.util")
 ---@field model FacileLLM.LLM
 ---@field conversation FacileLLM.Conversation
 ---@field conversation_locked boolean
+---@field config FacileLLM.LLMConfig
 
 
 ---@type table<FacileLLM.SessionId,FacileLLM.Session> Table of sessions by their id
@@ -72,6 +73,10 @@ local unique_name_variant = function (name)
   return name
 end
 
+local get_model_config = function (sessionid)
+  return sessions[sessionid].config
+end
+
 ---@param model_config FacileLLM.LLMConfig
 ---@return FacileLLM.SessionId
 local create = function (model_config)
@@ -86,6 +91,7 @@ local create = function (model_config)
     model = model,
     conversation = conversation.create(model.initial_conversation),
     conversation_locked = false,
+    config = model_config,
   }
   sessions[sessionid] = sess
 
@@ -267,6 +273,7 @@ return {
   get_some_session       = get_some_session,
   get_name               = get_name,
   get_model              = get_model,
+  get_model_config       = get_model_config,
   get_conversation       = get_conversation,
   add_message            = add_message,
   add_message_selection  = add_message_selection,

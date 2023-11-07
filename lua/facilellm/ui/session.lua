@@ -158,47 +158,60 @@ local set_keymaps = function (sessionid)
   local conv_bufnr = get_conversation_buffer(sessionid)
   local input_bufnr = get_input_buffer(sessionid)
 
+  local ui_session = require("facilellm.ui.session")
+
   vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-c>", "",
     { callback = function ()
-        clear_conversation(sessionid, true)
+        ui_session.clear_conversation(sessionid, true)
       end,
     })
   vim.api.nvim_buf_set_keymap(input_bufnr, "n", "<C-c>", "",
     { callback = function ()
-        clear_conversation(sessionid, true)
+        ui_session.clear_conversation(sessionid, true)
       end,
     })
 
   vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-n>", "",
     { callback = function ()
-        clear_conversation(sessionid, false)
+        ui_session.clear_conversation(sessionid, false)
       end,
     })
   vim.api.nvim_buf_set_keymap(input_bufnr, "n", "<C-n>", "",
     { callback = function ()
-        clear_conversation(sessionid, false)
+        ui_session.clear_conversation(sessionid, false)
       end,
     })
 
   vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-d>", "",
     { callback = function ()
-        delete(sessionid)
+        ui_session.delete(sessionid)
       end,
     })
   vim.api.nvim_buf_set_keymap(input_bufnr, "n", "<C-d>", "",
     { callback = function ()
-        delete(sessionid)
+        ui_session.delete(sessionid)
+      end,
+    })
+
+  vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-f>", "",
+    { callback = function ()
+        ui_session.fork(sessionid)
+      end,
+    })
+  vim.api.nvim_buf_set_keymap(input_bufnr, "n", "<C-f>", "",
+    { callback = function ()
+        ui_session.fork(sessionid)
       end,
     })
 
   vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-r>", "",
     { callback = function ()
-        rename(sessionid)
+        ui_session.rename(sessionid)
       end,
     })
   vim.api.nvim_buf_set_keymap(input_bufnr, "n", "<C-r>", "",
     { callback = function ()
-        rename(sessionid)
+        ui_session.rename(sessionid)
       end,
     })
 end
@@ -270,6 +283,19 @@ local create = function (model_config)
     sess.conv_bufnr, sess.render_state)
 
   return sessionid
+end
+
+---@param sessionid FacileLLM.SessionId
+---@return FacileLLM.SessionId
+local fork = function (sessionid)
+  local model_config = {
+    name = session.fork_name_variant(session.get_name(sessionid)),
+    initial_conversation =
+      vim.tbl_deep_extend("force", {}, session.get_conversation(sessionid)),
+  }
+  model_config =
+    vim.tbl_deep_extend("keep", model_config, session.get_model_config(sessionid))
+  return create(model_config)
 end
 
 ---@param sessionid FacileLLM.SessionId
@@ -352,6 +378,7 @@ end
 return {
   create                             = create,
   delete                             = delete,
+  fork                               = fork,
   rename                             = rename,
   get_conversation_buffer            = get_conversation_buffer,
   get_input_buffer                   = get_input_buffer,

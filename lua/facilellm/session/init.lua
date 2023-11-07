@@ -73,6 +73,21 @@ local unique_name_variant = function (name)
   return name
 end
 
+---@param orig_name string
+---@return string
+local fork_name_variant = function (orig_name)
+  if string.find(orig_name, "Fork$") then
+    return orig_name
+  else
+    local fork_nmb_find = string.find(orig_name, "Fork %d+$")
+    if fork_nmb_find then
+      return string.sub(orig_name, 1, fork_nmb_find + 3)
+    else
+      return orig_name .. " Fork"
+    end
+  end
+end
+
 local get_model_config = function (sessionid)
   return sessions[sessionid].config
 end
@@ -267,11 +282,12 @@ end
 return {
   create                 = create,
   delete                 = delete,
-  set_name               = set_name,
   get_session_names      = get_session_names,
   get_by_name            = get_by_name,
   get_some_session       = get_some_session,
+  set_name               = set_name,
   get_name               = get_name,
+  fork_name_variant      = fork_name_variant,
   get_model              = get_model,
   get_model_config       = get_model_config,
   get_conversation       = get_conversation,

@@ -73,12 +73,11 @@ local unique_name_variant = function (name)
 end
 
 ---@param model_config FacileLLM.LLMConfig
----@param name string?
 ---@return FacileLLM.SessionId
-local create = function (model_config, name)
+local create = function (model_config)
   local sessionid = new_sessionid()
   local model = llm.dispatch(model_config.implementation)(model_config.opts)
-  name = name or model_config.name or model.name
+  local name = model_config.name or model.name
   name = unique_name_variant(name)
 
   ---@type FacileLLM.Session

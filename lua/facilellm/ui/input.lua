@@ -7,30 +7,47 @@ local buf_get_namespace_confirm_feedback = function ()
   return vim.api.nvim_create_namespace("facilellm-confirm-feedback")
 end
 
+---@type number?
+local signal_response_not_yet_complete_extmark = nil
+
+---@param bufnr BufNr
+---@return nil
+local signal_response_not_yet_complete = function (bufnr)
+  local nspc_confirm_feedback = buf_get_namespace_confirm_feedback()
+  if signal_response_not_yet_complete_extmark == nil then
+    signal_response_not_yet_complete_extmark =
+      vim.api.nvim_buf_set_extmark(bufnr, nspc_confirm_feedback, 0, 0,
+      {
+        virt_text = { {"Response not yet completed", "WarningMsg"} },
+        virt_text_pos = "eol"
+      })
+  end
+end
+
+---@param bufnr BufNr
+---@return string[]
+local empty_input_buffer = function (bufnr)
+  signal_response_not_yet_complete_extmark = nil
+  local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+  vim.api.nvim_buf_set_lines(bufnr, 0,-1, true, {})
+  return lines
+end
+
 ---@param bufnr BufNr
 ---@param on_confirm function(string[]): nil
 ---@return nil
 local set_confirm_hook = function (bufnr, on_confirm)
-  local feedback_extmark = nil
   vim.api.nvim_buf_set_keymap(bufnr, "n", "<Enter>", "",
     { callback = function ()
         local sessionid = ui_common.buf_get_session(bufnr)
         ---@cast sessionid FacileLLM.SessionId
+
         if session.is_conversation_locked(sessionid) then
-          local nspc_confirm_feedback = buf_get_namespace_confirm_feedback()
-          if feedback_extmark == nil then
-            feedback_extmark = vim.api.nvim_buf_set_extmark(bufnr, nspc_confirm_feedback, 0, 0,
-              {
-                virt_text = { {"Response not yet completed", "WarningMsg"} },
-                virt_text_pos = "eol"
-              })
-          end
+          signal_response_not_yet_complete(bufnr)
           return
         end
 
-        feedback_extmark = nil
-        local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-        vim.api.nvim_buf_set_lines(bufnr, 0,-1, true, {})
+        local lines = empty_input_buffer(bufnr)
         if on_confirm then
           on_confirm(lines)
         end

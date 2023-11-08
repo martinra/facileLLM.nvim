@@ -160,34 +160,37 @@ local set_keymaps = function (sessionid)
 
   local ui_session = require("facilellm.ui.session")
 
-  vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-c>", "",
+  -- mnemonic: delete interaction
+  vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-d>i", "",
     { callback = function ()
         ui_session.clear_conversation(sessionid, true)
       end,
     })
-  vim.api.nvim_buf_set_keymap(input_bufnr, "n", "<C-c>", "",
+  vim.api.nvim_buf_set_keymap(input_bufnr, "n", "<C-d>i", "",
     { callback = function ()
         ui_session.clear_conversation(sessionid, true)
       end,
     })
 
-  vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-n>", "",
+  -- mnemonic: delete conversation
+  vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-d>c", "",
     { callback = function ()
         ui_session.clear_conversation(sessionid, false)
       end,
     })
-  vim.api.nvim_buf_set_keymap(input_bufnr, "n", "<C-n>", "",
+  vim.api.nvim_buf_set_keymap(input_bufnr, "n", "<C-d>c", "",
     { callback = function ()
         ui_session.clear_conversation(sessionid, false)
       end,
     })
 
-  vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-d>", "",
+  -- mnemonic: delete session
+  vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-d>s", "",
     { callback = function ()
         ui_session.delete(sessionid)
       end,
     })
-  vim.api.nvim_buf_set_keymap(input_bufnr, "n", "<C-d>", "",
+  vim.api.nvim_buf_set_keymap(input_bufnr, "n", "<C-d>s", "",
     { callback = function ()
         ui_session.delete(sessionid)
       end,

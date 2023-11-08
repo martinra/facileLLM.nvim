@@ -213,18 +213,18 @@ local unlock_conversation = function (sessionid)
 end
 
 ---@param sessionid FacileLLM.SessionId
----@param preserve_context boolean
+---@param context ("delete" | "combine" | "preserve")
 ---@return boolean
-local clear_conversation = function (sessionid, preserve_context)
+local clear_conversation = function (sessionid, context)
   if is_conversation_locked(sessionid) then
     vim.notify("clearing conversation despite lock", vim.log.levels.WARN)
     return false
   end
 
-  if not preserve_context then
+  if context == "delete" then
     sessions[sessionid].conversation = {}
     return true
-  else
+  elseif context == "combine" then
     local context_lines = {}
     for _,msg in ipairs(sessions[sessionid].conversation) do
       if msg.role == "Context" then
@@ -240,6 +240,21 @@ local clear_conversation = function (sessionid, preserve_context)
       sessions[sessionid].conversation = conversation.create({ context_msg })
     end
     return true
+  elseif context == "preserve" then
+    local context_msgs = {}
+    for _,msg in ipairs(sessions[sessionid].conversation) do
+      if msg.role == "Context" then
+        table.insert(context_msgs, msg)
+      end
+    end
+    if #context_msgs == 0 then
+      sessions[sessionid].conversation = conversation.create()
+    else
+      sessions[sessionid].conversation = conversation.create(context_msgs)
+    end
+    return true
+  else
+    error("incorrect value of context: " .. context)
   end
 end
 

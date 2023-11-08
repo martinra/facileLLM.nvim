@@ -87,13 +87,7 @@ local add_context = function ()
     return
   end
 
-  session.add_message(sessionid, "Context",
-    {
-      "The conversation will be based on the following context:",
-      '"""',
-    })
   session.add_message_selection(sessionid, "Context")
-  session.add_message(sessionid, "Context", {'"""'} )
   ui_session.render_conversation(sessionid)
 end
 

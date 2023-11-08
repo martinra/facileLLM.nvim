@@ -43,6 +43,23 @@ local convert_role_from_openai = function (role)
   end
 end
 
+---@param msg FacileLLM.Message
+---@return FacileLLM.OpenAI.Message
+local convert_msg_to_openai = function (msg)
+  local msg_openai = {
+    role = convert_role_to_openai(msg.role),
+    content = table.concat(msg.lines, "\n"),
+  }
+  if msg.role == "Context" then
+    msg_openai.content =
+      "The conversation will be based on the following context:\n" ..
+      '"""\n' ..
+      msg_openai.content .. "\n" ..
+      '"""'
+  end
+  return msg_openai
+end
+
 ---@param stdout_record FacileLLM.OpenAI.StdOutRecord
 ---@param data string
 local append_to_stdout_record = function (stdout_record, data)
@@ -135,11 +152,7 @@ local response_to = function (conversation, add_message, on_complete, opts)
   data.model = opts.openai_model
   data.messages = {}
   for _,msg in ipairs(conversation) do
-    table.insert(data.messages,
-      {
-        role = convert_role_to_openai(msg.role),
-        content = table.concat(msg.lines, "\n"),
-      })
+    table.insert(data.messages, convert_msg_to_openai(msg))
   end
 
   if not opts.api_key then

@@ -43,15 +43,16 @@ end
 
 ---@param session_names table<FacileLLM.SessionId, string>
 ---@param callback function(FacileLLM.SessionId): nil
+---@param title string?
 ---@return nil
-local select_session = function (session_names, callback)
+local select_session = function (session_names, callback, title)
   local sessionids = {}
   for id,_ in pairs(session_names) do
     table.insert(sessionids,id)
   end
 
   pickers.new({}, {
-    prompt_title = "Select a session",
+    prompt_title = title or "Select a session",
     finder = finders.new_table {
       results = sessionids,
       entry_maker = function(sessionid)
@@ -77,10 +78,11 @@ end
 
 ---@param models FacileLLM.LLMConfig[]
 ---@param callback function(FacileLLM.LLMConfig): nil
+---@param title string?
 ---@return nil
-local select_model = function (models, callback)
+local select_model = function (models, callback, title)
   pickers.new({}, {
-    prompt_title = "Select an LLM model",
+    prompt_title = title or "Select an LLM model",
     finder = finders.new_table {
       results = models,
       entry_maker = function(model)

@@ -20,7 +20,8 @@ local create_from_selection = function ()
       local sessionid = create_from_model(model_config)
       ui_select.touch(sessionid)
       ui_session.set_current_win_conversation_input(sessionid)
-    end
+    end,
+    "Select model to create new session from"
   )
 end
 
@@ -29,7 +30,8 @@ local delete_from_selection = function ()
   ui_select.select_session(session.get_session_names(),
     function (sessionid)
       ui_session.delete(sessionid)
-    end
+    end,
+    "Select session to delete"
   )
 end
 
@@ -38,7 +40,8 @@ local rename_from_selection = function ()
   ui_select.select_session(session.get_session_names(),
     function (sessionid)
       ui_session.rename(sessionid)
-    end
+    end,
+    "Select session to rename"
   )
 end
 
@@ -72,7 +75,8 @@ local focus_from_selection = function ()
     function (sessionid)
       ui_select.touch(sessionid)
       ui_session.set_current_win_conversation_input(sessionid)
-    end
+    end,
+    "Select session to focus"
   )
 end
 

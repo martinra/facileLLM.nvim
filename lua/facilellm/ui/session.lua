@@ -247,10 +247,21 @@ local create = function (model_config)
       end)
   end
 
+  ---@param lines string[]
+  ---@return nil
+  local on_context_input = function (lines)
+    ui_select.touch(sessionid)
+    session.add_message(sessionid, "Context", lines)
+    vim.schedule(
+      function ()
+        render_conversation(sessionid)
+      end)
+  end
+
   local sess = {
     conv_bufnr = ui_conversation.create_buffer(sessionid, conversation_buffer_name(name)),
     input_bufnr = ui_input.create_buffer(sessionid, input_buffer_name(name),
-                                         on_confirm_input),
+                                         on_confirm_input, on_context_input),
     render_state = ui_render.create_state(),
     conversation_winids = {},
     follow_conversation_flags = {},

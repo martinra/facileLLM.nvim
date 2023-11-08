@@ -36,7 +36,7 @@ end
 ---@param bufnr BufNr
 ---@param on_confirm function(string[]): nil
 ---@return nil
-local set_confirm_hook = function (bufnr, on_confirm)
+local set_confirm_keymap = function (bufnr, on_confirm)
   vim.api.nvim_buf_set_keymap(bufnr, "n", "<Enter>", "",
     { callback = function ()
         local sessionid = ui_common.buf_get_session(bufnr)
@@ -55,11 +55,34 @@ local set_confirm_hook = function (bufnr, on_confirm)
     })
 end
 
+---@param bufnr BufNr
+---@param on_context function(string[]): nil
+---@return nil
+local set_context_keymap = function (bufnr, on_context)
+  vim.api.nvim_buf_set_keymap(bufnr, "n", "c", "",
+    { callback = function ()
+        local sessionid = ui_common.buf_get_session(bufnr)
+        ---@cast sessionid FacileLLM.SessionId
+
+        if session.is_conversation_locked(sessionid) then
+          signal_response_not_yet_complete(bufnr)
+          return
+        end
+
+        local lines = empty_input_buffer(bufnr)
+        if on_context then
+          on_context(lines)
+        end
+      end,
+    })
+end
+
 ---@param sessionid FacileLLM.SessionId
 ---@param name string
 ---@param on_confirm function(string):nil
+---@param on_context function(string):nil
 ---@return BufNr
-local create_buffer = function (sessionid, name, on_confirm)
+local create_buffer = function (sessionid, name, on_confirm, on_context)
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_name(bufnr, name)
 
@@ -71,7 +94,8 @@ local create_buffer = function (sessionid, name, on_confirm)
 
   ui_common.buf_set_session(bufnr, sessionid)
 
-  set_confirm_hook(bufnr, on_confirm)
+  set_confirm_keymap(bufnr, on_confirm)
+  set_context_keymap(bufnr, on_context)
 
   return bufnr
 end

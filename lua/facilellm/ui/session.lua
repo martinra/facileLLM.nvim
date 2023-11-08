@@ -145,7 +145,7 @@ end
 ---@return nil
 local rename = function (sessionid)
   local cur_name = session.get_name(sessionid)
-  vim.ui.input({prompt = "Rename Session " .. cur_name .. ": "},
+  vim.ui.input({prompt = "Rename session " .. cur_name .. ": "},
     function (name)
       set_name(sessionid, name)
     end

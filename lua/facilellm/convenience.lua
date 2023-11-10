@@ -45,6 +45,21 @@ local rename_from_selection = function ()
   )
 end
 
+local set_model_from_selection = function ()
+  ui_select.select_session(session.get_session_names(),
+    function (sessionid)
+      local name = session.get_name(sessionid)
+      ui_select.select_model(config.opts.models,
+        function (model_config)
+          session.set_model(sessionid, model_config)
+        end,
+        "Select model for session " .. name
+      )
+    end,
+    "Select session to change model of"
+  )
+end
+
 ---@param sessionid FacileLLM.SessionId?
 ---@return nil
 local show = function (sessionid)
@@ -97,6 +112,7 @@ return {
   create_from_selection = create_from_selection,
   delete_from_selection = delete_from_selection,
   rename_from_selection = rename_from_selection,
+  set_model_from_selection = set_model_from_selection,
   show = show,
   focus = focus,
   focus_from_selection = focus_from_selection,

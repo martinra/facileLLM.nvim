@@ -20,10 +20,11 @@ local set_global_keymaps = function ()
 
   vim.keymap.set('n', '<leader>ais', facilellm.show,                  {silent = true})
   vim.keymap.set('v', '<leader>aic', facilellm.add_context,           {silent = true})
-  vim.keymap.set('n', '<leader>aim', facilellm.create_from_selection, {silent = true})
+  vim.keymap.set('n', '<leader>ain', facilellm.create_from_selection, {silent = true})
   vim.keymap.set('n', '<leader>aid', facilellm.delete_from_selection, {silent = true})
   vim.keymap.set('n', '<leader>aif', facilellm.focus_from_selection,  {silent = true})
   vim.keymap.set('n', '<leader>air', facilellm.rename_from_selection, {silent = true})
+  vim.keymap.set('n', '<leader>aim', facilellm.set_model_from_selection, {silent = true})
 end
 
 ---@return FacileLLM.Config

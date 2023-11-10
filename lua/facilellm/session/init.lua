@@ -106,7 +106,7 @@ local create = function (model_config)
     model = model,
     conversation = conversation.create(model.initial_conversation),
     conversation_locked = false,
-    config = model_config,
+    config = vim.tbl_deep_extend("force", {}, model_config),
   }
   sessions[sessionid] = sess
 
@@ -117,15 +117,6 @@ end
 ---@return nil
 local delete = function (sessionid)
   sessions[sessionid] = nil
-end
-
----@param sessionid FacileLLM.SessionId
----@param name string
----@return string
-local set_name = function (sessionid, name)
-  name = unique_name_variant(name)
-  sessions[sessionid].name = name
-  return name
 end
 
 ---@return table<FacileLLM.SessionId,string>
@@ -165,9 +156,27 @@ local get_name = function (sessionid)
 end
 
 ---@param sessionid FacileLLM.SessionId
+---@param name string
+---@return string
+local set_name = function (sessionid, name)
+  name = unique_name_variant(name)
+  sessions[sessionid].name = name
+  return name
+end
+
+---@param sessionid FacileLLM.SessionId
 ---@return FacileLLM.LLM
 local get_model = function (sessionid)
   return sessions[sessionid].model
+end
+
+---@param sessionid FacileLLM.SessionId
+---@param model_config FacileLLM.LLMConfig
+local set_model = function (sessionid, model_config)
+  local sess = sessions[sessionid]
+  local model = llm.dispatch(model_config.implementation)(model_config.opts)
+  sess.model = model
+  sess.config = vim.tbl_deep_extend("force", {}, model_config)
 end
 
 ---@param sessionid FacileLLM.SessionId
@@ -300,10 +309,11 @@ return {
   get_session_names      = get_session_names,
   get_by_name            = get_by_name,
   get_some_session       = get_some_session,
-  set_name               = set_name,
   get_name               = get_name,
+  set_name               = set_name,
   fork_name_variant      = fork_name_variant,
   get_model              = get_model,
+  set_model              = set_model,
   get_model_config       = get_model_config,
   get_conversation       = get_conversation,
   add_message            = add_message,

@@ -19,6 +19,7 @@ local set_global_keymaps = function ()
   local facilellm = require("facilellm")
 
   vim.keymap.set('n', '<leader>ais', facilellm.show,                  {silent = true})
+  vim.keymap.set('v', '<leader>aii', facilellm.add_input_and_query,   {silent = true})
   vim.keymap.set('v', '<leader>aic', facilellm.add_context,           {silent = true})
   vim.keymap.set('n', '<leader>ain', facilellm.create_from_selection, {silent = true})
   vim.keymap.set('n', '<leader>aid', facilellm.delete_from_selection, {silent = true})

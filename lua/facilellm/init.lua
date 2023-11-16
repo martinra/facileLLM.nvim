@@ -13,6 +13,7 @@ M.set_model_from_selection = convenience.set_model_from_selection
 M.show = convenience.show
 M.focus = convenience.focus
 M.focus_from_selection = convenience.focus_from_selection
+M.add_input_and_query = convenience.add_input_and_query
 M.add_context = convenience.add_context
 
 

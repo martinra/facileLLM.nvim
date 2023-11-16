@@ -219,67 +219,66 @@ local set_keymaps = function (sessionid)
     })
 end
 
+---@param sessionid FacileLLM.SessionId
+---@param role FacileLLM.MsgRole
+---@param lines string[]
+---@return nil
+local add_message = function (sessionid, role, lines)
+  ui_select.touch(sessionid)
+  session.add_message(sessionid, role, lines)
+  vim.schedule(
+    function ()
+      render_conversation(sessionid)
+    end)
+end
+
+---@param sessionid FacileLLM.SessionId
+---@return nil
+local on_complete_query = function (sessionid)
+  local lines = session.get_last_llm_message(sessionid)
+  if lines then
+    vim.fn.setreg("a", lines, "l")
+  end
+  local bufnr = get_conversation_buffer(sessionid)
+  ui_render.end_highlight_msg_receiving(bufnr, get_render_state(sessionid))
+  ui_conversation.on_complete_query(bufnr)
+  ui_input.on_complete_query(get_input_buffer(sessionid))
+end
+
+---@param sessionid FacileLLM.SessionId
+---@param lines string[]
+---@return nil
+local add_input_message_and_query = function (sessionid, lines)
+  ui_select.touch(sessionid)
+  session.add_message(sessionid, "Input", lines)
+  ui_render.start_highlight_msg_receiving(
+    session.get_conversation(sessionid), get_render_state(sessionid))
+  session.query_model(sessionid, render_conversation, on_complete_query)
+  vim.schedule(
+    function ()
+      render_conversation(sessionid)
+    end)
+end
+
 ---@param model_config FacileLLM.LLMConfig
 ---@return FacileLLM.SessionId
 local create = function (model_config)
   local sessionid = session.create(model_config)
   local name = session.get_name(sessionid)
 
-  ---@return nil
-  local on_complete_query = function ()
-    local lines = session.get_last_llm_message(sessionid)
-    if lines then
-      vim.fn.setreg("a", lines, "l")
-    end
-    local bufnr = get_conversation_buffer(sessionid)
-    ui_render.end_highlight_msg_receiving(bufnr, get_render_state(sessionid))
-    ui_conversation.on_complete_query(bufnr)
-    ui_input.on_complete_query(get_input_buffer(sessionid))
-  end
-
-  ---@param lines string[]
-  ---@return nil
-  local on_confirm_input = function (lines)
-    ui_select.touch(sessionid)
-    session.add_message(sessionid, "Input", lines)
-    ui_render.start_highlight_msg_receiving(
-      session.get_conversation(sessionid), get_render_state(sessionid))
-    session.query_model(sessionid, render_conversation, on_complete_query)
-    vim.schedule(
-      function ()
-        render_conversation(sessionid)
-      end)
-  end
-
-  ---@param lines string[]
-  ---@return nil
-  local on_instruction_input = function (lines)
-    ui_select.touch(sessionid)
-    session.add_message(sessionid, "Instruction", lines)
-    vim.schedule(
-      function ()
-        render_conversation(sessionid)
-      end)
-  end
-
-  ---@param lines string[]
-  ---@return nil
-  local on_context_input = function (lines)
-    ui_select.touch(sessionid)
-    session.add_message(sessionid, "Context", lines)
-    vim.schedule(
-      function ()
-        render_conversation(sessionid)
-      end)
-  end
-
   local sess = {
     conv_bufnr = ui_conversation.create_buffer(sessionid, conversation_buffer_name(name)),
     input_bufnr = ui_input.create_buffer(sessionid, input_buffer_name(name),
       {
-        on_confirm = on_confirm_input,
-        on_instruction = on_instruction_input,
-        on_context = on_context_input,
+        on_confirm = function (lines)
+          add_input_message_and_query(sessionid, lines)
+        end,
+        on_instruction = function (lines)
+          add_message(sessionid, "Instruction", lines)
+        end,
+        on_context = function (lines)
+          add_message(sessionid, "Context", lines)
+        end,
       }),
     render_state = ui_render.create_state(),
     conversation_winids = {},
@@ -426,4 +425,6 @@ return {
   render_conversation                = render_conversation,
   fold_context_messages              = fold_context_messages,
   win_fold_context_messages          = win_fold_context_messages,
+  add_message                        = add_message,
+  add_input_message_and_query        = add_input_message_and_query,
 }

@@ -280,7 +280,7 @@ end
 
 ---@param sessionid FacileLLM.SessionId
 ---@param render_conversation function(FacileLLM.SessionId): nil
----@param on_complete function(): nil
+---@param on_complete function(FacileLLM.SessionId): nil
 ---@return nil
 local query_model = function (sessionid, render_conversation, on_complete)
   if is_conversation_locked(sessionid) then
@@ -302,7 +302,7 @@ local query_model = function (sessionid, render_conversation, on_complete)
   local on_complete__loc = function ()
     unlock_conversation(sessionid)
     vim.schedule(function ()
-      on_complete()
+      on_complete(sessionid)
       render_conversation(sessionid)
     end)
   end

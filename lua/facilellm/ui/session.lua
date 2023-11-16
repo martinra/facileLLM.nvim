@@ -227,6 +227,10 @@ local create = function (model_config)
 
   ---@return nil
   local on_complete_query = function ()
+    local lines = session.get_last_llm_message(sessionid)
+    if lines then
+      vim.fn.setreg("a", lines, "l")
+    end
     local bufnr = get_conversation_buffer(sessionid)
     ui_render.end_highlight_msg_receiving(bufnr, get_render_state(sessionid))
     ui_conversation.on_complete_query(bufnr)

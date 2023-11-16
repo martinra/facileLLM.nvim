@@ -26,7 +26,7 @@ end
 ---@return nil
 local fold_context_messages = function (winid)
   local foldexpr = ""
-  foldexpr = foldexpr .. "getline(v:lnum)=~'^Context:$'"
+  foldexpr = foldexpr .. "getline(v:lnum)=~'^\\(Instruction\\|Context\\):$'"
   foldexpr = foldexpr .. "?'>1':("
   foldexpr = foldexpr .. "getline(v:lnum+1)=~'^\\a*:$'"
   foldexpr = foldexpr .. ")?'<1':'='"

@@ -18,7 +18,9 @@ local job = require("plenary.job")
 ---@param role FacileLLM.MsgRole
 ---@return FacileLLM.OpenAI.MsgRole
 local convert_role_to_openai = function (role)
-  if role == "Context" then
+  if role == "Instruction" then
+    return "system"
+  elseif role == "Context" then
     return "system"
   elseif role == "LLM" then
     return "assistant"
@@ -33,7 +35,7 @@ end
 ---@return FacileLLM.MsgRole
 local convert_role_from_openai = function (role)
   if role == "system" then
-    return "Context"
+    return "Instruction"
   elseif role == "assistant" then
     return "LLM"
   elseif role == "user" then

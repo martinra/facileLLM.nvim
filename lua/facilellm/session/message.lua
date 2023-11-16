@@ -1,7 +1,7 @@
 -- Possible roles in a Message need to be provided/translated
 -- by a model, we do not check them. The default role for
 -- input is "Input".
----@alias FacileLLM.MsgRole ("Context"| "Input"| "LLM")
+---@alias FacileLLM.MsgRole ("Instruction"| "Context"| "Input"| "LLM")
 
 ---@class FacileLLM.Message
 ---@field role FacileLLM.MsgRole

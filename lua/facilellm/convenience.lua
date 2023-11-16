@@ -3,6 +3,7 @@ local llm = require("facilellm.llm")
 local session = require("facilellm.session")
 local ui_select = require("facilellm.ui.select_session")
 local ui_session = require("facilellm.ui.session")
+local util = require("facilellm.util")
 
 
 ---@param model_config? FacileLLM.LLMConfig
@@ -102,8 +103,10 @@ local add_context = function ()
     return
   end
 
-  session.add_message_selection(sessionid, "Context")
-  ui_session.render_conversation(sessionid)
+  local lines = util.get_visual_selection()
+  if lines then
+    ui_session.add_message(sessionid, "Context", lines)
+  end
 end
 
 

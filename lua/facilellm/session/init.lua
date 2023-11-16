@@ -1,7 +1,6 @@
 local conversation = require("facilellm.session.conversation")
 local llm = require("facilellm.llm")
 local message = require("facilellm.session.message")
-local util = require("facilellm.util")
 
 
 ---@alias FacileLLM.SessionId number
@@ -202,16 +201,6 @@ end
 ---@return nil
 local add_message = function (sessionid, role, content)
   conversation.add_message(get_conversation(sessionid), role, content)
-end
-
----@param sessionid FacileLLM.SessionId
----@param role FacileLLM.MsgRole
----@return nil
-local add_message_selection = function (sessionid, role)
-  local lines = util.get_visual_selection()
-  if lines then
-    add_message(sessionid, role, lines)
-  end
 end
 
 ---@param sessionid FacileLLM.SessionId

@@ -25,8 +25,10 @@ R.send_word_by_word = function (conv, add_message, on_complete, lines, delay)
     local word = table.remove(fst_line, 1)
     add_message("LLM", word .. " ")
   else
-    add_message("LLM", "\n")
     table.remove(lines, 1)
+    if #lines ~= 0 then
+      add_message("LLM", "\n")
+    end
   end
 
   vim.defer_fn(function () R.send_word_by_word(conv, add_message, on_complete, lines, delay) end, delay)
@@ -52,7 +54,10 @@ R.send_response = function(conv, add_message, on_complete, lines, response_lines
       major_delay)
   else
     local line = table.remove(response_lines, 1)
-    add_message("LLM", line .. "\n")
+    add_message("LLM", line)
+    if #response_lines ~= 0 or #lines ~= 0 then
+      add_message("LLM", "\n")
+    end
     vim.defer_fn(
       function ()
         R.send_response(conv, add_message, on_complete, lines, response_lines, major_delay, minor_delay)
@@ -83,7 +88,8 @@ local response_to = function (conv, add_message, on_complete, opts)
 
   local major_delay = opts.params.major_delay
   local minor_delay = opts.params.minor_delay
-  R.send_response(conv, add_message, on_complete, lines, response_lines, major_delay, minor_delay)
+  R.send_response(conv, add_message, on_complete,
+    lines, response_lines, major_delay, minor_delay)
 end
 
 ---@return table

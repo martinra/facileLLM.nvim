@@ -1,3 +1,6 @@
+local config = require("facilellm.config")
+
+
 ---@class FacileLLM.RenderState
 ---@field msg FacileLLM.MsgIndex index of the last rendered message
 ---@field line number index of the last rendered line
@@ -30,6 +33,21 @@ local buf_get_namespace_highlight_role = function ()
   return vim.api.nvim_create_namespace("facilellm-highlight-role")
 end
 
+---@param bufnr BufNr
+---@param row number
+---@param len number
+---@return nil
+local create_highlight_role = function (bufnr, row, len)
+  local ns = buf_get_namespace_highlight_role()
+  vim.api.nvim_buf_set_extmark(bufnr, ns,
+    row, 0,
+    {
+      end_row = row,
+      end_col = len,
+      hl_group = get_hl_group_role(),
+    })
+end
+
 ---@param conv FacileLLM.Conversation
 ---@param render_state FacileLLM.RenderState
 ---@return nil
@@ -49,19 +67,20 @@ local end_highlight_msg_receiving = function (bufnr, render_state)
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
 end
 
----@param bufnr BufNr
----@param row number
----@param len number
----@return nil
-local create_highlight_role = function (bufnr, row, len)
-  local ns = buf_get_namespace_highlight_role()
-  vim.api.nvim_buf_set_extmark(bufnr, ns,
-    row, 0,
-    {
-      end_row = row,
-      end_col = len,
-      hl_group = get_hl_group_role(),
-    })
+---@param role FacileLLM.MsgRole
+---@return string
+local role_display = function (role)
+  if role == "Instruction" then
+    return config.opts.naming.role_display.instruction
+  elseif role == "Context" then
+    return config.opts.naming.role_display.context
+  elseif role == "Input" then
+    return config.opts.naming.role_display.input
+  elseif role == "LLM" then
+    return config.opts.naming.role_display.llm
+  else
+    error("unreachable role dispatch")
+  end
 end
 
 ---@param bufnr BufNr
@@ -77,7 +96,7 @@ local create_highlight_msg_receiving = function (bufnr, render_state, mx, msg)
     local end_row = render_state.lines_total - 1
     local end_col
     if #msg.lines == 0 then
-      end_col = string.len(msg.role .. ":")
+      end_col = string.len(role_display(msg.role))
     else
       end_col = string.len(msg.lines[#msg.lines])
     end
@@ -161,7 +180,7 @@ local render_conversation = function (conv, bufnr, render_state)
     -- initial one.
     local mx = 1
     local msg = conv[mx]
-    vim.api.nvim_buf_set_lines(bufnr, -2, -1, false, {msg.role .. ":"})
+    vim.api.nvim_buf_set_lines(bufnr, -2, -1, false, {role_display(msg.role)})
     vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, msg.lines)
 
     render_state.lines_total = 1 + #msg.lines
@@ -170,7 +189,7 @@ local render_conversation = function (conv, bufnr, render_state)
     render_state.line = #msg.lines
     render_state.char = msg.lines and string.len(msg.lines[#msg.lines])
 
-    create_highlight_role(bufnr, 0, string.len(msg.role)+1)
+    create_highlight_role(bufnr, 0, string.len(role_display(msg.role)))
     create_highlight_msg_receiving(bufnr, render_state, mx, msg)
 
   else
@@ -209,7 +228,7 @@ local render_conversation = function (conv, bufnr, render_state)
     local msg = conv[mx]
     -- NOTE: This requires the role to be completely revealed, since we write
     -- it immediately when inserting a new message.
-    vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, {msg.role .. ":"})
+    vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, {role_display(msg.role)})
     vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, msg.lines)
 
     local role_line = render_state.lines_total
@@ -220,7 +239,7 @@ local render_conversation = function (conv, bufnr, render_state)
     local line = msg.lines[#msg.lines]
     render_state.char = line and string.len(line) or 0
 
-    create_highlight_role(bufnr, role_line, string.len(msg.role)+1)
+    create_highlight_role(bufnr, role_line, string.len(role_display(msg.role)))
     create_highlight_msg_receiving(bufnr, render_state, mx, msg)
   end
 

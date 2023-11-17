@@ -14,7 +14,14 @@
 ---@field autostart boolean
 
 ---@class FacileLLM.NamingConfig
+---@field role_display FacileLLM.NamingConfig.RoleDisplay
 ---@field fork_suffix string
+
+---@class FacileLLM.NamingConfig.RoleDisplay
+---@field instruction string
+---@field context string
+---@field input string
+---@field llm string
 
 ---@class FacileLLM.LayoutConfig
 ---@field relative string Relative to what should the conversation window be opened?
@@ -85,6 +92,12 @@ local default_opts = function ()
     },
 
     naming = {
+      role_display = {
+        instruction = "Instruction:",
+        context     = "Context:",
+        input       = "Input:",
+        llm         = "LLM:",
+      },
       fork_suffix = "Fork",
     },
 
@@ -131,7 +144,7 @@ local validate_facilellm_config = function (opts)
 
   if opts.models then
     vim.validate({
-      default_model = {opts.default_model, {"s", "n"}, false}
+      default_model = {opts.default_model, {"s", "n"}, false},
     })
     local default_model_available = opts.models[opts.default_model] ~= nil
 
@@ -162,8 +175,20 @@ local validate_facilellm_config = function (opts)
   if opts.naming then
     local naming = opts.naming
     vim.validate({
-      fork_suffix = {naming.fork_suffix, "s", true}
+      role_display = {naming.role_display, "t", true},
+      fork_suffix  = {naming.fork_suffix,  "s", true},
     })
+
+    if naming.role_display then
+      local role_display = naming.role_display
+      vim.validate({
+        instruction = {role_display.instruction, "s", true},
+        context     = {role_display.context    , "s", true},
+        input       = {role_display.input      , "s", true},
+        llm         = {role_display.llm        , "s", true},
+      })
+    end
+
   end
 
   if opts.layout then

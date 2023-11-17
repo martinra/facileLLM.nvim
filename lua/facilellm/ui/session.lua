@@ -303,7 +303,8 @@ local create = function (model_config)
     callback = function()
       local nmb_conv_wins = 0
       for _,winid in pairs(vim.api.nvim_list_wins()) do
-        if ui_common.win_get_session(winid) == sessionid then
+        if ui_common.win_get_session(winid) == sessionid
+          and ui_common.win_is_conversation(winid) then
           if nmb_conv_wins == 0 then
             nmb_conv_wins = 1
           else

@@ -96,7 +96,8 @@ local focus_from_selection = function ()
   )
 end
 
-local add_input_and_query = function ()
+---@return nil
+local add_visual_as_input_and_query = function ()
   local sessionid = ui_select.get_most_recent()
   if not sessionid then
     return
@@ -109,7 +110,7 @@ local add_input_and_query = function ()
 end
 
 ---@return nil
-local add_context = function ()
+local add_visual_as_context = function ()
   local sessionid = ui_select.get_most_recent()
   if not sessionid then
     return
@@ -118,6 +119,19 @@ local add_context = function ()
   local lines = util.get_visual_selection()
   if lines then
     ui_session.add_message(sessionid, "Context", lines)
+  end
+end
+
+---@return nil
+local add_visual_as_instruction = function ()
+  local sessionid = ui_select.get_most_recent()
+  if not sessionid then
+    return
+  end
+
+  local lines = util.get_visual_selection()
+  if lines then
+    ui_session.add_message(sessionid, "Instruction", lines)
   end
 end
 
@@ -131,6 +145,7 @@ return {
   show = show,
   focus = focus,
   focus_from_selection = focus_from_selection,
-  add_input_and_query = add_input_and_query,
-  add_context = add_context,
+  add_visual_as_input_and_query = add_visual_as_input_and_query,
+  add_visual_as_context = add_visual_as_context,
+  add_visual_as_instruction = add_visual_as_instruction,
 }

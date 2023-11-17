@@ -18,14 +18,16 @@
 local set_global_keymaps = function ()
   local facilellm = require("facilellm")
 
-  vim.keymap.set('n', '<leader>ais', facilellm.show,                  {silent = true})
-  vim.keymap.set('v', '<leader>aii', facilellm.add_input_and_query,   {silent = true})
-  vim.keymap.set('v', '<leader>aic', facilellm.add_context,           {silent = true})
-  vim.keymap.set('n', '<leader>ain', facilellm.create_from_selection, {silent = true})
-  vim.keymap.set('n', '<leader>aid', facilellm.delete_from_selection, {silent = true})
-  vim.keymap.set('n', '<leader>aif', facilellm.focus_from_selection,  {silent = true})
-  vim.keymap.set('n', '<leader>air', facilellm.rename_from_selection, {silent = true})
-  vim.keymap.set('n', '<leader>aim', facilellm.set_model_from_selection, {silent = true})
+  vim.keymap.set('n', '<leader>aiw', facilellm.show, {})
+  vim.keymap.set('n', '<leader>ain', facilellm.create_from_selection, {})
+  vim.keymap.set('n', '<leader>aid', facilellm.delete_from_selection, {})
+  vim.keymap.set('n', '<leader>aif', facilellm.focus_from_selection, {})
+  vim.keymap.set('n', '<leader>air', facilellm.rename_from_selection, {})
+  vim.keymap.set('n', '<leader>aim', facilellm.set_model_from_selection, {})
+
+  vim.keymap.set('v', '<leader>ai<Enter>', facilellm.add_visual_as_input_and_query, {})
+  vim.keymap.set('v', '<leader>aic', facilellm.add_visual_as_context, {})
+  vim.keymap.set('v', '<leader>aii', facilellm.add_visual_as_instruction, {})
 end
 
 ---@return FacileLLM.Config

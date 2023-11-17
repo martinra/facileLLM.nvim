@@ -404,25 +404,6 @@ local set_current_win_conversation_input = function (sessionid)
   end
 end
 
----@param sessionid FacileLLM.SessionId
----@return nil
-local fold_context_messages = function (sessionid)
-  for _,winid in pairs(vim.api.nvim_list_wins()) do
-    if ui_common.win_get_session(winid) == sessionid and ui_common.win_is_conversation(winid) then
-      ui_conversation.fold_context_messages(winid)
-    end
-  end
-end
-
----@param winid WinId
----@return nil
-local win_fold_context_messages = function (winid)
-  local sessionid = ui_common.win_get_session(winid)
-  if sessionid and ui_common.win_is_conversation(winid) then
-    ui_conversation.fold_context_messages(winid)
-  end
-end
-
 
 return {
   create                             = create,
@@ -440,8 +421,6 @@ return {
   set_current_win_conversation_input = set_current_win_conversation_input,
   clear_conversation                 = clear_conversation,
   render_conversation                = render_conversation,
-  fold_context_messages              = fold_context_messages,
-  win_fold_context_messages          = win_fold_context_messages,
   add_message                        = add_message,
   add_input_message_and_query        = add_input_message_and_query,
 }

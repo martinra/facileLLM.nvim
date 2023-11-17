@@ -57,6 +57,16 @@ local get_visual_selection = function (cursor_position)
   end
 end
 
+---@return string[]
+local substitute_visual_selection = function ()
+  vim.api.nvim_feedkeys("s", "vx", false)
+  local lines = {}
+  for line in string.gmatch(vim.fn.getreg("1"), "[^\n]+") do
+    table.insert(lines, line)
+  end
+  return lines
+end
+
 ---@param winid WinId
 ---@param row_start number
 ---@param row_end number
@@ -96,6 +106,7 @@ end
 return {
   win_vsplit_modifier  = win_vsplit_modifier,
   get_visual_selection = get_visual_selection,
+  substitute_visual_selection = substitute_visual_selection,
   create_fold          = create_fold,
   delete_fold          = delete_fold,
 }

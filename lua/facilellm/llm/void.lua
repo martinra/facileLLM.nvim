@@ -21,9 +21,13 @@ R.send_word_by_word = function (conv, add_message, on_complete, lines, delay)
     fst_line = words
     lines[1] = words
   end
+
   if #fst_line ~= 0 then
     local word = table.remove(fst_line, 1)
-    add_message("LLM", word .. " ")
+    add_message("LLM", word)
+    if #fst_line ~= 0 then
+      add_message("LLM", " ")
+    end
   else
     table.remove(lines, 1)
     if #lines ~= 0 then

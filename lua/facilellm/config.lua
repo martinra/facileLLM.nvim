@@ -31,6 +31,17 @@
 ---@field highlight_role boolean
 ---@field fold_instruction boolean
 ---@field fold_context boolean
+---@field keymaps FacileLLM.Config.Interface.Keymaps
+
+---@class FacileLLM.Config.Interface.Keymaps
+---@field delete_interaction string
+---@field delete_conversation string
+---@field delete_session string
+---@field fork_session string
+---@field rename_session string
+---@field input_confirm string
+---@field input_instruction string
+---@field input_context string
 
 ---@class FacileLLM.Config.Feedback
 ---@field highlight_message_while_receiving boolean
@@ -118,6 +129,16 @@ local default_opts = function ()
       highlight_role   = true,
       fold_instruction = true,
       fold_context     = true,
+      keymaps = {
+        delete_interaction  = "<C-d>i",
+        delete_conversation = "<C-d>c",
+        delete_session      = "<C-d>s",
+        fork_session        = "<C-f>",
+        rename_session      = "<C-r>",
+        input_confirm       = "<Enter>",
+        input_instruction   = "<C-i>",
+        input_context       = "<C-c>",
+      },
     },
 
     feedback = {
@@ -219,7 +240,22 @@ local validate_facilellm_config = function (opts)
       highlight_role        = {interface.highlight_role,        "b", true},
       fold_instruction      = {interface.fold_instruction,      "b", true},
       fold_context          = {interface.fold_context,          "b", true},
+      keymaps               = {interface.keymaps,               "t", true},
     })
+
+    if interface.keymaps then
+      local keymaps = interface.keymaps
+      vim.validate({
+        delete_interaction   = {keymaps.delete_interaction,  "s", true},
+        delete_conversation  = {keymaps.delete_conversation, "s", true},
+        delete_session       = {keymaps.delete_session,      "s", true},
+        fork_session         = {keymaps.fork_session,        "s", true},
+        rename_session       = {keymaps.rename_session,      "s", true},
+        input_confirm        = {keymaps.input_confirm,       "s", true},
+        input_instruction    = {keymaps.input_instruction,   "s", true},
+        input_context        = {keymaps.input_context,       "s", true},
+      })
+    end
   end
 
   if opts.feedback then

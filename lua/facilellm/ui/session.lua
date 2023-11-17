@@ -163,70 +163,84 @@ local set_keymaps = function (sessionid)
   local input_bufnr = get_input_buffer(sessionid)
 
   -- mnemonic: delete interaction
-  vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-d>i", "",
+  
+  vim.api.nvim_buf_set_keymap(conv_bufnr,
+    "n", config.opts.interface.keymaps.delete_interaction, "",
     { callback = function ()
         ui_session.clear_conversation(sessionid, "preserve", "preserve")
       end,
     })
-  vim.api.nvim_buf_set_keymap(input_bufnr, "n", "<C-d>i", "",
+  vim.api.nvim_buf_set_keymap(input_bufnr,
+    "n", config.opts.interface.keymaps.delete_interaction, "",
     { callback = function ()
         ui_session.clear_conversation(sessionid, "preserve", "preserve")
       end,
     })
 
   -- mnemonic: delete conversation
-  vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-d>c", "",
+  vim.api.nvim_buf_set_keymap(conv_bufnr,
+    "n", config.opts.interface.keymaps.delete_conversation, "",
     { callback = function ()
         ui_session.clear_conversation(sessionid, "delete", "delete")
       end,
     })
-  vim.api.nvim_buf_set_keymap(input_bufnr, "n", "<C-d>c", "",
+  vim.api.nvim_buf_set_keymap(input_bufnr,
+    "n", config.opts.interface.keymaps.delete_conversation, "",
     { callback = function ()
         ui_session.clear_conversation(sessionid, "delete", "delete")
       end,
     })
 
   -- mnemonic: delete session
-  vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-d>s", "",
+  vim.api.nvim_buf_set_keymap(conv_bufnr,
+    "n", config.opts.interface.keymaps.delete_session, "",
     { callback = function ()
         ui_session.delete(sessionid)
       end,
     })
-  vim.api.nvim_buf_set_keymap(input_bufnr, "n", "<C-d>s", "",
+  vim.api.nvim_buf_set_keymap(input_bufnr,
+    "n", config.opts.interface.keymaps.delete_session, "",
     { callback = function ()
         ui_session.delete(sessionid)
       end,
     })
 
-  vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-f>", "",
+  vim.api.nvim_buf_set_keymap(conv_bufnr,
+    "n", config.opts.interface.keymaps.fork_session, "",
     { callback = function ()
         ui_session.fork(sessionid)
       end,
     })
-  vim.api.nvim_buf_set_keymap(input_bufnr, "n", "<C-f>", "",
+  vim.api.nvim_buf_set_keymap(input_bufnr,
+    "n", config.opts.interface.keymaps.fork_session, "",
     { callback = function ()
         ui_session.fork(sessionid)
       end,
     })
 
-  vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-r>", "",
+  vim.api.nvim_buf_set_keymap(conv_bufnr,
+    "n", config.opts.interface.keymaps.rename_session, "",
     { callback = function ()
         ui_session.rename(sessionid)
       end,
     })
-  vim.api.nvim_buf_set_keymap(input_bufnr, "n", "<C-r>", "",
+  vim.api.nvim_buf_set_keymap(input_bufnr,
+    "n", config.opts.interface.keymaps.rename_session, "",
     { callback = function ()
         ui_session.rename(sessionid)
       end,
     })
 
-  ui_input.set_confirm_keymap(input_bufnr, "n", "<Enter>", function (lines)
+  ui_input.set_confirm_keymap(input_bufnr,
+    "n", config.opts.interface.keymaps.input_confirm, function (lines)
     ui_session.add_input_message_and_query(sessionid, lines)
   end)
-  ui_input.set_instruction_keymap(input_bufnr, "n", "<C-i>", function (lines)
+  ui_input.set_instruction_keymap(input_bufnr,
+    "n", config.opts.interface.keymaps.input_instruction, function (lines)
     ui_session.add_message(sessionid, "Instruction", lines)
   end)
-  ui_input.set_context_keymap(input_bufnr, "n", "<C-c>", function (lines)
+  ui_input.set_context_keymap(input_bufnr,
+    "n", config.opts.interface.keymaps.input_context, function (lines)
     ui_session.add_message(sessionid, "Context", lines)
   end)
 end
@@ -298,8 +312,6 @@ local create = function (model_config)
   }
   session_uis[sessionid] = sess
 
-  set_keymaps(sessionid)
-
   vim.api.nvim_create_autocmd("WinClosed", {
     buffer = sess.conv_bufnr,
     callback = function()
@@ -321,6 +333,8 @@ local create = function (model_config)
       end
     end
   })
+
+  set_keymaps(sessionid)
 
   -- HACK: We delay rendering so that foldexpr is applied to the initial
   -- conversation in all cases Without this on 0.9.4 when creating from

@@ -47,7 +47,7 @@ end
 ---@return nil
 local autostart_sessions = function (models)
   local ui_session = require("facilellm.ui.session")
-  for _,model in pairs(models) do
+  for _,model in ipairs(models) do
     if model.autostart then
       ui_session.create(model)
     end
@@ -140,7 +140,7 @@ end
 ---@return FacileLLM.Config
 local extend_facilellm_config = function (opts)
   opts = vim.tbl_deep_extend("force", default_opts(), opts)
-  for mx,model in pairs(opts.models) do
+  for mx,model in ipairs(opts.models) do
     opts.models[mx] = vim.tbl_deep_extend("keep", model, default_model_config())
   end
   return opts

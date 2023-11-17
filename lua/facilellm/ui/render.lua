@@ -232,8 +232,6 @@ local render_conversation = function (conv, bufnr, render_state)
   -- Render new messages
   for mx = render_state.msg+1, #conv do
     local msg = conv[mx]
-    -- NOTE: This requires the role to be completely revealed, since we write
-    -- it immediately when inserting a new message.
     vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, {role_display(msg.role)})
     vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, msg.lines)
 

@@ -91,10 +91,11 @@ local does_follow_conversation = function (sessionid, winid)
 end
 
 ---@param sessionid FacileLLM.SessionId
----@param context ("delete" | "combine" | "preserve")
+---@param instruction ("delete"| "preserve"| "combine")
+---@param context ("delete"| "preserve"| "combine")
 ---@return nil
-local clear_conversation = function (sessionid, context)
-  if not session.clear_conversation(sessionid, context) then
+local clear_conversation = function (sessionid, instruction, context)
+  if not session.clear_conversation(sessionid, instruction, context) then
     return
   end
   local conv = session.get_conversation(sessionid)
@@ -163,24 +164,24 @@ local set_keymaps = function (sessionid)
   -- mnemonic: delete interaction
   vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-d>i", "",
     { callback = function ()
-        ui_session.clear_conversation(sessionid, "preserve")
+        ui_session.clear_conversation(sessionid, "preserve", "preserve")
       end,
     })
   vim.api.nvim_buf_set_keymap(input_bufnr, "n", "<C-d>i", "",
     { callback = function ()
-        ui_session.clear_conversation(sessionid, "preserve")
+        ui_session.clear_conversation(sessionid, "preserve", "preserve")
       end,
     })
 
   -- mnemonic: delete conversation
   vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-d>c", "",
     { callback = function ()
-        ui_session.clear_conversation(sessionid, "delete")
+        ui_session.clear_conversation(sessionid, "delete", "delete")
       end,
     })
   vim.api.nvim_buf_set_keymap(input_bufnr, "n", "<C-d>c", "",
     { callback = function ()
-        ui_session.clear_conversation(sessionid, "delete")
+        ui_session.clear_conversation(sessionid, "delete", "delete")
       end,
     })
 

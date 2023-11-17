@@ -224,49 +224,73 @@ local unlock_conversation = function (sessionid)
 end
 
 ---@param sessionid FacileLLM.SessionId
----@param context ("delete" | "combine" | "preserve")
+---@param instruction ("delete"| "preserve"| "combine")
+---@param context ("delete"| "preserve"| "combine")
 ---@return boolean
-local clear_conversation = function (sessionid, context)
+local clear_conversation = function (sessionid, instruction, context)
   if is_conversation_locked(sessionid) then
     vim.notify("clearing conversation despite lock", vim.log.levels.WARN)
     return false
   end
 
-  if context == "delete" then
+  if context == "delete" and instruction == "delete" then
     sessions[sessionid].conversation = {}
     return true
-  elseif context == "combine" then
-    local context_lines = {}
-    for _,msg in ipairs(sessions[sessionid].conversation) do
-      if msg.role == "Context" then
-        for _,line in ipairs(msg.lines) do
-          table.insert(context_lines, line)
-        end
-      end
-    end
-    if #context_lines == 0 then
-      sessions[sessionid].conversation = conversation.create()
-    else
-      local context_msg = message.create("Context", context_lines)
-      sessions[sessionid].conversation = conversation.create({ context_msg })
-    end
-    return true
-  elseif context == "preserve" then
-    local context_msgs = {}
-    for _,msg in ipairs(sessions[sessionid].conversation) do
-      if msg.role == "Context" then
-        table.insert(context_msgs, msg)
-      end
-    end
-    if #context_msgs == 0 then
-      sessions[sessionid].conversation = conversation.create()
-    else
-      sessions[sessionid].conversation = conversation.create(context_msgs)
-    end
-    return true
-  else
-    error("incorrect value of context: " .. context)
   end
+
+  if instruction == "preserve" and context == "preserve" then
+    local conv = {}
+    for _,msg in ipairs(sessions[sessionid].conversation) do
+      if msg.role == "Instruction" or msg.role == "Context" then
+        table.insert(conv, msg)
+      end
+    end
+    sessions[sessionid].conversation = conversation.create(conv)
+    return true
+  end
+
+  local instruction_msgs = {}
+  if instruction == "combine" then
+    instruction_msgs[1] = message.create("Context")
+  end
+  local context_msgs = {}
+  if context == "combine" then
+    context_msgs[1] = message.create("Instruction")
+  end
+
+  for _,msg in ipairs(sessions[sessionid].conversation) do
+    if msg.role == "Instruction" then
+      if instruction == "preserve" then
+        table.insert(context_msgs, msg)
+      elseif instruction == "combine" then
+        message.append_lines(instruction_msgs[1], msg.lines)
+      end
+    elseif msg.role == "Context" then
+      if context == "preserve" then
+        table.insert(context_msgs, msg)
+      elseif context == "combine" then
+        message.append_lines(context_msgs[1], msg.lines)
+      end
+    end
+  end
+
+  if instruction == "combine" and message.isempty(instruction_msgs[1]) then
+    instruction_msgs[1] = nil
+  end
+  if context == "combine" and message.isempty(context_msgs[1]) then
+    context_msgs[1] = nil
+  end
+
+  local conv = {}
+  for _,msg in ipairs(instruction_msgs) do
+    table.insert(conv, msg)
+  end
+  for _,msg in ipairs(context_msgs) do
+    table.insert(conv, msg)
+  end
+  sessions[sessionid].conversation = conversation.create(conv)
+
+  return true
 end
 
 ---@param sessionid FacileLLM.SessionId

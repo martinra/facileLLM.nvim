@@ -318,7 +318,6 @@ return {
   get_conversation       = get_conversation,
   get_last_llm_message   = get_last_llm_message,
   add_message            = add_message,
-  add_message_selection  = add_message_selection,
   is_conversation_locked = is_conversation_locked,
   lock_conversation      = lock_conversation,
   unlock_conversation    = unlock_conversation,

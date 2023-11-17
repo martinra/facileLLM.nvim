@@ -34,6 +34,8 @@
 
 ---@class FacileLLM.Config.Feedback
 ---@field highlight_message_while_receiving boolean
+---@field pending_insertion_feedback boolean
+---@field pending_insertion_feedback_message string
 ---@field conversation_lock FacileLLM.Config.Feedback.ConversationLock
 
 ---@class FacileLLM.Config.Feedback.ConversationLock
@@ -120,6 +122,8 @@ local default_opts = function ()
 
     feedback = {
       highlight_message_while_receiving = true,
+      pending_insertion_feedback = true,
+      pending_insertion_feedback_message = "Will insert pending LLM response",
       conversation_lock = {
         input_confirm     = true,
         input_instruction = true,
@@ -221,8 +225,10 @@ local validate_facilellm_config = function (opts)
   if opts.feedback then
     local feedback = opts.feedback
     vim.validate({
-      highlight_message_while_receiving = {feedback.highlight_message_while_receiving, "b", true},
-      conversation_lock = {feedback.conversation_lock, "t", true},
+      highlight_message_while_receiving  = {feedback.highlight_message_while_receiving,  "b", true},
+      pending_insertion_feedback         = {feedback.pending_insertion_feedback,         "b", true},
+      pending_insertion_feedback_message = {feedback.pending_insertion_feedback_message, "s", true},
+      conversation_lock                  = {feedback.conversation_lock,                  "t", true},
     })
 
     if feedback.conversation_lock then

@@ -1,3 +1,4 @@
+local config = require("facilellm.config")
 local session = require("facilellm.session")
 local ui_common = require("facilellm.ui.common")
 local ui_conversation = require("facilellm.ui.conversation")
@@ -60,13 +61,13 @@ end
 ---@param name string
 ---@return string
 local conversation_buffer_name = function (name)
-  return "facileLLM " .. name
+  return config.opts.naming.conversation_buffer_prefix .. " " .. name
 end
 
 ---@param name string
 ---@return string
 local input_buffer_name = function (name)
-  return "facileLLM Input " .. name
+  return config.opts.naming.input_buffer_prefix .. " " .. name
 end
 
 ---@param sessionid FacileLLM.SessionId

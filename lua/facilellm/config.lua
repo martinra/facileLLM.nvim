@@ -15,6 +15,8 @@
 
 ---@class FacileLLM.Config.Naming
 ---@field role_display FacileLLM.Config.Naming.RoleDisplay
+---@field conversation_buffer_prefix string
+---@field input_buffer_prefix string
 ---@field fork_suffix string
 
 ---@class FacileLLM.Config.Naming.RoleDisplay
@@ -103,6 +105,8 @@ local default_opts = function ()
         input       = "Input:",
         llm         = "LLM:",
       },
+      conversation_buffer_prefix = "facileLLM",
+      input_buffer_prefix = "facileLLM Input",
       fork_suffix = "Fork",
     },
 
@@ -185,8 +189,10 @@ local validate_facilellm_config = function (opts)
   if opts.naming then
     local naming = opts.naming
     vim.validate({
-      role_display = {naming.role_display, "t", true},
-      fork_suffix  = {naming.fork_suffix,  "s", true},
+      role_display               = {naming.role_display,               "t", true},
+      conversation_buffer_prefix = {naming.conversation_buffer_prefix, "s", true},
+      input_buffer_prefix        = {naming.input_buffer_prefix,        "s", true},
+      fork_suffix                = {naming.fork_suffix,                "s", true},
     })
 
     if naming.role_display then

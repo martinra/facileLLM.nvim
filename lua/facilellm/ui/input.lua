@@ -2,12 +2,6 @@ local session = require("facilellm.session")
 local ui_common = require("facilellm.ui.common")
 
 
----@class FacileLLM.InputBufHandles
----@field on_confirm function(string[]): nil
----@field on_instruction function(string[]): nil
----@field on_context function(string[]): nil
-
-
 ---@return number
 local buf_get_namespace_confirm_feedback = function ()
   return vim.api.nvim_create_namespace("facilellm-confirm-feedback")
@@ -40,10 +34,12 @@ local empty_input_buffer = function (bufnr)
 end
 
 ---@param bufnr BufNr
+---@param mode string
+---@param lhs string
 ---@param on_confirm function(string[]): nil
 ---@return nil
-local set_confirm_keymap = function (bufnr, on_confirm)
-  vim.api.nvim_buf_set_keymap(bufnr, "n", "<Enter>", "",
+local set_confirm_keymap = function (bufnr, mode, lhs, on_confirm)
+  vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, "",
     { callback = function ()
         local sessionid = ui_common.buf_get_session(bufnr)
         ---@cast sessionid FacileLLM.SessionId
@@ -62,10 +58,12 @@ local set_confirm_keymap = function (bufnr, on_confirm)
 end
 
 ---@param bufnr BufNr
+---@param mode string
+---@param lhs string
 ---@param on_instruction function(string[]): nil
 ---@return nil
-local set_instruction_keymap = function (bufnr, on_instruction)
-  vim.api.nvim_buf_set_keymap(bufnr, "n", "i", "",
+local set_instruction_keymap = function (bufnr, mode, lhs, on_instruction)
+  vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, "",
     { callback = function ()
         local sessionid = ui_common.buf_get_session(bufnr)
         ---@cast sessionid FacileLLM.SessionId
@@ -84,10 +82,12 @@ local set_instruction_keymap = function (bufnr, on_instruction)
 end
 
 ---@param bufnr BufNr
+---@param mode string
+---@param lhs string
 ---@param on_context function(string[]): nil
 ---@return nil
-local set_context_keymap = function (bufnr, on_context)
-  vim.api.nvim_buf_set_keymap(bufnr, "n", "c", "",
+local set_context_keymap = function (bufnr, mode, lhs, on_context)
+  vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, "",
     { callback = function ()
         local sessionid = ui_common.buf_get_session(bufnr)
         ---@cast sessionid FacileLLM.SessionId
@@ -107,9 +107,8 @@ end
 
 ---@param sessionid FacileLLM.SessionId
 ---@param name string
----@param handles FacileLLM.InputBufHandles
 ---@return BufNr
-local create_buffer = function (sessionid, name, handles)
+local create_buffer = function (sessionid, name)
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_name(bufnr, name)
 
@@ -120,10 +119,6 @@ local create_buffer = function (sessionid, name, handles)
   vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
 
   ui_common.buf_set_session(bufnr, sessionid)
-
-  set_confirm_keymap(bufnr, handles.on_confirm)
-  set_instruction_keymap(bufnr, handles.on_instruction)
-  set_context_keymap(bufnr, handles.on_context)
 
   return bufnr
 end
@@ -159,4 +154,7 @@ return {
   create_buffer = create_buffer,
   create_window = create_window,
   on_complete_query = on_complete_query,
+  set_confirm_keymap = set_confirm_keymap,
+  set_instruction_keymap = set_instruction_keymap,
+  set_context_keymap = set_context_keymap,
 }

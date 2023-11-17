@@ -155,10 +155,10 @@ end
 ---@param sessionid FacileLLM.SessionId
 ---@return nil
 local set_keymaps = function (sessionid)
+  local ui_session = require("facilellm.ui.session")
+
   local conv_bufnr = get_conversation_buffer(sessionid)
   local input_bufnr = get_input_buffer(sessionid)
-
-  local ui_session = require("facilellm.ui.session")
 
   -- mnemonic: delete interaction
   vim.api.nvim_buf_set_keymap(conv_bufnr, "n", "<C-d>i", "",
@@ -217,6 +217,16 @@ local set_keymaps = function (sessionid)
         ui_session.rename(sessionid)
       end,
     })
+
+  ui_input.set_confirm_keymap(input_bufnr, "n", "<Enter>", function (lines)
+    ui_session.add_input_message_and_query(sessionid, lines)
+  end)
+  ui_input.set_instruction_keymap(input_bufnr, "n", "<C-i>", function (lines)
+    ui_session.add_message(sessionid, "Instruction", lines)
+  end)
+  ui_input.set_context_keymap(input_bufnr, "n", "<C-c>", function (lines)
+    ui_session.add_message(sessionid, "Context", lines)
+  end)
 end
 
 ---@param sessionid FacileLLM.SessionId
@@ -277,18 +287,7 @@ local create = function (model_config)
 
   local sess = {
     conv_bufnr = ui_conversation.create_buffer(sessionid, conversation_buffer_name(name)),
-    input_bufnr = ui_input.create_buffer(sessionid, input_buffer_name(name),
-      {
-        on_confirm = function (lines)
-          add_input_message_and_query(sessionid, lines)
-        end,
-        on_instruction = function (lines)
-          add_message(sessionid, "Instruction", lines)
-        end,
-        on_context = function (lines)
-          add_message(sessionid, "Context", lines)
-        end,
-      }),
+    input_bufnr = ui_input.create_buffer(sessionid, input_buffer_name(name)),
     render_state = ui_render.create_state(),
     conversation_winids = {},
     follow_conversation_flags = {},

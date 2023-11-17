@@ -28,6 +28,12 @@ local create = function (role, content)
 end
 
 ---@param msg FacileLLM.Message
+---@return boolean
+local isempty = function (msg)
+  return #msg.lines == 0
+end
+
+---@param msg FacileLLM.Message
 ---@param content string
 ---@return nil
 local append = function (msg, content)
@@ -53,6 +59,7 @@ end
 
 return {
   create       = create,
+  isempty      = isempty,
   append       = append,
   append_lines = append_lines,
 }

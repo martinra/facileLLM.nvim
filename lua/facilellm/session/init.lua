@@ -103,7 +103,7 @@ local create = function (model_config)
   local sess = {
     name = name,
     model = model,
-    conversation = conversation.create(model.initial_conversation),
+    conversation = conversation.create(model_config.initial_conversation),
     conversation_locked = false,
     config = vim.tbl_deep_extend("force", {}, model_config),
   }

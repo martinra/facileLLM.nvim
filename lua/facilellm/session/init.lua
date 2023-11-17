@@ -306,7 +306,7 @@ local query_model = function (sessionid, render_conversation, on_complete)
   ---@param role FacileLLM.MsgRole
   ---@param content string | string[]
   ---@return nil
-  local add_message_wrapped = function (role, content)
+  local add_message_and_render = function (role, content)
     add_message(sessionid, role, content)
     vim.schedule(function ()
       render_conversation(sessionid)
@@ -325,7 +325,7 @@ local query_model = function (sessionid, render_conversation, on_complete)
   lock_conversation(sessionid)
   local model = get_model(sessionid)
   model.response_to(get_conversation(sessionid),
-    add_message_wrapped, on_complete__loc)
+    add_message_and_render, on_complete__loc)
 end
 
 

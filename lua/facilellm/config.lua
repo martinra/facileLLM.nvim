@@ -61,6 +61,16 @@ local default_opts = function ()
   }
 end
 
+---@return FacileLLM.LLMConfig
+local default_model_config = function ()
+  return {
+    name = nil,
+    implementation = "undefined",
+    opts = {},
+    initial_conversation = {},
+  }
+end
+
 ---@param opts table
 ---@return nil
 local validate_facilellm_config = function (opts)
@@ -110,22 +120,25 @@ local validate_facilellm_config = function (opts)
   end
 end
 
-
-local M = {
-  ---@type FacileLLM.Config
-  opts = default_opts(),
-}
-
 ---@param opts table
+---@return FacileLLM.Config
+local extend_facilellm_config = function (opts)
+  opts = vim.tbl_deep_extend("force", default_opts(), opts)
+  for mx,model in pairs(opts.models) do
+    opts.models[mx] = vim.tbl_deep_extend("keep", model, default_model_config())
+  end
+  return opts
+end
+
+
+local M = {}
+
+---@param opts table?
 ---@return nil
 M.setup = function (opts)
   opts = opts or {}
   validate_facilellm_config(opts)
-
-  -- We merge options anyway, because this has the best change to mirror the
-  -- expected behavior.
-  M.opts = vim.tbl_deep_extend("force", M.opts, opts)
-
+  M.opts = extend_facilellm_config(opts)
 
   set_highlights()
   set_global_keymaps()

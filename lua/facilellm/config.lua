@@ -126,8 +126,6 @@ M.setup = function (opts)
   -- expected behavior.
   M.opts = vim.tbl_deep_extend("force", M.opts, opts)
 
-  vim.api.nvim_set_hl(0, "FacileLLMMsgReceiving", {link = "DiffAdd"})
-  vim.api.nvim_set_hl(0, "FacileLLMRole", {link = "markdownH1"})
 
   set_highlights()
   set_global_keymaps()

@@ -1,3 +1,4 @@
+local config = require("facilellm.config")
 local conversation = require("facilellm.session.conversation")
 local llm = require("facilellm.llm")
 local message = require("facilellm.session.message")
@@ -75,14 +76,15 @@ end
 ---@param orig_name string
 ---@return string
 local fork_name_variant = function (orig_name)
-  if string.find(orig_name, "Fork$") then
+  local fork = config.opts.naming.fork_suffix
+  if string.find(orig_name, fork .. "$") then
     return orig_name
   else
-    local fork_nmb_find = string.find(orig_name, "Fork %d+$")
+    local fork_nmb_find = string.find(orig_name, fork .. " %d+$")
     if fork_nmb_find then
       return string.sub(orig_name, 1, fork_nmb_find + 3)
     else
-      return orig_name .. " Fork"
+      return orig_name .. " " .. fork
     end
   end
 end

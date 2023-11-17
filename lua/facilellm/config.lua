@@ -1,6 +1,7 @@
 ---@class FacileLLM.Config
 ---@field default_model string | number Name or index of the default model.
 ---@field models FacileLLM.LLMConfig[]
+---@field naming FacileLLM.NamingConfig
 ---@field layout FacileLLM.LayoutConfig
 
 ---@class FacileLLM.LLMConfig
@@ -10,6 +11,9 @@
 ---@field opts table Options that are forwarded to the implementation.
 ---@field initial_conversation FacileLLM.Conversation 
 ---@field autostart boolean
+
+---@class FacileLLM.NamingConfig
+---@field fork_suffix string
 
 ---@class FacileLLM.LayoutConfig
 ---@field relative string Relative to what should the conversation window be opened?
@@ -69,6 +73,10 @@ local default_opts = function ()
       },
     },
 
+    naming = {
+      fork_suffix = "Fork",
+    },
+
     layout = {
       relative = "editor",
     },
@@ -95,6 +103,7 @@ local validate_facilellm_config = function (opts)
   vim.validate({
     -- default_model validated when validating models
     models        = {opts.models,        "t",        true},
+    naming        = {opts.naming,        "t",        true},
     layout        = {opts.layout,        "t",        true},
   })
 
@@ -126,6 +135,13 @@ local validate_facilellm_config = function (opts)
 
   elseif opts.default_model then
     error("default model but no model defined")
+  end
+
+  if opts.naming then
+    local naming = opts.naming
+    vim.validate({
+      fork_suffix = {naming.fork_suffix, "s", true}
+    })
   end
 
   if opts.layout then

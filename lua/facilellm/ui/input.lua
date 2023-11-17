@@ -132,11 +132,13 @@ local create_window = function (bufnr, conv_winid)
     vim.api.nvim_set_current_win(conv_winid)
   end
 
+  local conv_height = vim.api.nvim_win_get_height(conv_winid)
+  local input_height = math.ceil(config.opts.interface.input_relative_height*conv_height)
+
   vim.cmd("noau rightbelow split")
   local input_winid = vim.api.nvim_get_current_win()
 
-  local conv_height = vim.api.nvim_win_get_height(conv_winid)
-  vim.api.nvim_win_set_height(input_winid, math.ceil(0.2*conv_height))
+  vim.api.nvim_win_set_height(input_winid, input_height)
 
   vim.api.nvim_win_set_buf(input_winid, bufnr)
 

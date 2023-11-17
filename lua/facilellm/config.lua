@@ -3,6 +3,7 @@
 ---@field models FacileLLM.LLMConfig[]
 ---@field naming FacileLLM.NamingConfig
 ---@field layout FacileLLM.LayoutConfig
+---@field feedback FacileLLM.FeedbackConfig
 
 ---@class FacileLLM.LLMConfig
 ---@field name string? Name of the model.
@@ -17,6 +18,16 @@
 
 ---@class FacileLLM.LayoutConfig
 ---@field relative string Relative to what should the conversation window be opened?
+
+---@class FacileLLM.FeedbackConfig
+---@field conversation_lock FacileLLM.FeedbackConfig.ConversationLock
+
+---@class FacileLLM.FeedbackConfig.ConversationLock
+---@field input_confirm boolean
+---@field input_instruction boolean
+---@field input_context boolean
+---@field warn_on_query boolean
+---@field warn_on_clear boolean
 
 
 ---@return nil
@@ -80,6 +91,16 @@ local default_opts = function ()
     layout = {
       relative = "editor",
     },
+
+    feedback = {
+      conversation_lock = {
+        input_confirm     = true,
+        input_instruction = true,
+        input_context     = true,
+        warn_on_query     = true,
+        warn_on_clear     = true,
+      },
+    },
   }
 end
 
@@ -105,6 +126,7 @@ local validate_facilellm_config = function (opts)
     models        = {opts.models,        "t",        true},
     naming        = {opts.naming,        "t",        true},
     layout        = {opts.layout,        "t",        true},
+    feedback      = {opts.feedback,      "t",        true},
   })
 
   if opts.models then
@@ -149,6 +171,24 @@ local validate_facilellm_config = function (opts)
     vim.validate({
       relative = {layout.relative, "s", true}
     })
+  end
+
+  if opts.feedback then
+    local feedback = opts.feedback
+    vim.validate({
+      conversation_lock = {feedback.conversation_lock, "t", true}
+    })
+
+    if feedback.conversation_lock then
+      local conversation_lock = feedback.conversation_lock
+      vim.validate({
+        input_confirm     = {conversation_lock.input_confirm    , "b", true},
+        input_instruction = {conversation_lock.input_instruction, "b", true},
+        input_context     = {conversation_lock.input_context    , "b", true},
+        warn_on_query     = {conversation_lock.warn_on_query    , "b", true},
+        warn_on_clear     = {conversation_lock.warn_on_clear    , "b", true},
+      })
+    end
   end
 end
 

@@ -228,7 +228,7 @@ end
 ---@param context ("delete"| "preserve"| "combine")
 ---@return boolean
 local clear_conversation = function (sessionid, instruction, context)
-  if is_conversation_locked(sessionid) then
+  if is_conversation_locked(sessionid) and config.opts.feedback.conversation_lock.warn_on_clear then
     vim.notify("clearing conversation despite lock", vim.log.levels.WARN)
     return false
   end
@@ -298,7 +298,7 @@ end
 ---@param on_complete function(FacileLLM.SessionId): nil
 ---@return nil
 local query_model = function (sessionid, render_conversation, on_complete)
-  if is_conversation_locked(sessionid) then
+  if is_conversation_locked(sessionid) and config.opts.feedback.conversation_lock.warn_on_query then
     vim.notify("querying model despite lock", vim.log.levels.WARN)
     return
   end

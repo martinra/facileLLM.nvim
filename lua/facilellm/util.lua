@@ -23,8 +23,20 @@ local win_vsplit_modifier = function (relative, direction)
   end
 end
 
+---@param cursor_position ("top"| "bottom")?
 ---@return string[]?
-local get_visual_selection = function ()
+local get_visual_selection = function (cursor_position)
+  if cursor_position then
+    vim.api.nvim_feedkeys("o", "vx", false)
+    local r1,_ = unpack(vim.api.nvim_win_get_cursor(0))
+    vim.api.nvim_feedkeys("o", "vx", false)
+    local r2,_ = unpack(vim.api.nvim_win_get_cursor(0))
+    if (cursor_position == "top" and r1 < r2) or
+       (cursor_position == "bottom" and r1 > r2) then
+      vim.api.nvim_feedkeys("o", "vx", false)
+    end
+  end
+
   local mode = vim.fn.mode()
   local esckey = vim.api.nvim_replace_termcodes("<Esc>", true, true, true)
   vim.api.nvim_feedkeys(esckey, "nx", false)
@@ -36,12 +48,12 @@ local get_visual_selection = function ()
   elseif mode == "V" then
     return vim.api.nvim_buf_get_lines(0, rs-1, re, false)
   elseif mode == "" then
-    local lines_buf = vim.api.nvim_buf_get_lines(0, rs-1, re, false)
-    local lines = {}
-    for _,l in ipairs(lines_buf) do
-      table.insert(lines, string.sub(l, cs, ce))
+    local lines = vim.api.nvim_buf_get_lines(0, rs-1, re, false)
+    local block = {}
+    for _,l in ipairs(lines) do
+      table.insert(block, string.sub(l, cs, ce))
     end
-    return lines
+    return block
   end
 end
 

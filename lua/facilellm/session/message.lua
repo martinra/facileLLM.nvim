@@ -9,13 +9,13 @@
 
 
 ---@param role FacileLLM.MsgRole
----@param content string | string[]
+---@param content nil | string | string[]
 ---@return FacileLLM.Message
 local create = function (role, content)
   local lines = {}
   if type(content) == "string" then
     lines = vim.split(content, "\n")
-  else
+  elseif type(content) == "table" then
     lines = content
   end
 

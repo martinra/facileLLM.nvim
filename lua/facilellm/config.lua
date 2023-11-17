@@ -62,18 +62,23 @@ local default_opts = function ()
 end
 
 ---@param opts table
----@return string?
+---@return nil
 local validate_facilellm_config = function (opts)
   vim.validate({
     opts = {opts, "t"},
   })
   vim.validate({
-    default_model = {opts.default_model, {"s", "n"}, true},
+    -- default_model validated when validating models
     models        = {opts.models,        "t",        true},
     layout        = {opts.layout,        "t",        true},
   })
 
   if opts.models then
+    vim.validate({
+      default_model = {opts.default_model, {"s", "n"}, false}
+    })
+    local default_model_available = opts.models[opts.default_model] ~= nil
+
     for _,model in ipairs(opts.models) do
       vim.validate({
         model                = {model, "t", false}
@@ -84,7 +89,17 @@ local validate_facilellm_config = function (opts)
         opts                 = {model.opts,           "t",        true},
         initial_conversation = {model.initial_conversation, "t",  true},
       })
+      if not default_model_available and model.name and opts.default_model == model.name then
+        default_model_available = true
+      end
     end
+
+    if not default_model_available then
+      error("default model not defined")
+    end
+
+  elseif opts.default_model then
+    error("default model but no model defined")
   end
 
   if opts.layout then

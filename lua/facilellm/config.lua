@@ -9,6 +9,7 @@
 ---    the function facilelll.llm.dispatch.
 ---@field opts table Options that are forwarded to the implementation.
 ---@field initial_conversation FacileLLM.Conversation 
+---@field autostart boolean
 
 ---@class FacileLLM.LayoutConfig
 ---@field relative string Relative to what should the conversation window be opened?
@@ -42,6 +43,18 @@ local set_global_keymaps = function ()
     function () facilellm.add_visual_as_input_query_and_insert("substitute") end, {})
 end
 
+---@param models FacileLLM.LLMConfig[]
+---@return nil
+local autostart_sessions = function (models)
+  local ui_session = require("facilellm.ui.session")
+  for _,model in pairs(models) do
+    if model.autostart then
+      ui_session.create(model)
+    end
+  end
+end
+
+
 ---@return FacileLLM.Config
 local default_opts = function ()
   return {
@@ -52,6 +65,7 @@ local default_opts = function ()
         implementation = "OpenAI API",
         opts = {},
         initial_conversation = {},
+        autostart = false,
       },
     },
 
@@ -68,6 +82,7 @@ local default_model_config = function ()
     implementation = "undefined",
     opts = {},
     initial_conversation = {},
+    autostart = false,
   }
 end
 
@@ -98,6 +113,7 @@ local validate_facilellm_config = function (opts)
         implementation       = {model.implementation, {"s", "f"}, false},
         opts                 = {model.opts,           "t",        true},
         initial_conversation = {model.initial_conversation, "t",  true},
+        autostart            = {model.autostart,      "b",        true},
       })
       if not default_model_available and model.name and opts.default_model == model.name then
         default_model_available = true
@@ -142,6 +158,7 @@ M.setup = function (opts)
 
   set_highlights()
   set_global_keymaps()
+  autostart_sessions(M.opts.models)
 end
 
 

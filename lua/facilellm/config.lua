@@ -15,6 +15,12 @@
 
 
 ---@return nil
+local set_highlights = function ()
+  vim.api.nvim_set_hl(0, "FacileLLMMsgReceiving", {link = "DiffAdd"})
+  vim.api.nvim_set_hl(0, "FacileLLMRole", {link = "markdownH1"})
+end
+
+---@return nil
 local set_global_keymaps = function ()
   local facilellm = require("facilellm")
 
@@ -108,6 +114,7 @@ M.setup = function (opts)
   vim.api.nvim_set_hl(0, "FacileLLMMsgReceiving", {link = "DiffAdd"})
   vim.api.nvim_set_hl(0, "FacileLLMRole", {link = "markdownH1"})
 
+  set_highlights()
   set_global_keymaps()
 end
 

@@ -40,7 +40,7 @@ local fold_messages = function (winid)
 end
 
 ---@param bufnr BufNr
----@param direction string Will be parsed by util.win_vsplit_modifier.
+---@param direction ("right"| "left")
 ---@return WinId
 local create_window = function (bufnr, direction)
   direction = direction or "right"

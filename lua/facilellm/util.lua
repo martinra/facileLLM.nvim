@@ -1,5 +1,5 @@
----@param relative string
----@param direction string
+---@param relative ("editor"| "win")
+---@param direction ("right"| "left")
 ---@return string
 local win_vsplit_modifier = function (relative, direction)
   if relative == "editor" then

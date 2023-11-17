@@ -24,7 +24,7 @@
 ---@field llm string
 
 ---@class FacileLLM.LayoutConfig
----@field relative string Relative to what should the conversation window be opened?
+---@field relative ("editor"| "win") Relative to what should the conversation window be opened?
 
 ---@class FacileLLM.FeedbackConfig
 ---@field conversation_lock FacileLLM.FeedbackConfig.ConversationLock

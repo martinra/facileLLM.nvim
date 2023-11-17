@@ -46,6 +46,7 @@ local rename_from_selection = function ()
   )
 end
 
+---@return nil
 local set_model_from_selection = function ()
   ui_select.select_session(session.get_session_names(),
     function (sessionid)
@@ -140,6 +141,7 @@ end
 -- * append the LLM output after the selection, or
 -- * prepend the LLM output before the selection.
 ---@param mode ("substitute"| "append"| "prepend")
+---@return nil
 local add_visual_as_input_query_and_insert = function (mode)
   local sessionid = ui_select.get_most_recent()
   if not sessionid then

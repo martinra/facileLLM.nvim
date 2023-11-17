@@ -25,11 +25,23 @@ end
 ---@param winid WinId
 ---@return nil
 local fold_messages = function (winid)
+  if not config.opts.interface.fold_instruction
+    and not config.opts.interface.fold_context then
+    vim.api.nvim_win_set_option(winid, "foldenable", false)
+  end
+
   local foldexpr = ""
   foldexpr = foldexpr .. "getline(v:lnum)=~'^\\("
-  foldexpr = foldexpr .. config.opts.naming.role_display.instruction
-  foldexpr = foldexpr .. "\\|"
-  foldexpr = foldexpr .. config.opts.naming.role_display.context
+  if config.opts.interface.fold_instruction then
+    foldexpr = foldexpr .. config.opts.naming.role_display.instruction
+  end
+  if config.opts.interface.fold_instruction
+    and config.opts.interface.fold_context then
+    foldexpr = foldexpr .. "\\|"
+  end
+  if config.opts.interface.fold_context then
+    foldexpr = foldexpr .. config.opts.naming.role_display.context
+  end
   foldexpr = foldexpr .. "\\)$'"
   foldexpr = foldexpr .. "?'>1':("
   foldexpr = foldexpr .. "getline(v:lnum+1)=~'^\\a*:$'"
@@ -45,7 +57,7 @@ end
 local create_window = function (bufnr, direction)
   direction = direction or "right"
   local split_modifier = util.win_vsplit_modifier(
-                           config.opts.layout.relative, direction)
+                           config.opts.interface.layout_relative, direction)
   vim.cmd(string.format("noau %s vsplit", split_modifier))
   local winid = vim.api.nvim_get_current_win()
 

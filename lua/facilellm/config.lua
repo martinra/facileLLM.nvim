@@ -2,7 +2,7 @@
 ---@field default_model string | number Name or index of the default model.
 ---@field models FacileLLM.LLMConfig[]
 ---@field naming FacileLLM.NamingConfig
----@field layout FacileLLM.LayoutConfig
+---@field interface FacileLLM.InterfaceConfig
 ---@field feedback FacileLLM.FeedbackConfig
 
 ---@class FacileLLM.LLMConfig
@@ -23,8 +23,10 @@
 ---@field input string
 ---@field llm string
 
----@class FacileLLM.LayoutConfig
----@field relative ("editor"| "win") Relative to what should the conversation window be opened?
+---@class FacileLLM.InterfaceConfig
+---@field layout_relative ("editor"| "win") Relative to what should the conversation window be opened?
+---@field fold_instruction boolean
+---@field fold_context boolean
 
 ---@class FacileLLM.FeedbackConfig
 ---@field conversation_lock FacileLLM.FeedbackConfig.ConversationLock
@@ -101,8 +103,10 @@ local default_opts = function ()
       fork_suffix = "Fork",
     },
 
-    layout = {
-      relative = "editor",
+    interface = {
+      layout_relative = "editor",
+      fold_instruction = true,
+      fold_context = true,
     },
 
     feedback = {
@@ -138,7 +142,7 @@ local validate_facilellm_config = function (opts)
     -- default_model validated when validating models
     models        = {opts.models,        "t",        true},
     naming        = {opts.naming,        "t",        true},
-    layout        = {opts.layout,        "t",        true},
+    interface     = {opts.interface,     "t",        true},
     feedback      = {opts.feedback,      "t",        true},
   })
 
@@ -191,17 +195,19 @@ local validate_facilellm_config = function (opts)
 
   end
 
-  if opts.layout then
-    local layout = opts.layout
+  if opts.interface then
+    local interface = opts.interface
     vim.validate({
-      relative = {layout.relative, "s", true}
+      layout_relative  = {interface.layout_relative,  "s", true},
+      fold_instruction = {interface.fold_instruction, "b", true},
+      fold_context     = {interface.fold_context,     "b", true},
     })
   end
 
   if opts.feedback then
     local feedback = opts.feedback
     vim.validate({
-      conversation_lock = {feedback.conversation_lock, "t", true}
+      conversation_lock = {feedback.conversation_lock, "t", true},
     })
 
     if feedback.conversation_lock then

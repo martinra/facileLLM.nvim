@@ -50,7 +50,7 @@ local set_confirm_keymap = function (bufnr, mode, lhs, on_confirm)
         end
 
         local lines = empty_input_buffer(bufnr)
-        if on_confirm then
+        if #lines ~= 0 and on_confirm then
           on_confirm(lines)
         end
       end,
@@ -74,7 +74,7 @@ local set_instruction_keymap = function (bufnr, mode, lhs, on_instruction)
         end
 
         local lines = empty_input_buffer(bufnr)
-        if on_instruction then
+        if #lines ~= 0 and on_instruction then
           on_instruction(lines)
         end
       end,
@@ -98,7 +98,7 @@ local set_context_keymap = function (bufnr, mode, lhs, on_context)
         end
 
         local lines = empty_input_buffer(bufnr)
-        if on_context then
+        if #lines ~= 0 and on_context then
           on_context(lines)
         end
       end,

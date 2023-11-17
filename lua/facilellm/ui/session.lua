@@ -162,87 +162,110 @@ local set_keymaps = function (sessionid)
   local conv_bufnr = get_conversation_buffer(sessionid)
   local input_bufnr = get_input_buffer(sessionid)
 
-  -- mnemonic: delete interaction
-  
-  vim.api.nvim_buf_set_keymap(conv_bufnr,
-    "n", config.opts.interface.keymaps.delete_interaction, "",
-    { callback = function ()
-        ui_session.clear_conversation(sessionid, "preserve", "preserve")
-      end,
-    })
-  vim.api.nvim_buf_set_keymap(input_bufnr,
-    "n", config.opts.interface.keymaps.delete_interaction, "",
-    { callback = function ()
-        ui_session.clear_conversation(sessionid, "preserve", "preserve")
-      end,
-    })
 
-  -- mnemonic: delete conversation
-  vim.api.nvim_buf_set_keymap(conv_bufnr,
-    "n", config.opts.interface.keymaps.delete_conversation, "",
-    { callback = function ()
-        ui_session.clear_conversation(sessionid, "delete", "delete")
-      end,
-    })
-  vim.api.nvim_buf_set_keymap(input_bufnr,
-    "n", config.opts.interface.keymaps.delete_conversation, "",
-    { callback = function ()
-        ui_session.clear_conversation(sessionid, "delete", "delete")
-      end,
-    })
+  if config.opts.interface.keymaps.delete_interaction ~= "" then
+    vim.api.nvim_buf_set_keymap(conv_bufnr,
+      "n", config.opts.interface.keymaps.delete_interaction, "",
+      { callback = function ()
+          ui_session.clear_conversation(sessionid, "preserve", "preserve")
+        end,
+      }
+    )
+    vim.api.nvim_buf_set_keymap(input_bufnr,
+      "n", config.opts.interface.keymaps.delete_interaction, "",
+      { callback = function ()
+          ui_session.clear_conversation(sessionid, "preserve", "preserve")
+        end,
+      }
+    )
+  end
 
-  -- mnemonic: delete session
-  vim.api.nvim_buf_set_keymap(conv_bufnr,
-    "n", config.opts.interface.keymaps.delete_session, "",
-    { callback = function ()
-        ui_session.delete(sessionid)
-      end,
-    })
-  vim.api.nvim_buf_set_keymap(input_bufnr,
-    "n", config.opts.interface.keymaps.delete_session, "",
-    { callback = function ()
-        ui_session.delete(sessionid)
-      end,
-    })
+  if config.opts.interface.keymaps.delete_conversation ~= "" then
+    vim.api.nvim_buf_set_keymap(conv_bufnr,
+      "n", config.opts.interface.keymaps.delete_conversation, "",
+      { callback = function ()
+          ui_session.clear_conversation(sessionid, "delete", "delete")
+        end,
+      }
+    )
+    vim.api.nvim_buf_set_keymap(input_bufnr,
+      "n", config.opts.interface.keymaps.delete_conversation, "",
+      { callback = function ()
+          ui_session.clear_conversation(sessionid, "delete", "delete")
+        end,
+      }
+    )
+  end
 
-  vim.api.nvim_buf_set_keymap(conv_bufnr,
-    "n", config.opts.interface.keymaps.fork_session, "",
-    { callback = function ()
-        ui_session.fork(sessionid)
-      end,
-    })
-  vim.api.nvim_buf_set_keymap(input_bufnr,
-    "n", config.opts.interface.keymaps.fork_session, "",
-    { callback = function ()
-        ui_session.fork(sessionid)
-      end,
-    })
+  if config.opts.interface.keymaps.delete_session ~= "" then
+    vim.api.nvim_buf_set_keymap(conv_bufnr,
+      "n", config.opts.interface.keymaps.delete_session, "",
+      { callback = function ()
+          ui_session.delete(sessionid)
+        end,
+      }
+    )
+    vim.api.nvim_buf_set_keymap(input_bufnr,
+      "n", config.opts.interface.keymaps.delete_session, "",
+      { callback = function ()
+          ui_session.delete(sessionid)
+        end,
+      }
+    )
+  end
 
-  vim.api.nvim_buf_set_keymap(conv_bufnr,
-    "n", config.opts.interface.keymaps.rename_session, "",
-    { callback = function ()
-        ui_session.rename(sessionid)
-      end,
-    })
-  vim.api.nvim_buf_set_keymap(input_bufnr,
-    "n", config.opts.interface.keymaps.rename_session, "",
-    { callback = function ()
-        ui_session.rename(sessionid)
-      end,
-    })
+  if config.opts.interface.keymaps.fork_session ~= "" then
+    vim.api.nvim_buf_set_keymap(conv_bufnr,
+      "n", config.opts.interface.keymaps.fork_session, "",
+      { callback = function ()
+          ui_session.fork(sessionid)
+        end,
+      }
+    )
+    vim.api.nvim_buf_set_keymap(input_bufnr,
+      "n", config.opts.interface.keymaps.fork_session, "",
+      { callback = function ()
+          ui_session.fork(sessionid)
+        end,
+      }
+    )
+  end
 
-  ui_input.set_confirm_keymap(input_bufnr,
-    "n", config.opts.interface.keymaps.input_confirm, function (lines)
-    ui_session.add_input_message_and_query(sessionid, lines)
-  end)
-  ui_input.set_instruction_keymap(input_bufnr,
-    "n", config.opts.interface.keymaps.input_instruction, function (lines)
-    ui_session.add_message(sessionid, "Instruction", lines)
-  end)
-  ui_input.set_context_keymap(input_bufnr,
-    "n", config.opts.interface.keymaps.input_context, function (lines)
-    ui_session.add_message(sessionid, "Context", lines)
-  end)
+  if config.opts.interface.keymaps.rename_session ~= "" then
+    vim.api.nvim_buf_set_keymap(conv_bufnr,
+      "n", config.opts.interface.keymaps.rename_session, "",
+      { callback = function ()
+          ui_session.rename(sessionid)
+        end,
+      }
+    )
+    vim.api.nvim_buf_set_keymap(input_bufnr,
+      "n", config.opts.interface.keymaps.rename_session, "",
+      { callback = function ()
+          ui_session.rename(sessionid)
+        end,
+      }
+    )
+  end
+
+  if config.opts.interface.keymaps.input_confirm ~= "" then
+    ui_input.set_confirm_keymap(input_bufnr,
+      "n", config.opts.interface.keymaps.input_confirm, function (lines)
+      ui_session.add_input_message_and_query(sessionid, lines)
+    end)
+  end
+  if config.opts.interface.keymaps.input_instruction ~= "" then
+    ui_input.set_instruction_keymap(input_bufnr,
+      "n", config.opts.interface.keymaps.input_instruction, function (lines)
+      ui_session.add_message(sessionid, "Instruction", lines)
+    end)
+  end
+  if config.opts.interface.keymaps.input_context ~= "" then
+    ui_input.set_context_keymap(input_bufnr,
+      "n", config.opts.interface.keymaps.input_context, function (lines)
+      ui_session.add_message(sessionid, "Context", lines)
+    end)
+  end
 end
 
 ---@param sessionid FacileLLM.SessionId

@@ -4,7 +4,7 @@
 ---@field layout FacileLLM.LayoutConfig
 
 ---@class FacileLLM.LLMConfig
----@field name string Name of the model.
+---@field name string? Name of the model.
 ---@field implementation FacileLLM.LLMImplementation Name of an implementation. Must be accepted by
 ---    the function facilelll.llm.dispatch.
 ---@field opts table Options that are forwarded to the implementation.

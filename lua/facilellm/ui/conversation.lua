@@ -24,7 +24,7 @@ end
 
 ---@param winid WinId
 ---@return nil
-local fold_context_messages = function (winid)
+local fold_messages = function (winid)
   local foldexpr = ""
   foldexpr = foldexpr .. "getline(v:lnum)=~'^\\(Instruction\\|Context\\):$'"
   foldexpr = foldexpr .. "?'>1':("
@@ -45,7 +45,7 @@ local create_window = function (bufnr, direction)
   vim.cmd(string.format("noau %s vsplit", split_modifier))
   local winid = vim.api.nvim_get_current_win()
 
-  fold_context_messages(winid)
+  fold_messages(winid)
 
   vim.api.nvim_win_set_buf(winid, bufnr)
 

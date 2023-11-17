@@ -5,7 +5,7 @@ local message = require("facilellm.session.message")
 ---@alias FacileLLM.MsgIndex number
 
 
----@param initial FacileLLM.Message[]?
+---@param initial FacileLLM.Conversation?
 ---@return FacileLLM.Conversation
 local create = function (initial)
   return initial or {}

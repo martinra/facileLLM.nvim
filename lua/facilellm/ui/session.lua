@@ -320,8 +320,14 @@ local create = function (model_config)
     end
   })
 
-  ui_render.render_conversation(session.get_conversation(sessionid),
-    sess.conv_bufnr, sess.render_state)
+  -- HACK: We delay rendering so that foldexpr is applied to the initial
+  -- conversation in all cases Without this on 0.9.4 when creating from
+  -- selection, they are seemingly never applied. This might not be neccessary
+  -- once #18479 of github/neovim is applied (v0.10?).
+  vim.schedule( function ()
+    ui_render.render_conversation(session.get_conversation(sessionid),
+      sess.conv_bufnr, sess.render_state)
+  end)
 
   return sessionid
 end

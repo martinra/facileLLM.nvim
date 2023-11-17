@@ -233,27 +233,36 @@ local add_message = function (sessionid, role, lines)
 end
 
 ---@param sessionid FacileLLM.SessionId
+---@param response_callback function?(): nil
 ---@return nil
-local on_complete_query = function (sessionid)
-  local lines = session.get_last_llm_message(sessionid)
-  if lines then
-    vim.fn.setreg("a", lines, "l")
-  end
+local on_complete_query = function (sessionid, response_callback)
   local bufnr = get_conversation_buffer(sessionid)
   ui_render.end_highlight_msg_receiving(bufnr, get_render_state(sessionid))
   ui_conversation.on_complete_query(bufnr)
   ui_input.on_complete_query(get_input_buffer(sessionid))
+
+  local lines = session.get_last_llm_message(sessionid)
+  if lines then
+    vim.fn.setreg("a", lines, "l")
+    if response_callback then
+      response_callback(lines)
+    end
+  end
 end
 
 ---@param sessionid FacileLLM.SessionId
 ---@param lines string[]
+---@param response_callback function?(): nil
 ---@return nil
-local add_input_message_and_query = function (sessionid, lines)
+local add_input_message_and_query = function (sessionid, lines, response_callback)
   ui_select.touch(sessionid)
   session.add_message(sessionid, "Input", lines)
   ui_render.start_highlight_msg_receiving(
     session.get_conversation(sessionid), get_render_state(sessionid))
-  session.query_model(sessionid, render_conversation, on_complete_query)
+  session.query_model(sessionid, render_conversation,
+    function (sessionid__loc)
+      on_complete_query(sessionid__loc, response_callback)
+    end)
   vim.schedule(
     function ()
       render_conversation(sessionid)

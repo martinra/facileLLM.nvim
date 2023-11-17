@@ -26,7 +26,7 @@ end
 
 ---@param bufnr BufNr
 ---@return string[]
-local empty_input_buffer = function (bufnr)
+local clear_input_buffer = function (bufnr)
   signal_response_not_yet_complete_extmark = nil
   local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
   vim.api.nvim_buf_set_lines(bufnr, 0,-1, true, {})
@@ -49,7 +49,7 @@ local set_confirm_keymap = function (bufnr, mode, lhs, on_confirm)
           return
         end
 
-        local lines = empty_input_buffer(bufnr)
+        local lines = clear_input_buffer(bufnr)
         if #lines ~= 0 and on_confirm then
           on_confirm(lines)
         end
@@ -73,7 +73,7 @@ local set_instruction_keymap = function (bufnr, mode, lhs, on_instruction)
           return
         end
 
-        local lines = empty_input_buffer(bufnr)
+        local lines = clear_input_buffer(bufnr)
         if #lines ~= 0 and on_instruction then
           on_instruction(lines)
         end
@@ -97,7 +97,7 @@ local set_context_keymap = function (bufnr, mode, lhs, on_context)
           return
         end
 
-        local lines = empty_input_buffer(bufnr)
+        local lines = clear_input_buffer(bufnr)
         if #lines ~= 0 and on_context then
           on_context(lines)
         end

@@ -103,7 +103,7 @@ local add_input_and_query = function ()
   end
 
   local lines = util.get_visual_selection()
-  if lines then
+  if lines and #lines ~= 0 then
     ui_session.add_input_message_and_query(sessionid, lines)
   end
 end

@@ -45,7 +45,8 @@ local set_confirm_keymap = function (bufnr, mode, lhs, on_confirm)
         local sessionid = ui_common.buf_get_session(bufnr)
         ---@cast sessionid FacileLLM.SessionId
 
-        if session.is_conversation_locked(sessionid) and config.opts.feedback.conversation_lock.input_confirm then
+        if session.is_conversation_locked(sessionid)
+          and config.opts.feedback.conversation_lock.input_confirm then
           signal_response_not_yet_complete(bufnr)
           return
         end
@@ -69,7 +70,8 @@ local set_instruction_keymap = function (bufnr, mode, lhs, on_instruction)
         local sessionid = ui_common.buf_get_session(bufnr)
         ---@cast sessionid FacileLLM.SessionId
 
-        if session.is_conversation_locked(sessionid) and config.opts.feedback.conversation_lock.input_instruction then
+        if session.is_conversation_locked(sessionid)
+          and config.opts.feedback.conversation_lock.input_instruction then
           signal_response_not_yet_complete(bufnr)
           return
         end
@@ -93,7 +95,8 @@ local set_context_keymap = function (bufnr, mode, lhs, on_context)
         local sessionid = ui_common.buf_get_session(bufnr)
         ---@cast sessionid FacileLLM.SessionId
 
-        if session.is_conversation_locked(sessionid) and config.opts.feedback.conversation_lock.input_context then
+        if session.is_conversation_locked(sessionid)
+          and config.opts.feedback.conversation_lock.input_context then
           signal_response_not_yet_complete(bufnr)
           return
         end

@@ -167,11 +167,11 @@ local validate_facilellm_config = function (opts)
         model                = {model, "t", false}
       })
       vim.validate({
-        name                 = {model.name,           "s",        true},
-        implementation       = {model.implementation, {"s", "f"}, false},
-        opts                 = {model.opts,           "t",        true},
-        initial_conversation = {model.initial_conversation, "t",  true},
-        autostart            = {model.autostart,      "b",        true},
+        name                 = {model.name,                 "s",        true},
+        implementation       = {model.implementation,       {"s", "f"}, false},
+        opts                 = {model.opts,                 "t",        true},
+        initial_conversation = {model.initial_conversation, "t",        true},
+        autostart            = {model.autostart,            "b",        true},
       })
       if not default_model_available and model.name and opts.default_model == model.name then
         default_model_available = true
@@ -199,9 +199,9 @@ local validate_facilellm_config = function (opts)
       local role_display = naming.role_display
       vim.validate({
         instruction = {role_display.instruction, "s", true},
-        context     = {role_display.context    , "s", true},
-        input       = {role_display.input      , "s", true},
-        llm         = {role_display.llm        , "s", true},
+        context     = {role_display.context,     "s", true},
+        input       = {role_display.input,       "s", true},
+        llm         = {role_display.llm,         "s", true},
       })
     end
 

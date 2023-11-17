@@ -28,6 +28,12 @@ local set_global_keymaps = function ()
   vim.keymap.set('v', '<leader>ai<Enter>', facilellm.add_visual_as_input_and_query, {})
   vim.keymap.set('v', '<leader>aic', facilellm.add_visual_as_context, {})
   vim.keymap.set('v', '<leader>aii', facilellm.add_visual_as_instruction, {})
+  vim.keymap.set('v', '<leader>aip',
+    function () facilellm.add_visual_as_input_query_and_insert("append") end, {})
+  vim.keymap.set('v', '<leader>aiP',
+    function () facilellm.add_visual_as_input_query_and_insert("prepend") end, {})
+  vim.keymap.set('v', '<leader>ais',
+    function () facilellm.add_visual_as_input_query_and_insert("substitute") end, {})
 end
 
 ---@return FacileLLM.Config

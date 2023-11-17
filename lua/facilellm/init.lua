@@ -19,6 +19,7 @@ M.focus_from_selection = convenience.focus_from_selection
 M.add_visual_as_input_and_query = convenience.add_visual_as_input_and_query
 M.add_visual_as_context = convenience.add_visual_as_context
 M.add_visual_as_instruction = convenience.add_visual_as_instruction
+M.add_visual_as_input_query_and_insert = convenience.add_visual_as_input_query_and_insert
 
 
 return M

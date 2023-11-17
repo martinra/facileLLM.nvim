@@ -135,6 +135,61 @@ local add_visual_as_instruction = function ()
   end
 end
 
+-- Use the visual line selection as input. Depending on the value of mode
+-- * substitute the selection by the LLM output,
+-- * append the LLM output after the selection, or
+-- * prepend the LLM output before the selection.
+---@param mode ("substitute"| "append"| "prepend")
+local add_visual_as_input_query_and_insert = function (mode)
+  local sessionid = ui_select.get_most_recent()
+  if not sessionid then
+    return
+  end
+
+  local lines
+  if mode == "substitute" then
+    if vim.fn.mode() ~= "V" then
+      return
+    end
+    lines = util.substitute_visual_selection()
+  else
+    if mode == "append" then
+      lines = util.get_visual_selection("bottom")
+      vim.api.nvim_feedkeys("o", "nx", false)
+    else
+      lines = util.get_visual_selection("top")
+      vim.api.nvim_feedkeys("O", "nx", false)
+    end
+  end
+  ---@cast lines string[]
+
+  local esckey = vim.api.nvim_replace_termcodes("<Esc>", true, true, true)
+  vim.api.nvim_feedkeys(esckey, "nx", false)
+
+  -- This can happen when only one empty line is selected.
+  if not lines or #lines == 0 then
+    return
+  end
+
+  local bufnr = vim.api.nvim_get_current_buf()
+  local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
+  local nspc_pending_insert = vim.api.nvim_create_namespace("facilellm-pending-insert")
+
+  ---@param lines__loc string[]
+  local response_callback = function (lines__loc)
+    vim.api.nvim_buf_clear_namespace(bufnr, nspc_pending_insert, row-1, row)
+    vim.api.nvim_buf_set_lines(bufnr, row-1, row, false, lines__loc)
+  end
+
+  vim.api.nvim_buf_set_extmark(bufnr, nspc_pending_insert, row-1, 0,
+  {
+    virt_text = { {"Will insert pending LLM response", "WarningMsg"} },
+    virt_text_pos = "overlay"
+  })
+
+  ui_session.add_input_message_and_query(sessionid, lines, response_callback)
+end
+
 
 return {
   create_from_model = create_from_model,
@@ -148,4 +203,5 @@ return {
   add_visual_as_input_and_query = add_visual_as_input_and_query,
   add_visual_as_context = add_visual_as_context,
   add_visual_as_instruction = add_visual_as_instruction,
+  add_visual_as_input_query_and_insert = add_visual_as_input_query_and_insert
 }

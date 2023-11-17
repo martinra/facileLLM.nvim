@@ -26,10 +26,12 @@
 ---@class FacileLLM.Config.Interface
 ---@field layout_relative ("editor"| "win") Relative to what should the conversation window be opened?
 ---@field input_relative_height number
+---@field highlight_role boolean
 ---@field fold_instruction boolean
 ---@field fold_context boolean
 
 ---@class FacileLLM.Config.Feedback
+---@field highlight_message_while_receiving boolean
 ---@field conversation_lock FacileLLM.Config.Feedback.ConversationLock
 
 ---@class FacileLLM.Config.Feedback.ConversationLock
@@ -107,11 +109,13 @@ local default_opts = function ()
     interface = {
       layout_relative = "editor",
       input_relative_height = 0.15,
+      highlight_role   = true,
       fold_instruction = true,
-      fold_context = true,
+      fold_context     = true,
     },
 
     feedback = {
+      highlight_message_while_receiving = true,
       conversation_lock = {
         input_confirm     = true,
         input_instruction = true,
@@ -202,6 +206,7 @@ local validate_facilellm_config = function (opts)
     vim.validate({
       layout_relative       = {interface.layout_relative,       "s", true},
       input_relative_height = {interface.input_relative_height, "n", true},
+      highlight_role        = {interface.highlight_role,        "b", true},
       fold_instruction      = {interface.fold_instruction,      "b", true},
       fold_context          = {interface.fold_context,          "b", true},
     })
@@ -210,6 +215,7 @@ local validate_facilellm_config = function (opts)
   if opts.feedback then
     local feedback = opts.feedback
     vim.validate({
+      highlight_message_while_receiving = {feedback.highlight_message_while_receiving, "b", true},
       conversation_lock = {feedback.conversation_lock, "t", true},
     })
 

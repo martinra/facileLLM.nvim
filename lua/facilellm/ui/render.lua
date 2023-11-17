@@ -189,8 +189,12 @@ local render_conversation = function (conv, bufnr, render_state)
     render_state.line = #msg.lines
     render_state.char = msg.lines and string.len(msg.lines[#msg.lines])
 
-    create_highlight_role(bufnr, 0, string.len(role_display(msg.role)))
-    create_highlight_msg_receiving(bufnr, render_state, mx, msg)
+    if config.opts.interface.highlight_role then
+      create_highlight_role(bufnr, 0, string.len(role_display(msg.role)))
+    end
+    if config.opts.feedback.highlight_message_while_receiving then
+      create_highlight_msg_receiving(bufnr, render_state, mx, msg)
+    end
 
   else
     local mx = render_state.msg
@@ -219,7 +223,9 @@ local render_conversation = function (conv, bufnr, render_state)
       render_state.line = #msg.lines
       render_state.char = msg.lines and string.len(msg.lines[#msg.lines])
 
-      update_highlight_msg_receiving(bufnr, render_state, msg)
+      if config.opts.feedback.highlight_message_while_receiving then
+        update_highlight_msg_receiving(bufnr, render_state, msg)
+      end
     end
   end
 
@@ -239,8 +245,12 @@ local render_conversation = function (conv, bufnr, render_state)
     local line = msg.lines[#msg.lines]
     render_state.char = line and string.len(line) or 0
 
-    create_highlight_role(bufnr, role_line, string.len(role_display(msg.role)))
-    create_highlight_msg_receiving(bufnr, render_state, mx, msg)
+    if config.opts.interface.highlight_role then
+      create_highlight_role(bufnr, role_line, string.len(role_display(msg.role)))
+    end
+    if config.opts.feedback.highlight_message_while_receiving then
+      create_highlight_msg_receiving(bufnr, render_state, mx, msg)
+    end
   end
 
   vim.api.nvim_buf_set_option(bufnr, "modifiable", false)

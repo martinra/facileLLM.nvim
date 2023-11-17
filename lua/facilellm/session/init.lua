@@ -11,7 +11,7 @@ local message = require("facilellm.session.message")
 ---@field model FacileLLM.LLM
 ---@field conversation FacileLLM.Conversation
 ---@field conversation_locked boolean
----@field config FacileLLM.LLMConfig
+---@field config FacileLLM.Config.LLM
 
 
 ---@type table<FacileLLM.SessionId,FacileLLM.Session> Table of sessions by their id
@@ -93,7 +93,7 @@ local get_model_config = function (sessionid)
   return sessions[sessionid].config
 end
 
----@param model_config FacileLLM.LLMConfig
+---@param model_config FacileLLM.Config.LLM
 ---@return FacileLLM.SessionId
 local create = function (model_config)
   local sessionid = new_sessionid()
@@ -172,7 +172,7 @@ local get_model = function (sessionid)
 end
 
 ---@param sessionid FacileLLM.SessionId
----@param model_config FacileLLM.LLMConfig
+---@param model_config FacileLLM.Config.LLM
 local set_model = function (sessionid, model_config)
   local sess = sessions[sessionid]
   local model = llm.dispatch(model_config.implementation)(model_config.opts)

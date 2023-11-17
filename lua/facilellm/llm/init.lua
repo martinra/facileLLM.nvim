@@ -21,7 +21,7 @@ local dispatch = function (implementation)
   end
 end
 
----@return FacileLLM.LLMConfig
+---@return FacileLLM.Config.LLM
 local default_model_config = function ()
   local default_model = config.opts.default_model
   local models = config.opts.models

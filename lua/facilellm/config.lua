@@ -1,11 +1,11 @@
 ---@class FacileLLM.Config
 ---@field default_model string | number Name or index of the default model.
----@field models FacileLLM.LLMConfig[]
----@field naming FacileLLM.NamingConfig
----@field interface FacileLLM.InterfaceConfig
----@field feedback FacileLLM.FeedbackConfig
+---@field models FacileLLM.Config.LLM[]
+---@field naming FacileLLM.Config.Naming
+---@field interface FacileLLM.Config.Interface
+---@field feedback FacileLLM.Config.Feedback
 
----@class FacileLLM.LLMConfig
+---@class FacileLLM.Config.LLM
 ---@field name string? Name of the model.
 ---@field implementation FacileLLM.LLMImplementation Name of an implementation. Must be accepted by
 ---    the function facilelll.llm.dispatch.
@@ -13,25 +13,25 @@
 ---@field initial_conversation FacileLLM.Conversation 
 ---@field autostart boolean
 
----@class FacileLLM.NamingConfig
----@field role_display FacileLLM.NamingConfig.RoleDisplay
+---@class FacileLLM.Config.Naming
+---@field role_display FacileLLM.Config.Naming.RoleDisplay
 ---@field fork_suffix string
 
----@class FacileLLM.NamingConfig.RoleDisplay
+---@class FacileLLM.Config.Naming.RoleDisplay
 ---@field instruction string
 ---@field context string
 ---@field input string
 ---@field llm string
 
----@class FacileLLM.InterfaceConfig
+---@class FacileLLM.Config.Interface
 ---@field layout_relative ("editor"| "win") Relative to what should the conversation window be opened?
 ---@field fold_instruction boolean
 ---@field fold_context boolean
 
----@class FacileLLM.FeedbackConfig
----@field conversation_lock FacileLLM.FeedbackConfig.ConversationLock
+---@class FacileLLM.Config.Feedback
+---@field conversation_lock FacileLLM.Config.Feedback.ConversationLock
 
----@class FacileLLM.FeedbackConfig.ConversationLock
+---@class FacileLLM.Config.Feedback.ConversationLock
 ---@field input_confirm boolean
 ---@field input_instruction boolean
 ---@field input_context boolean
@@ -67,7 +67,7 @@ local set_global_keymaps = function ()
     function () facilellm.add_visual_as_input_query_and_insert("substitute") end, {})
 end
 
----@param models FacileLLM.LLMConfig[]
+---@param models FacileLLM.Config.LLM[]
 ---@return nil
 local autostart_sessions = function (models)
   local ui_session = require("facilellm.ui.session")
@@ -121,7 +121,7 @@ local default_opts = function ()
   }
 end
 
----@return FacileLLM.LLMConfig
+---@return FacileLLM.Config.LLM
 local default_model_config = function ()
   return {
     name = nil,

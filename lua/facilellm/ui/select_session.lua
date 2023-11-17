@@ -76,8 +76,8 @@ local select_session = function (session_names, callback, title)
   }):find()
 end
 
----@param models FacileLLM.LLMConfig[]
----@param callback function(FacileLLM.LLMConfig): nil
+---@param models FacileLLM.Config.LLM[]
+---@param callback function(FacileLLM.Config.LLM): nil
 ---@param title string?
 ---@return nil
 local select_model = function (models, callback, title)
@@ -97,7 +97,7 @@ local select_model = function (models, callback, title)
     attach_mappings = function (prompt_bufnr)
       actions.select_default:replace(function ()
         actions.close(prompt_bufnr)
-        ---@type FacileLLM.LLMConfig model
+        ---@type FacileLLM.Config.LLM model
         local model_config = actions_state.get_selected_entry().value
         callback(model_config)
       end)

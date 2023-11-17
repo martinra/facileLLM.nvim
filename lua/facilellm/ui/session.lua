@@ -280,7 +280,7 @@ local add_input_message_and_query = function (sessionid, lines, response_callbac
     end)
 end
 
----@param model_config FacileLLM.LLMConfig
+---@param model_config FacileLLM.Config.LLM
 ---@return FacileLLM.SessionId
 local create = function (model_config)
   local sessionid = session.create(model_config)

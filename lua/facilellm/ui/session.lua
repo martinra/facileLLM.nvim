@@ -157,7 +157,7 @@ end
 
 ---@param sessionid FacileLLM.SessionId
 ---@return nil
-local set_keymaps = function (sessionid)
+local set_buffer_keymaps = function (sessionid)
   local ui_session = require("facilellm.ui.session")
 
   local conv_bufnr = get_conversation_buffer(sessionid)
@@ -318,7 +318,7 @@ local create = function (model_config)
     end
   })
 
-  set_keymaps(sessionid)
+  set_buffer_keymaps(sessionid)
 
   -- HACK: We delay rendering so that foldexpr is applied to the initial
   -- conversation in all cases Without this on 0.9.4 when creating from

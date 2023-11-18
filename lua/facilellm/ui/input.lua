@@ -40,23 +40,23 @@ end
 ---@param on_confirm function(string[]): nil
 ---@return nil
 local set_confirm_keymap = function (bufnr, mode, lhs, on_confirm)
-  vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, "",
-    { callback = function ()
-        local sessionid = ui_common.buf_get_session(bufnr)
-        ---@cast sessionid FacileLLM.SessionId
+  vim.keymap.set(mode, lhs,
+    function ()
+      local sessionid = ui_common.buf_get_session(bufnr)
+      ---@cast sessionid FacileLLM.SessionId
 
-        if session.is_conversation_locked(sessionid)
-          and config.opts.feedback.conversation_lock.input_confirm then
-          signal_response_not_yet_complete(bufnr)
-          return
-        end
+      if session.is_conversation_locked(sessionid)
+        and config.opts.feedback.conversation_lock.input_confirm then
+        signal_response_not_yet_complete(bufnr)
+        return
+      end
 
-        local lines = clear_input_buffer(bufnr)
-        if #lines ~= 0 and on_confirm then
-          on_confirm(lines)
-        end
-      end,
-    })
+      local lines = clear_input_buffer(bufnr)
+      if #lines ~= 0 and on_confirm then
+        on_confirm(lines)
+      end
+    end,
+    { buffer = bufnr })
 end
 
 ---@param bufnr BufNr
@@ -65,23 +65,23 @@ end
 ---@param on_instruction function(string[]): nil
 ---@return nil
 local set_instruction_keymap = function (bufnr, mode, lhs, on_instruction)
-  vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, "",
-    { callback = function ()
-        local sessionid = ui_common.buf_get_session(bufnr)
-        ---@cast sessionid FacileLLM.SessionId
+  vim.keymap.set(mode, lhs,
+    function ()
+      local sessionid = ui_common.buf_get_session(bufnr)
+      ---@cast sessionid FacileLLM.SessionId
 
-        if session.is_conversation_locked(sessionid)
-          and config.opts.feedback.conversation_lock.input_instruction then
-          signal_response_not_yet_complete(bufnr)
-          return
-        end
+      if session.is_conversation_locked(sessionid)
+        and config.opts.feedback.conversation_lock.input_instruction then
+        signal_response_not_yet_complete(bufnr)
+        return
+      end
 
-        local lines = clear_input_buffer(bufnr)
-        if #lines ~= 0 and on_instruction then
-          on_instruction(lines)
-        end
-      end,
-    })
+      local lines = clear_input_buffer(bufnr)
+      if #lines ~= 0 and on_instruction then
+        on_instruction(lines)
+      end
+    end,
+    { buffer = bufnr })
 end
 
 ---@param bufnr BufNr
@@ -90,23 +90,23 @@ end
 ---@param on_context function(string[]): nil
 ---@return nil
 local set_context_keymap = function (bufnr, mode, lhs, on_context)
-  vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, "",
-    { callback = function ()
-        local sessionid = ui_common.buf_get_session(bufnr)
-        ---@cast sessionid FacileLLM.SessionId
+  vim.keymap.set(mode, lhs,
+    function ()
+      local sessionid = ui_common.buf_get_session(bufnr)
+      ---@cast sessionid FacileLLM.SessionId
 
-        if session.is_conversation_locked(sessionid)
-          and config.opts.feedback.conversation_lock.input_context then
-          signal_response_not_yet_complete(bufnr)
-          return
-        end
+      if session.is_conversation_locked(sessionid)
+        and config.opts.feedback.conversation_lock.input_context then
+        signal_response_not_yet_complete(bufnr)
+        return
+      end
 
-        local lines = clear_input_buffer(bufnr)
-        if #lines ~= 0 and on_context then
-          on_context(lines)
-        end
-      end,
-    })
+      local lines = clear_input_buffer(bufnr)
+      if #lines ~= 0 and on_context then
+        on_context(lines)
+      end
+    end,
+    { buffer = bufnr })
 end
 
 ---@param sessionid FacileLLM.SessionId

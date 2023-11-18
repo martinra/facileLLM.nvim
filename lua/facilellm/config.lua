@@ -42,6 +42,18 @@
 ---@field input_confirm string
 ---@field input_instruction string
 ---@field input_context string
+---@field show string
+---@field create_from_selection string
+---@field delete_from_selection string
+---@field focus_from_selection string
+---@field rename_from_selection string
+---@field set_model_from_selection string
+---@field add_visual_as_input_and_query string
+---@field add_visual_as_context string
+---@field add_visual_as_instruction string
+---@field add_visual_as_input_query_and_append string
+---@field add_visual_as_input_query_and_prepend string
+---@field add_visual_as_input_query_and_substitute string
 
 ---@class FacileLLM.Config.Feedback
 ---@field highlight_message_while_receiving boolean
@@ -66,23 +78,58 @@ end
 ---@return nil
 local set_global_keymaps = function ()
   local facilellm = require("facilellm")
+  local config = require("facilellm.config")
 
-  vim.keymap.set('n', '<leader>aiw', facilellm.show, {})
-  vim.keymap.set('n', '<leader>ain', facilellm.create_from_selection, {})
-  vim.keymap.set('n', '<leader>aid', facilellm.delete_from_selection, {})
-  vim.keymap.set('n', '<leader>aif', facilellm.focus_from_selection, {})
-  vim.keymap.set('n', '<leader>air', facilellm.rename_from_selection, {})
-  vim.keymap.set('n', '<leader>aim', facilellm.set_model_from_selection, {})
+  if config.opts.interface.keymaps.show ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.show,
+      facilellm.show, {})
+  end
+  if config.opts.interface.keymaps.create_from_selection ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.create_from_selection,
+      facilellm.create_from_selection, {})
+  end
+  if config.opts.interface.keymaps.delete_from_selection ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.delete_from_selection,
+      facilellm.delete_from_selection, {})
+  end
+  if config.opts.interface.keymaps.focus_from_selection ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.focus_from_selection,
+      facilellm.focus_from_selection, {})
+  end
+  if config.opts.interface.keymaps.rename_from_selection ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.rename_from_selection,
+      facilellm.rename_from_selection, {})
+  end
+  if config.opts.interface.keymaps.set_model_from_selection ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.set_model_from_selection,
+      facilellm.set_model_from_selection, {})
+  end
 
-  vim.keymap.set('v', '<leader>ai<Enter>', facilellm.add_visual_as_input_and_query, {})
-  vim.keymap.set('v', '<leader>aic', facilellm.add_visual_as_context, {})
-  vim.keymap.set('v', '<leader>aii', facilellm.add_visual_as_instruction, {})
-  vim.keymap.set('v', '<leader>aip',
-    function () facilellm.add_visual_as_input_query_and_insert("append") end, {})
-  vim.keymap.set('v', '<leader>aiP',
-    function () facilellm.add_visual_as_input_query_and_insert("prepend") end, {})
-  vim.keymap.set('v', '<leader>ais',
-    function () facilellm.add_visual_as_input_query_and_insert("substitute") end, {})
+  if config.opts.interface.keymaps.add_visual_as_input_and_query ~= "" then
+    vim.keymap.set("v", config.opts.interface.keymaps.add_visual_as_input_and_query,
+      facilellm.add_visual_as_input_and_query, {})
+  end
+  if config.opts.interface.keymaps.add_visual_as_context ~= "" then
+    vim.keymap.set("v", config.opts.interface.keymaps.add_visual_as_context,
+      facilellm.add_visual_as_context, {})
+  end
+  if config.opts.interface.keymaps.add_visual_as_instruction ~= "" then
+    vim.keymap.set("v", config.opts.interface.keymaps.add_visual_as_instruction,
+      facilellm.add_visual_as_instruction, {})
+  end
+  if config.opts.interface.keymaps.add_visual_as_input_query_and_append ~= "" then
+    vim.keymap.set("v", config.opts.interface.keymaps.add_visual_as_input_query_and_append,
+      function () facilellm.add_visual_as_input_query_and_insert("append") end, {})
+  end
+  if config.opts.interface.keymaps.add_visual_as_input_query_and_prepend ~= "" then
+    vim.keymap.set("v", config.opts.interface.keymaps.add_visual_as_input_query_and_prepend,
+      function () facilellm.add_visual_as_input_query_and_insert("prepend") end, {})
+  end
+  if config.opts.interface.keymaps.add_visual_as_input_query_and_substitute ~= "" then
+    vim.keymap.set("v", config.opts.interface.keymaps.add_visual_as_input_query_and_substitute,
+      function () facilellm.add_visual_as_input_query_and_insert("substitute") end, {}
+    )
+  end
 end
 
 ---@param models FacileLLM.Config.LLM[]
@@ -138,6 +185,20 @@ local default_opts = function ()
         input_confirm       = "<Enter>",
         input_instruction   = "<C-i>",
         input_context       = "<C-c>",
+
+        show                                     = "<leader>aiw",
+        create_from_selection                    = "<leader>ain",
+        delete_from_selection                    = "<leader>aid",
+        focus_from_selection                     = "<leader>aif",
+        rename_from_selection                    = "<leader>air",
+        set_model_from_selection                 = "<leader>aim",
+
+        add_visual_as_input_and_query            = "<leader>ai<Enter>",
+        add_visual_as_context                    = "<leader>aic",
+        add_visual_as_instruction                = "<leader>aii",
+        add_visual_as_input_query_and_append     = "<leader>aip",
+        add_visual_as_input_query_and_prepend    = "<leader>aiP",
+        add_visual_as_input_query_and_substitute = "<leader>ais",
       },
     },
 
@@ -254,6 +315,26 @@ local validate_facilellm_config = function (opts)
         input_confirm        = {keymaps.input_confirm,       "s", true},
         input_instruction    = {keymaps.input_instruction,   "s", true},
         input_context        = {keymaps.input_context,       "s", true},
+
+        show                     = {keymaps.show,                     "s", true},
+        create_from_selection    = {keymaps.create_from_selection,    "s", true},
+        delete_from_selection    = {keymaps.delete_from_selection,    "s", true},
+        focus_from_selection     = {keymaps.focus_from_selection,     "s", true},
+        rename_from_selection    = {keymaps.rename_from_selection,    "s", true},
+        set_model_from_selection = {keymaps.set_model_from_selection, "s", true},
+
+        add_visual_as_input_and_query             =
+          {keymaps.add_visual_as_input_and_query,            "s", true},
+        add_visual_as_context                     =
+          {keymaps.add_visual_as_context,                    "s", true},
+        add_visual_as_instruction                 =
+          {keymaps.add_visual_as_instruction,                "s", true},
+        add_visual_as_input_query_and_append      =
+          {keymaps.add_visual_as_input_query_and_append,     "s", true},
+        add_visual_as_input_query_and_prepend     =
+          {keymaps.add_visual_as_input_query_and_prepend,    "s", true},
+        add_visual_as_input_query_and_substitute  =
+          {keymaps.add_visual_as_input_query_and_substitute, "s", true},
       })
     end
   end

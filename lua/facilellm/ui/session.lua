@@ -164,88 +164,48 @@ local set_keymaps = function (sessionid)
 
 
   if config.opts.interface.keymaps.delete_interaction ~= "" then
-    vim.api.nvim_buf_set_keymap(conv_bufnr,
-      "n", config.opts.interface.keymaps.delete_interaction, "",
-      { callback = function ()
-          ui_session.clear_conversation(sessionid, "preserve", "preserve")
-        end,
-      }
-    )
-    vim.api.nvim_buf_set_keymap(input_bufnr,
-      "n", config.opts.interface.keymaps.delete_interaction, "",
-      { callback = function ()
-          ui_session.clear_conversation(sessionid, "preserve", "preserve")
-        end,
-      }
-    )
+    vim.keymap.set("n", config.opts.interface.keymaps.delete_interaction,
+      function () ui_session.clear_conversation(sessionid, "preserve", "preserve") end,
+      { buffer = conv_bufnr })
+    vim.keymap.set("n", config.opts.interface.keymaps.delete_interaction,
+      function () ui_session.clear_conversation(sessionid, "preserve", "preserve") end,
+      { buffer = input_bufnr })
   end
 
   if config.opts.interface.keymaps.delete_conversation ~= "" then
-    vim.api.nvim_buf_set_keymap(conv_bufnr,
-      "n", config.opts.interface.keymaps.delete_conversation, "",
-      { callback = function ()
-          ui_session.clear_conversation(sessionid, "delete", "delete")
-        end,
-      }
-    )
-    vim.api.nvim_buf_set_keymap(input_bufnr,
-      "n", config.opts.interface.keymaps.delete_conversation, "",
-      { callback = function ()
-          ui_session.clear_conversation(sessionid, "delete", "delete")
-        end,
-      }
-    )
+    vim.keymap.set("n", config.opts.interface.keymaps.delete_conversation,
+      function () ui_session.clear_conversation(sessionid, "delete", "delete") end,
+      { buffer = conv_bufnr })
+    vim.keymap.set("n", config.opts.interface.keymaps.delete_conversation,
+      function () ui_session.clear_conversation(sessionid, "delete", "delete") end,
+      { buffer = input_bufnr })
   end
 
   if config.opts.interface.keymaps.delete_session ~= "" then
-    vim.api.nvim_buf_set_keymap(conv_bufnr,
-      "n", config.opts.interface.keymaps.delete_session, "",
-      { callback = function ()
-          ui_session.delete(sessionid)
-        end,
-      }
-    )
-    vim.api.nvim_buf_set_keymap(input_bufnr,
-      "n", config.opts.interface.keymaps.delete_session, "",
-      { callback = function ()
-          ui_session.delete(sessionid)
-        end,
-      }
-    )
+    vim.keymap.set("n", config.opts.interface.keymaps.delete_session,
+      function () ui_session.delete(sessionid) end,
+      { buffer = conv_bufnr })
+    vim.keymap.set("n", config.opts.interface.keymaps.delete_session,
+      function () ui_session.delete(sessionid) end,
+      { buffer = input_bufnr })
   end
 
   if config.opts.interface.keymaps.fork_session ~= "" then
-    vim.api.nvim_buf_set_keymap(conv_bufnr,
-      "n", config.opts.interface.keymaps.fork_session, "",
-      { callback = function ()
-          ui_session.fork(sessionid)
-        end,
-      }
-    )
-    vim.api.nvim_buf_set_keymap(input_bufnr,
-      "n", config.opts.interface.keymaps.fork_session, "",
-      { callback = function ()
-          ui_session.fork(sessionid)
-        end,
-      }
-    )
+    vim.keymap.set("n", config.opts.interface.keymaps.fork_session,
+      function () ui_session.fork(sessionid) end,
+      { buffer = conv_bufnr })
+    vim.keymap.set("n", config.opts.interface.keymaps.fork_session,
+      function () ui_session.fork(sessionid) end,
+      { buffer = input_bufnr })
   end
 
   if config.opts.interface.keymaps.rename_session ~= "" then
-    vim.api.nvim_buf_set_keymap(conv_bufnr,
-      "n", config.opts.interface.keymaps.rename_session, "",
-      { callback = function ()
-          ui_session.rename(sessionid)
-        end,
-      }
-    )
-    vim.api.nvim_buf_set_keymap(input_bufnr,
-      "n", config.opts.interface.keymaps.rename_session, "",
-      { callback = function ()
-          ui_session.rename(sessionid)
-        end,
-      }
-    )
+    vim.keymap.set("n", config.opts.interface.keymaps.rename_session,
+      function () ui_session.rename(sessionid) end,
+      { buffer = conv_bufnr })
+    vim.keymap.set("n", config.opts.interface.keymaps.rename_session,
+      function () ui_session.rename(sessionid) end,
+      { buffer = input_bufnr })
   end
 
   if config.opts.interface.keymaps.input_confirm ~= "" then

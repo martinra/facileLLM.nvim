@@ -134,7 +134,8 @@ end
 local delete = function (sessionid)
   ui_select.delete(sessionid)
   for _,winid in pairs(vim.api.nvim_list_wins()) do
-    if ui_common.win_get_session(winid) == sessionid then
+    if vim.api.nvim_win_is_valid(winid)
+      and ui_common.win_get_session(winid) == sessionid then
       vim.api.nvim_win_close(winid, true)
     end
   end

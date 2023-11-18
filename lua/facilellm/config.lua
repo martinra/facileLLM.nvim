@@ -152,9 +152,23 @@ local default_opts = function ()
       {
         name = "OpenAI GPT 3.5-Turbo",
         implementation = "OpenAI API",
-        opts = {},
-        initial_conversation = {},
-        autostart = false,
+        opts = {
+          openai_model = "gpt-3.5-turbo",
+        },
+      },
+      {
+        name = "OpenAI GPT 4",
+        implementation = "OpenAI API",
+        opts = {
+          openai_model = "gpt-4",
+        },
+      },
+      {
+        name = "OpenAI GPT 4 32K",
+        implementation = "OpenAI API",
+        opts = {
+          openai_model = "gpt-4-32k",
+        },
       },
     },
 

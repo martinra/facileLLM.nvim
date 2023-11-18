@@ -193,7 +193,7 @@ end
 ---@return table
 local default_opts = function ()
   return {
-    name = "OpenAI GPT 3.5-Turbo",
+    name = "OpenAI GPT",
     url = "https://api.openai.com/v1/chat/completions",
     get_api_key = function ()
       vim.ui.input("API key for api.openai.com: ")

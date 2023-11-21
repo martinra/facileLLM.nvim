@@ -19,7 +19,6 @@ local create_from_selection = function ()
   ui_select.select_model(config.opts.models,
     function (model_config)
       local sessionid = create_from_model(model_config)
-      ui_select.touch(sessionid)
       ui_session.set_current_win_conversation_input(sessionid)
     end,
     "Select model to create new session from"
@@ -69,7 +68,6 @@ local show = function (sessionid)
   sessionid = sessionid or session.get_some_session()
   sessionid = sessionid or create_from_model()
 
-  ui_select.touch(sessionid)
   ui_session.set_current_win_conversation_input(sessionid)
 end
 
@@ -82,7 +80,6 @@ local focus = function (sessionid)
     return
   end
 
-  ui_select.touch(sessionid)
   ui_session.set_current_win_conversation_input(sessionid)
 end
 
@@ -90,7 +87,6 @@ end
 local focus_from_selection = function ()
   ui_select.select_session(session.get_session_names(),
     function (sessionid)
-      ui_select.touch(sessionid)
       ui_session.set_current_win_conversation_input(sessionid)
     end,
     "Select session to focus"

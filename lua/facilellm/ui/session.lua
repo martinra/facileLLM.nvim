@@ -92,6 +92,107 @@ local does_follow_conversation = function (sessionid, winid)
 end
 
 ---@param sessionid FacileLLM.SessionId
+---@return WinId
+local create_conversation_win = function (sessionid)
+  local bufnr = get_conversation_buffer(sessionid)
+  local conv_winid = ui_conversation.create_window(bufnr, "right")
+  follow_conversation(sessionid, conv_winid)
+  return conv_winid
+end
+
+---@param sessionid FacileLLM.SessionId
+---@param conv_winid WinId?
+---@return WinId
+local create_input_win = function (sessionid, conv_winid)
+  local bufnr = get_input_buffer(sessionid)
+  return ui_input.create_window(bufnr, conv_winid)
+end
+
+---@param sessionid FacileLLM.SessionId
+---@return nil
+local win_close_all_but_unique = function (sessionid)
+  for _,winid in pairs(vim.api.nvim_list_wins()) do
+    if vim.api.nvim_win_is_valid(winid) then
+      local sessionid__loc = ui_common.win_get_session(winid)
+      if sessionid__loc ~= nil and sessionid__loc ~= sessionid then
+        vim.api.nvim_win_close(winid, true)
+      end
+    end
+  end
+end
+
+---@param sessionid FacileLLM.SessionId
+---@return nil
+local set_current_win_conversation_input = function (sessionid)
+  -- We need to touch the session before creating any windows in order to avoid
+  -- the WinNew autocmd to close them if unique_session is true.
+  ui_select.touch(sessionid)
+
+  local conv_winid = get_some_conversation_window(sessionid)
+  if not conv_winid then
+    conv_winid = create_conversation_win(sessionid)
+  end
+
+  local input_winid = get_some_input_window(sessionid)
+  if not input_winid then
+    input_winid = create_input_win(sessionid, conv_winid)
+  end
+
+  if config.opts.interface.unique_session then
+    win_close_all_but_unique(sessionid)
+  end
+  vim.api.nvim_set_current_win(input_winid)
+end
+
+---@param sessionid FacileLLM.SessionId
+---@return nil
+local set_current_win_conversation = function (sessionid)
+  if config.opts.interface.couple_conv_input_windows then
+    set_current_win_conversation_input(sessionid)
+    return
+  end
+
+  -- We need to touch the session before creating any windows in order to avoid
+  -- the WinNew autocmd to close them if unique_session is true.
+  ui_select.touch(sessionid)
+
+  local conv_winid = get_some_conversation_window(sessionid)
+  if not conv_winid then
+    conv_winid = create_conversation_win(sessionid)
+  end
+
+  if config.opts.interface.unique_session then
+    win_close_all_but_unique(sessionid)
+  end
+  vim.api.nvim_set_current_win(conv_winid)
+  return conv_winid
+end
+
+---@param sessionid FacileLLM.SessionId
+---@return nil
+local set_current_win_input = function (sessionid)
+  if config.opts.interface.couple_conv_input_windows then
+    set_current_win_conversation_input(sessionid)
+    return
+  end
+
+  -- We need to touch the session before creating any windows in order to avoid
+  -- the WinNew autocmd to close them if unique_session is true.
+  ui_select.touch(sessionid)
+
+  local input_winid = get_some_input_window(sessionid)
+  if not input_winid then
+    input_winid = create_input_win(sessionid)
+  end
+
+  if config.opts.interface.unique_session then
+    win_close_all_but_unique(sessionid)
+  end
+  vim.api.nvim_set_current_win(input_winid)
+  return input_winid
+end
+
+---@param sessionid FacileLLM.SessionId
 ---@param instruction ("delete"| "preserve"| "combine")
 ---@param context ("delete"| "preserve"| "combine")
 ---@return nil
@@ -279,6 +380,83 @@ local add_input_message_and_query = function (sessionid, lines, response_callbac
     end)
 end
 
+---@param sessionid FacileLLM.SessionId
+---@return nil
+local set_buf_autocmds = function (sessionid)
+  local conv_bufnr = get_conversation_buffer(sessionid)
+  local input_bufnr = get_input_buffer(sessionid)
+
+  if config.opts.interface.couple_conv_input_windows then
+    vim.api.nvim_create_autocmd("WinClosed", {
+      buffer = conv_bufnr,
+      callback = function()
+        local nmb_conv_wins = 0
+        for _,winid in pairs(vim.api.nvim_list_wins()) do
+          if ui_common.win_get_session(winid) == sessionid
+            and ui_common.win_is_conversation(winid) then
+            if nmb_conv_wins == 0 then
+              nmb_conv_wins = 1
+            else
+              return
+            end
+          end
+        end
+        for _,winid in pairs(vim.api.nvim_list_wins()) do
+          if ui_common.win_get_session(winid) == sessionid then
+            vim.api.nvim_win_close(winid, true)
+          end
+        end
+      end
+    })
+    vim.api.nvim_create_autocmd("WinClosed", {
+      buffer = input_bufnr,
+      callback = function()
+        local nmb_input_wins = 0
+        for _,winid in pairs(vim.api.nvim_list_wins()) do
+          if ui_common.win_get_session(winid) == sessionid
+            and not ui_common.win_is_conversation(winid) then
+            if nmb_input_wins == 0 then
+              nmb_input_wins = 1
+            else
+              return
+            end
+          end
+        end
+        for _,winid in pairs(vim.api.nvim_list_wins()) do
+          if ui_common.win_get_session(winid) == sessionid then
+            vim.api.nvim_win_close(winid, true)
+          end
+        end
+      end
+    })
+  end
+
+  if config.opts.interface.unique_session then
+    vim.api.nvim_create_autocmd("WinNew", {
+      buffer = conv_bufnr,
+      callback = function()
+        local most_recent_session = ui_select.get_most_recent()
+        if most_recent_session == nil then
+          ui_select.touch(sessionid)
+        elseif most_recent_session ~= sessionid then
+          win_close_all_but_unique(most_recent_session)
+        end
+      end
+    })
+    vim.api.nvim_create_autocmd("WinNew", {
+      buffer = conv_bufnr,
+      callback = function()
+        local most_recent_session = ui_select.get_most_recent()
+        if most_recent_session == nil then
+          ui_select.touch(sessionid)
+        elseif most_recent_session ~= sessionid then
+          win_close_all_but_unique(most_recent_session)
+        end
+      end
+    })
+  end
+end
+
 ---@param model_config FacileLLM.Config.LLM
 ---@return FacileLLM.SessionId
 local create = function (model_config)
@@ -296,29 +474,8 @@ local create = function (model_config)
   }
   session_uis[sessionid] = sess
 
-  vim.api.nvim_create_autocmd("WinClosed", {
-    buffer = sess.conv_bufnr,
-    callback = function()
-      local nmb_conv_wins = 0
-      for _,winid in pairs(vim.api.nvim_list_wins()) do
-        if ui_common.win_get_session(winid) == sessionid
-          and ui_common.win_is_conversation(winid) then
-          if nmb_conv_wins == 0 then
-            nmb_conv_wins = 1
-          else
-            return
-          end
-        end
-      end
-      for _,winid in pairs(vim.api.nvim_list_wins()) do
-        if ui_common.win_get_session(winid) == sessionid then
-          vim.api.nvim_win_close(winid, true)
-        end
-      end
-    end
-  })
-
   set_buffer_keymaps(sessionid)
+  set_buf_autocmds(sessionid)
 
   -- HACK: We delay rendering so that foldexpr is applied to the initial
   -- conversation in all cases Without this on 0.9.4 when creating from
@@ -345,63 +502,6 @@ local fork = function (sessionid)
   return create(model_config)
 end
 
----@param sessionid FacileLLM.SessionId
----@return WinId
-local create_conversation_win = function (sessionid)
-  local bufnr = get_conversation_buffer(sessionid)
-  local conv_winid = ui_conversation.create_window(bufnr, "right")
-  follow_conversation(sessionid, conv_winid)
-  return conv_winid
-end
-
----@param sessionid FacileLLM.SessionId
----@param conv_winid WinId?
----@return WinId
-local create_input_win = function (sessionid, conv_winid)
-  local bufnr = get_input_buffer(sessionid)
-  return ui_input.create_window(bufnr, conv_winid)
-end
-
----@param sessionid FacileLLM.SessionId
----@return WinId
-local set_current_win_conversation = function (sessionid)
-  local conv_winid = get_some_conversation_window(sessionid)
-  if conv_winid then
-    vim.api.nvim_set_current_win(conv_winid)
-    return conv_winid
-  else
-    return create_conversation_win(sessionid)
-  end
-end
-
----@param sessionid FacileLLM.SessionId
----@return WinId
-local set_current_win_input = function (sessionid)
-  local input_winid = get_some_input_window(sessionid)
-  if input_winid then
-    vim.api.nvim_set_current_win(input_winid)
-    return input_winid
-  else
-    return create_input_win(sessionid)
-  end
-end
-
----@param sessionid FacileLLM.SessionId
----@return WinId
-local set_current_win_conversation_input = function (sessionid)
-  local input_winid = get_some_input_window(sessionid)
-  if input_winid then
-    vim.api.nvim_set_current_win(input_winid)
-    return input_winid
-  else
-    local conv_winid = get_some_conversation_window(sessionid)
-    if not conv_winid then
-      conv_winid = create_conversation_win(sessionid)
-    end
-    return create_input_win(sessionid, conv_winid)
-  end
-end
-
 
 return {
   create                             = create,
@@ -414,9 +514,9 @@ return {
   get_some_input_window              = get_some_input_window,
   follow_conversation                = follow_conversation,
   unfollow_conversation              = unfollow_conversation,
+  set_current_win_conversation_input = set_current_win_conversation_input,
   set_current_win_conversation       = set_current_win_conversation,
   set_current_win_input              = set_current_win_input,
-  set_current_win_conversation_input = set_current_win_conversation_input,
   clear_conversation                 = clear_conversation,
   render_conversation                = render_conversation,
   add_message                        = add_message,

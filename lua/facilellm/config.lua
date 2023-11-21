@@ -26,6 +26,8 @@
 ---@field llm string
 
 ---@class FacileLLM.Config.Interface
+---@field unique_session boolean
+---@field couple_conv_input_windows boolean
 ---@field layout_relative ("editor"| "win") Relative to what should the conversation window be opened?
 ---@field input_relative_height number
 ---@field highlight_role boolean
@@ -185,11 +187,13 @@ local default_opts = function ()
     },
 
     interface = {
-      layout_relative = "editor",
-      input_relative_height = 0.15,
-      highlight_role   = true,
-      fold_instruction = true,
-      fold_context     = true,
+      unique_session            = false,
+      couple_conv_input_windows = true,
+      layout_relative           = "editor",
+      input_relative_height     = 0.15,
+      highlight_role            = true,
+      fold_instruction          = true,
+      fold_context              = true,
       keymaps = {
         delete_interaction  = "<C-d>i",
         delete_conversation = "<C-d>c",
@@ -310,12 +314,14 @@ local validate_facilellm_config = function (opts)
   if opts.interface then
     local interface = opts.interface
     vim.validate({
-      layout_relative       = {interface.layout_relative,       "s", true},
-      input_relative_height = {interface.input_relative_height, "n", true},
-      highlight_role        = {interface.highlight_role,        "b", true},
-      fold_instruction      = {interface.fold_instruction,      "b", true},
-      fold_context          = {interface.fold_context,          "b", true},
-      keymaps               = {interface.keymaps,               "t", true},
+      unique_session            = {interface.unique_session,            "b", true},
+      couple_conv_input_windows = {interface.couple_conv_input_windows, "b", true},
+      layout_relative           = {interface.layout_relative,           "s", true},
+      input_relative_height     = {interface.input_relative_height,     "n", true},
+      highlight_role            = {interface.highlight_role,            "b", true},
+      fold_instruction          = {interface.fold_instruction,          "b", true},
+      fold_context              = {interface.fold_context,              "b", true},
+      keymaps                   = {interface.keymaps,                   "t", true},
     })
 
     if interface.keymaps then

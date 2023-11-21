@@ -29,6 +29,7 @@ local fold_messages = function (winid)
   if not config.opts.interface.fold_instruction
     and not config.opts.interface.fold_context then
     vim.api.nvim_win_set_option(winid, "foldenable", false)
+    return
   end
 
   local foldexpr = ""

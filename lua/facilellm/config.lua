@@ -206,7 +206,7 @@ local default_opts = function ()
         rename_session      = "<C-r>",
         input_confirm       = "<Enter>",
         input_instruction   = "<C-i>",
-        input_context       = "<C-c>",
+        input_context       = "<C-k>",
 
         show                                     = "<leader>aiw",
         create_from_selection                    = "<leader>ain",
@@ -216,7 +216,7 @@ local default_opts = function ()
         set_model_from_selection                 = "<leader>aim",
 
         add_visual_as_input_and_query            = "<leader>ai<Enter>",
-        add_visual_as_context                    = "<leader>aic",
+        add_visual_as_context                    = "<leader>aik",
         add_visual_as_instruction                = "<leader>aii",
         add_visual_as_input_query_and_append     = "<leader>aip",
         add_visual_as_input_query_and_prepend    = "<leader>aiP",

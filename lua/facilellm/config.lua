@@ -28,7 +28,8 @@
 ---@class FacileLLM.Config.Interface
 ---@field unique_session boolean
 ---@field couple_conv_input_windows boolean
----@field layout_relative ("editor"| "win") Relative to what should the conversation window be opened?
+---@field layout_relative ("editor"| "win")
+---@field layout_direction ("right"| "left")
 ---@field input_relative_height number
 ---@field highlight_role boolean
 ---@field fold_instruction boolean
@@ -190,6 +191,7 @@ local default_opts = function ()
       unique_session            = false,
       couple_conv_input_windows = true,
       layout_relative           = "editor",
+      layout_direction          = "right",
       input_relative_height     = 0.15,
       highlight_role            = true,
       fold_instruction          = true,
@@ -317,6 +319,7 @@ local validate_facilellm_config = function (opts)
       unique_session            = {interface.unique_session,            "b", true},
       couple_conv_input_windows = {interface.couple_conv_input_windows, "b", true},
       layout_relative           = {interface.layout_relative,           "s", true},
+      layout_direction          = {interface.layout_direction,          "s", true},
       input_relative_height     = {interface.input_relative_height,     "n", true},
       highlight_role            = {interface.highlight_role,            "b", true},
       fold_instruction          = {interface.fold_instruction,          "b", true},

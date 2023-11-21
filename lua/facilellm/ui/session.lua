@@ -95,7 +95,7 @@ end
 ---@return WinId
 local create_conversation_win = function (sessionid)
   local bufnr = get_conversation_buffer(sessionid)
-  local conv_winid = ui_conversation.create_window(bufnr, "right")
+  local conv_winid = ui_conversation.create_window(bufnr)
   follow_conversation(sessionid, conv_winid)
   return conv_winid
 end

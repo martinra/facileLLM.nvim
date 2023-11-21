@@ -53,12 +53,12 @@ local fold_messages = function (winid)
 end
 
 ---@param bufnr BufNr
----@param direction ("right"| "left")
 ---@return WinId
-local create_window = function (bufnr, direction)
-  direction = direction or "right"
+local create_window = function (bufnr)
   local split_modifier = util.win_vsplit_modifier(
-                           config.opts.interface.layout_relative, direction)
+    config.opts.interface.layout_relative,
+    config.opts.interface.layout_direction
+  )
   vim.cmd(string.format("noau %s vsplit", split_modifier))
   local winid = vim.api.nvim_get_current_win()
 

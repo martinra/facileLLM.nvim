@@ -173,7 +173,7 @@ local render_conversation = function (conv, bufnr, render_state)
 
   vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
 
-  if render_state.msg == 0 then
+  if render_state.offset_total == 0 then
     -- The very first line in the buffer when inserted needs to overwrite the
     -- initial one.
     local mx = 1

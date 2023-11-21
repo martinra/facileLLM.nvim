@@ -32,22 +32,37 @@ local fold_messages = function (winid)
     return
   end
 
-  local foldexpr = ""
-  foldexpr = foldexpr .. "getline(v:lnum)=~'^\\("
+  local hlroleexpr = "'^\\("
   if config.opts.interface.fold_instruction then
-    foldexpr = foldexpr .. config.opts.naming.role_display.instruction
+    hlroleexpr = hlroleexpr .. config.opts.naming.role_display.instruction
   end
   if config.opts.interface.fold_instruction
     and config.opts.interface.fold_context then
-    foldexpr = foldexpr .. "\\|"
+    hlroleexpr = hlroleexpr .. "\\|"
   end
   if config.opts.interface.fold_context then
-    foldexpr = foldexpr .. config.opts.naming.role_display.context
+    hlroleexpr = hlroleexpr .. config.opts.naming.role_display.context
   end
-  foldexpr = foldexpr .. "\\)$'"
-  foldexpr = foldexpr .. "?'>1':("
-  foldexpr = foldexpr .. "getline(v:lnum+1)=~'^\\a*:$'"
-  foldexpr = foldexpr .. ")?'<1':'='"
+  hlroleexpr = hlroleexpr .. "\\)$'"
+
+  local allroleexpr = "'^\\("
+  allroleexpr = allroleexpr .. config.opts.naming.role_display.instruction
+  allroleexpr = allroleexpr .. "\\|"
+  allroleexpr = allroleexpr .. config.opts.naming.role_display.context
+  allroleexpr = allroleexpr .. "\\|"
+  allroleexpr = allroleexpr .. config.opts.naming.role_display.input
+  allroleexpr = allroleexpr .. "\\|"
+  allroleexpr = allroleexpr .. config.opts.naming.role_display.llm
+  allroleexpr = allroleexpr .. "\\)$'"
+
+  local foldexpr = ""
+  foldexpr = foldexpr .. "getline(v:lnum)=~"
+  foldexpr = foldexpr .. hlroleexpr
+  foldexpr = foldexpr .. "?'>1':"
+  foldexpr = foldexpr .. "getline(v:lnum+1)=~"
+  foldexpr = foldexpr .. allroleexpr
+  foldexpr = foldexpr .. "?'<1':'='"
+
   vim.api.nvim_win_set_option(winid, "foldenable", true)
   vim.api.nvim_win_set_option(winid, "foldmethod", "expr")
   vim.api.nvim_win_set_option(winid, "foldexpr", foldexpr)

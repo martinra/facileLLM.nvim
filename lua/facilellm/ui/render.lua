@@ -5,8 +5,9 @@ local config = require("facilellm.config")
 ---@field msg FacileLLM.MsgIndex index of the last rendered message
 ---@field line number index of the last rendered line
 ---@field char number index of the last rendered character
----@field lines_total number total number of lines rendered
 ---@field highlight_receiving FacileLLM.RenderHighlight?
+---@field offsets number[]
+---@field offset_total number total number of lines rendered
 
 ---@class FacileLLM.RenderHighlight
 ---@field msg FacileLLM.MsgIndex
@@ -91,9 +92,9 @@ end
 local create_highlight_msg_receiving = function (bufnr, render_state, mx, msg)
   if render_state.highlight_receiving and render_state.highlight_receiving.msg == mx then
     local ns = buf_get_namespace_highlight_msg_receiving()
-    local row = render_state.lines_total - #msg.lines - 1
+    local row = render_state.offset_total - #msg.lines - 1
     local col = 0
-    local end_row = render_state.lines_total - 1
+    local end_row = render_state.offset_total - 1
     local end_col
     if #msg.lines == 0 then
       end_col = string.len(role_display(msg.role))
@@ -121,7 +122,7 @@ local update_highlight_msg_receiving = function (bufnr, render_state, msg)
     local ns = buf_get_namespace_highlight_msg_receiving()
     local id = render_state.highlight_receiving.extmark
     local row, col = unpack(vim.api.nvim_buf_get_extmark_by_id(bufnr, ns, id, {}))
-    local end_row = render_state.lines_total-1
+    local end_row = render_state.offset_total-1
     local end_col = string.len(msg.lines[#msg.lines])
 
     vim.api.nvim_buf_set_extmark(bufnr, ns,
@@ -141,7 +142,8 @@ local create_state = function ()
     msg = 0,
     line = 0,
     char = 0,
-    lines_total = 0,
+    offsets = {},
+    offset_total = 0,
     highlight_receiving = nil,
   }
 end
@@ -153,7 +155,8 @@ local clear_conversation = function (bufnr, render_state)
   render_state.msg = 0
   render_state.line = 0
   render_state.char = 0
-  render_state.lines_total = 0
+  render_state.offsets = {}
+  render_state.offset_total = 0
 
   if render_state.highlight_receiving then
     end_highlight_msg_receiving(bufnr, render_state)
@@ -183,7 +186,8 @@ local render_conversation = function (conv, bufnr, render_state)
     vim.api.nvim_buf_set_lines(bufnr, -2, -1, false, {role_display(msg.role)})
     vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, msg.lines)
 
-    render_state.lines_total = 1 + #msg.lines
+    render_state.offsets[mx] = 1 + #msg.lines
+    render_state.offset_total = 1 + #msg.lines
 
     render_state.msg = 1
     render_state.line = #msg.lines
@@ -204,8 +208,8 @@ local render_conversation = function (conv, bufnr, render_state)
       local line = msg.lines[render_state.line]
       if render_state.char ~= string.len(line) then
         vim.api.nvim_buf_set_text(bufnr,
-          render_state.lines_total-1, render_state.char,
-          render_state.lines_total-1, render_state.char,
+          render_state.offset_total-1, render_state.char,
+          render_state.offset_total-1, render_state.char,
           { string.sub(line, render_state.char+1, string.len(line)) })
       end
 
@@ -217,7 +221,8 @@ local render_conversation = function (conv, bufnr, render_state)
         end
         vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, new_lines)
 
-        render_state.lines_total = render_state.lines_total + #new_lines
+        render_state.offsets[mx] = 1 + #msg.lines
+        render_state.offset_total = render_state.offset_total + #new_lines
       end
 
       render_state.line = #msg.lines
@@ -235,8 +240,9 @@ local render_conversation = function (conv, bufnr, render_state)
     vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, {role_display(msg.role)})
     vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, msg.lines)
 
-    local role_line = render_state.lines_total
-    render_state.lines_total = render_state.lines_total + 1 + #msg.lines
+    local role_line = render_state.offset_total
+    render_state.offsets[mx] = 1 + #msg.lines
+    render_state.offset_total = render_state.offset_total + 1 + #msg.lines
 
     render_state.msg = mx
     render_state.line = #msg.lines

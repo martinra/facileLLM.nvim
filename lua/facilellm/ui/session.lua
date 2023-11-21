@@ -1,4 +1,5 @@
 local config = require("facilellm.config")
+local message = require("facilellm.session.message")
 local session = require("facilellm.session")
 local ui_common = require("facilellm.ui.common")
 local ui_conversation = require("facilellm.ui.conversation")

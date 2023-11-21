@@ -1,4 +1,5 @@
 local config = require("facilellm.config")
+local message = require("facilellm.session.message")
 
 
 ---@class FacileLLM.RenderState
@@ -8,14 +9,10 @@ local config = require("facilellm.config")
 ---@field offsets number[]
 ---@field offset_total number total number of lines rendered
 ---@field highlight_receiving FacileLLM.RenderState.HighlightReceiving?
----@field pruned table<FacileLLM.MsgIndex, FacileLLL.RenderState.PruneState>
+---@field prune_extmarks table<FacileLLM.MsgIndex, number>
 
 ---@class FacileLLM.RenderState.HighlightReceiving
 ---@field msg FacileLLM.MsgIndex
----@field extmark number?
-
----@class FacileLLL.RenderState.PruneState
----@field visible boolean
 ---@field extmark number?
 
 
@@ -35,6 +32,18 @@ local role_display = function (role)
   end
 end
 
+---@param mx FacileLLM.MsgIndex
+---@param render_state FacileLLM.RenderState
+---@return integer
+local previous_offset = function (mx, render_state)
+  for px = mx-1,1,-1 do
+    if render_state.offsets[px] then
+      return render_state.offsets[px]
+    end
+  end
+  return 0
+end
+
 ---@return number
 local buf_get_namespace_highlight_role = function ()
   return vim.api.nvim_create_namespace("facilellm-highlight-role")
@@ -42,7 +51,11 @@ end
 
 ---@return number
 local buf_get_namespace_highlight_receiving = function ()
-  return vim.api.nvim_create_namespace("facilellm-highlight-msg-receiving")
+  return vim.api.nvim_create_namespace("facilellm-highlight-receiving")
+end
+
+local buf_get_namespace_highlight_pruned = function ()
+  return vim.api.nvim_create_namespace("facilellm-highlight-pruned")
 end
 
 ---@param bufnr BufNr
@@ -70,37 +83,85 @@ end
 ---@param msg FacileLLM.Message
 ---@return nil
 local set_highlight_receiving = function (bufnr, render_state, mx, msg)
-  if render_state.highlight_receiving and render_state.highlight_receiving.msg == mx then
-    local row = render_state.offsets[mx-1] or 0
-    local col = 0
-    local end_row = render_state.offsets[mx] - 1
-    local end_col
-    if #msg.lines == 0 then
-      end_col = string.len(role_display(msg.role))
-    else
-      end_col = string.len(msg.lines[#msg.lines])
-    end
+  local row = render_state.offsets[mx-1] or 0
+  local col = 0
+  local end_row = render_state.offsets[mx] - 1
+  local end_col
+  if #msg.lines == 0 then
+    end_col = string.len(role_display(msg.role))
+  else
+    end_col = string.len(msg.lines[#msg.lines])
+  end
 
-    local ns = buf_get_namespace_highlight_receiving()
-    if render_state.highlight_receiving.extmark then
+  local ns = buf_get_namespace_highlight_receiving()
+  if render_state.highlight_receiving.extmark then
+    vim.api.nvim_buf_set_extmark(bufnr, ns,
+    row, col,
+    {
+      id = render_state.highlight_receiving.extmark,
+      end_row = end_row,
+      end_col = end_col,
+      hl_group = "FacileLLMMsgReceiving",
+    })
+  else
+    render_state.highlight_receiving.extmark =
+    vim.api.nvim_buf_set_extmark(bufnr, ns,
+    row, col,
+    {
+      end_row = end_row,
+      end_col = end_col,
+      hl_group = "FacileLLMMsgReceiving",
+    })
+  end
+end
+
+---@param bufnr BufNr
+---@param render_state FacileLLM.RenderState
+---@param mx FacileLLM.MsgIndex
+---@param msg FacileLLM.Message
+---@return nil
+local set_highlight_pruned = function (bufnr, render_state, mx, msg)
+  local row = render_state.offsets[mx-1] or 0
+  local col = 0
+  local end_row = render_state.offsets[mx] - 1
+  local end_col
+  if #msg.lines == 0 then
+    end_col = string.len(role_display(msg.role))
+  else
+    end_col = string.len(msg.lines[#msg.lines])
+  end
+
+  local ns = buf_get_namespace_highlight_pruned()
+  if render_state.prune_extmarks[mx] then
+    vim.api.nvim_buf_set_extmark(bufnr, ns,
+      row, col,
+      {
+        id = render_state.prune_extmarks[mx],
+        end_row = end_row,
+        end_col = end_col,
+        hl_group = "FacileLLMMsgPruned",
+      })
+  else
+    render_state.prune_extmarks[mx] =
       vim.api.nvim_buf_set_extmark(bufnr, ns,
         row, col,
         {
-          id = render_state.highlight_receiving.extmark,
           end_row = end_row,
           end_col = end_col,
-          hl_group = "FacileLLMMsgReceiving",
+          hl_group = "FacileLLMMsgPruned",
         })
-    else
-      render_state.highlight_receiving.extmark =
-        vim.api.nvim_buf_set_extmark(bufnr, ns,
-          row, col,
-          {
-            end_row = end_row,
-            end_col = end_col,
-            hl_group = "FacileLLMMsgReceiving",
-          })
-    end
+  end
+end
+
+---@param bufnr BufNr
+---@param render_state FacileLLM.RenderState
+---@param mx FacileLLM.MsgIndex
+---@return nil
+local del_highlight_pruned = function (bufnr, render_state, mx)
+  if render_state.prune_extmarks[mx] then
+    local ns = buf_get_namespace_highlight_pruned()
+    vim.api.nvim_buf_del_extmark(bufnr, ns, render_state.prune_extmarks[mx])
+    render_state.prune_extmarks[mx] = nil
   end
 end
 
@@ -132,7 +193,7 @@ local create_state = function ()
     offsets = {},
     offset_total = 0,
     highlight_receiving = nil,
-    pruned = {},
+    prune_extmarks = {},
   }
 end
 
@@ -170,7 +231,7 @@ local render_conversation = function (conv, bufnr, render_state)
 
   for mx = render_state.msg, #conv do
     local msg = conv[mx]
-    if msg then
+    if msg and not message.ispurged(msg) then
       if not render_state.offsets[mx] then
         render_state.offsets[mx] = render_state.offset_total
       end
@@ -228,8 +289,13 @@ local render_conversation = function (conv, bufnr, render_state)
       local line = msg.lines[#msg.lines]
       render_state.char = line and string.len(line) or 0
 
-      if config.opts.feedback.highlight_message_while_receiving then
+      if config.opts.feedback.highlight_message_while_receiving
+        and render_state.highlight_receiving
+        and render_state.highlight_receiving.msg == mx then
         set_highlight_receiving(bufnr, render_state, mx, msg)
+      end
+      if message.ispruned(msg) then
+        set_highlight_pruned(bufnr, render_state, mx, msg)
       end
 
       if msg.role == "Instruction" or msg.role == "Context" then
@@ -257,28 +323,80 @@ local render_conversation = function (conv, bufnr, render_state)
   end
 end
 
+
+---@param conv FacileLLM.Conversation
 ---@param mx FacileLLM.MsgIndex
+---@param bufnr BufNr
 ---@param render_state FacileLLM.RenderState
 ---@return nil
-local prune_message = function (mx, render_state)
-  if not render_state.pruned[mx] then
-    render_state.pruned[mx] = {
-      visible = true,
-      extmark = nil,
-    }
+local prune_message = function (conv, mx, bufnr, render_state)
+  local msg = conv[mx]
+  if not message.ispruned(msg) then
+    return
+  end
+  if render_state.msg >= mx then
+    set_highlight_pruned(bufnr, render_state, mx, msg)
   end
 end
 
+local deprune_message = function (conv, mx, bufnr, render_state)
+  local msg = conv[mx]
+  if message.ispruned(msg) then
+    return
+  end
+  if render_state.offsets[mx] and render_state.msg >= mx then
+    del_highlight_pruned(bufnr, render_state, mx)
+  end
+end
+
+---@param conv FacileLLM.Conversation
 ---@param mx FacileLLM.MsgIndex
+---@param bufnr BufNr
 ---@param render_state FacileLLM.RenderState
 ---@return nil
-local purge_message = function (mx, render_state)
-  if not render_state.pruned[mx] then
-    render_state.pruned[mx] = {
-      visible = false,
-      extmark = nil,
-    }
+local purge_message = function (conv, mx, bufnr, render_state)
+  local msg = conv[mx]
+  if not message.ispurged(msg) then
+    return
   end
+
+  -- In this case the message has not yet been rendered or is already purged.
+  if render_state.msg < mx or render_state.offsets[mx] == nil then
+    return
+  end
+
+  if render_state.highlight_receiving and render_state.highlight_receiving.msg == mx then
+    end_highlight_receiving(bufnr, render_state)
+  end
+  if render_state.prune_extmarks[mx] then
+    del_highlight_pruned(bufnr, render_state, mx)
+  end
+
+  local row = previous_offset(mx, render_state)
+  local row_end = render_state.offsets[mx]
+
+  vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
+  vim.api.nvim_buf_set_lines(bufnr, row, row_end, false, {})
+  vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
+
+  if render_state.msg == mx then
+    render_state.offset_total = render_state.offset_total - 1 - render_state.line
+  else
+    render_state.offset_total = render_state.offset_total - 1 - #conv[mx].lines
+  end
+  render_state.offsets[mx] = nil
+end
+
+---@param row integer
+---@param render_state FacileLLM.RenderState
+---@return integer
+local get_message_index = function (row, render_state)
+  for mx,offset in ipairs(render_state.offsets) do
+    if offset >= row then
+      return mx
+    end
+  end
+  error("Row past highest offset")
 end
 
 
@@ -289,5 +407,7 @@ return {
   start_highlight_receiving = start_highlight_receiving,
   end_highlight_receiving = end_highlight_receiving,
   prune_message = prune_message,
+  deprune_message = deprune_message,
   purge_message = purge_message,
+  get_message_index = get_message_index,
 }

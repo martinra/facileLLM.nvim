@@ -11,6 +11,7 @@ local create_buffer = function (sessionid, name)
   vim.api.nvim_buf_set_name(bufnr, name)
 
   vim.api.nvim_buf_set_option(bufnr, "buftype",    "nofile")
+  vim.api.nvim_buf_set_option(bufnr, "filetype",   "facilellm-conversation")
   vim.api.nvim_buf_set_option(bufnr, "swapfile",   false)
   vim.api.nvim_buf_set_option(bufnr, "buflisted",  false)
   vim.api.nvim_buf_set_option(bufnr, "bufhidden",  "hide")

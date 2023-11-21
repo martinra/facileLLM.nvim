@@ -329,6 +329,61 @@ local set_buf_keymaps = function (sessionid)
       ui_session.add_message(sessionid, "Context", lines)
     end)
   end
+
+  if config.opts.interface.keymaps.prune_message ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.prune_message,
+      function ()
+        local conv = session.get_conversation(sessionid)
+        local bufnr = ui_session.get_conversation_buffer(sessionid)
+        local render_state = get_render_state(sessionid)
+
+        local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
+        local mx = ui_render.get_message_index(row, render_state)
+        if not mx then
+          return
+        end
+
+        message.prune(conv[mx])
+        ui_render.prune_message(conv, mx, bufnr, render_state)
+      end,
+      { buffer = conv_bufnr })
+  end
+  if config.opts.interface.keymaps.deprune_message ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.deprune_message,
+      function ()
+        local conv = session.get_conversation(sessionid)
+        local bufnr = ui_session.get_conversation_buffer(sessionid)
+        local render_state = get_render_state(sessionid)
+
+        local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
+        local mx = ui_render.get_message_index(row, render_state)
+        if not mx then
+          return
+        end
+
+        message.deprune(conv[mx])
+        ui_render.deprune_message(conv, mx, bufnr, render_state)
+      end,
+      { buffer = conv_bufnr })
+  end
+  if config.opts.interface.keymaps.purge_message ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.purge_message,
+      function ()
+        local conv = session.get_conversation(sessionid)
+        local bufnr = ui_session.get_conversation_buffer(sessionid)
+        local render_state = get_render_state(sessionid)
+
+        local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
+        local mx = ui_render.get_message_index(row, render_state)
+        if not mx then
+          return
+        end
+
+        message.purge(conv[mx])
+        ui_render.purge_message(conv, mx, bufnr, render_state)
+      end,
+      { buffer = conv_bufnr })
+  end
 end
 
 ---@param sessionid FacileLLM.SessionId

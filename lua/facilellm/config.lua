@@ -46,6 +46,9 @@
 ---@field input_confirm string
 ---@field input_instruction string
 ---@field input_context string
+---@field prune_message string
+---@field deprune_message string
+---@field purge_message string
 ---@field show string
 ---@field create_from_selection string
 ---@field delete_from_selection string
@@ -205,9 +208,14 @@ local default_opts = function ()
         delete_session      = "<C-d>s",
         fork_session        = "<C-f>",
         rename_session      = "<C-r>",
+
         input_confirm       = "<Enter>",
         input_instruction   = "<C-i>",
         input_context       = "<C-k>",
+
+        prune_message       = "p",
+        deprune_message     = "P",
+        purge_message       = "<C-p>",
 
         show                                     = "<leader>aiw",
         create_from_selection                    = "<leader>ain",
@@ -339,9 +347,14 @@ local validate_facilellm_config = function (opts)
         delete_session       = {keymaps.delete_session,      "s", true},
         fork_session         = {keymaps.fork_session,        "s", true},
         rename_session       = {keymaps.rename_session,      "s", true},
+
         input_confirm        = {keymaps.input_confirm,       "s", true},
         input_instruction    = {keymaps.input_instruction,   "s", true},
         input_context        = {keymaps.input_context,       "s", true},
+
+        prune_message        = {keymaps.prune_message,       "s", true},
+        deprune_message      = {keymaps.deprune_message,       "s", true},
+        purge_message        = {keymaps.purge_message,       "s", true},
 
         show                     = {keymaps.show,                     "s", true},
         create_from_selection    = {keymaps.create_from_selection,    "s", true},

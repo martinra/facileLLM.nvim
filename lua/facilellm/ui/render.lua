@@ -41,7 +41,7 @@ local buf_get_namespace_highlight_role = function ()
 end
 
 ---@return number
-local buf_get_namespace_highlight_msg_receiving = function ()
+local buf_get_namespace_highlight_receiving = function ()
   return vim.api.nvim_create_namespace("facilellm-highlight-msg-receiving")
 end
 
@@ -69,7 +69,7 @@ end
 ---@param mx FacileLLM.MsgIndex
 ---@param msg FacileLLM.Message
 ---@return nil
-local set_highlight_msg_receiving = function (bufnr, render_state, mx, msg)
+local set_highlight_receiving = function (bufnr, render_state, mx, msg)
   if render_state.highlight_receiving and render_state.highlight_receiving.msg == mx then
     local row = render_state.offsets[mx-1] or 0
     local col = 0
@@ -81,7 +81,7 @@ local set_highlight_msg_receiving = function (bufnr, render_state, mx, msg)
       end_col = string.len(msg.lines[#msg.lines])
     end
 
-    local ns = buf_get_namespace_highlight_msg_receiving()
+    local ns = buf_get_namespace_highlight_receiving()
     if render_state.highlight_receiving.extmark then
       vim.api.nvim_buf_set_extmark(bufnr, ns,
         row, col,
@@ -107,7 +107,7 @@ end
 ---@param conv FacileLLM.Conversation
 ---@param render_state FacileLLM.RenderState
 ---@return nil
-local start_highlight_msg_receiving = function (conv, render_state)
+local start_highlight_receiving = function (conv, render_state)
   render_state.highlight_receiving = {
     msg = #conv + 1,
     extmark = nil,
@@ -117,9 +117,9 @@ end
 ---@param bufnr BufNr
 ---@param render_state FacileLLM.RenderState
 ---@return nil
-local end_highlight_msg_receiving = function (bufnr, render_state)
+local end_highlight_receiving = function (bufnr, render_state)
   render_state.highlight_receiving = nil
-  local ns = buf_get_namespace_highlight_msg_receiving()
+  local ns = buf_get_namespace_highlight_receiving()
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
 end
 
@@ -147,7 +147,7 @@ local clear_conversation = function (bufnr, render_state)
   render_state.offset_total = 0
 
   if render_state.highlight_receiving then
-    end_highlight_msg_receiving(bufnr, render_state)
+    end_highlight_receiving(bufnr, render_state)
   end
 
   vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
@@ -229,7 +229,7 @@ local render_conversation = function (conv, bufnr, render_state)
       render_state.char = line and string.len(line) or 0
 
       if config.opts.feedback.highlight_message_while_receiving then
-        set_highlight_msg_receiving(bufnr, render_state, mx, msg)
+        set_highlight_receiving(bufnr, render_state, mx, msg)
       end
 
       if msg.role == "Instruction" or msg.role == "Context" then
@@ -286,8 +286,8 @@ return {
   create_state = create_state,
   render_conversation = render_conversation,
   clear_conversation = clear_conversation,
-  start_highlight_msg_receiving = start_highlight_msg_receiving,
-  end_highlight_msg_receiving = end_highlight_msg_receiving,
+  start_highlight_receiving = start_highlight_receiving,
+  end_highlight_receiving = end_highlight_receiving,
   prune_message = prune_message,
   purge_message = purge_message,
 }

@@ -348,7 +348,7 @@ end
 ---@return nil
 local on_complete_query = function (sessionid, response_callback)
   local bufnr = get_conversation_buffer(sessionid)
-  ui_render.end_highlight_msg_receiving(bufnr, get_render_state(sessionid))
+  ui_render.end_highlight_receiving(bufnr, get_render_state(sessionid))
   ui_conversation.on_complete_query(bufnr)
   ui_input.on_complete_query(get_input_buffer(sessionid))
 
@@ -368,7 +368,7 @@ end
 local add_input_message_and_query = function (sessionid, lines, response_callback)
   ui_select.touch(sessionid)
   session.add_message(sessionid, "Input", lines)
-  ui_render.start_highlight_msg_receiving(
+  ui_render.start_highlight_receiving(
     session.get_conversation(sessionid), get_render_state(sessionid))
   session.query_model(sessionid, render_conversation,
     function (sessionid__loc)

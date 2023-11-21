@@ -47,6 +47,26 @@ local previous_offset = function (mx, render_state)
   return 0
 end
 
+---@param render_state FacileLLM.RenderState
+---@param mx FacileLLM.MsgIndex
+---@param msg FacileLLM.Message
+---@return integer
+---@return integer
+---@return integer
+---@return integer
+local get_message_range = function (render_state, mx, msg)
+  local row = previous_offset(mx, render_state)
+  local col = 0
+  local end_row = render_state.offsets[mx] - 1
+  local end_col
+  if #msg.lines == 0 then
+    end_col = string.len(role_display(msg.role))
+  else
+    end_col = string.len(msg.lines[#msg.lines])
+  end
+  return row, col, end_row, end_col
+end
+
 ---@return number
 local buf_get_namespace_highlight_role = function ()
   return vim.api.nvim_create_namespace("facilellm-highlight-role")
@@ -67,8 +87,7 @@ end
 ---@param msg FacileLLM.Message
 ---@return nil
 local set_highlight_role = function (bufnr, render_state, mx, msg)
-  local row = render_state.offsets[mx-1] or 0
-  local col = 0
+  local row, col = get_message_range(render_state, mx, msg)
   local len = string.len(role_display(msg.role))
   local ns = buf_get_namespace_highlight_role()
   vim.api.nvim_buf_set_extmark(bufnr, ns,
@@ -86,16 +105,7 @@ end
 ---@param msg FacileLLM.Message
 ---@return nil
 local set_highlight_receiving = function (bufnr, render_state, mx, msg)
-  local row = render_state.offsets[mx-1] or 0
-  local col = 0
-  local end_row = render_state.offsets[mx] - 1
-  local end_col
-  if #msg.lines == 0 then
-    end_col = string.len(role_display(msg.role))
-  else
-    end_col = string.len(msg.lines[#msg.lines])
-  end
-
+  local row, col, end_row, end_col = get_message_range(render_state, mx, msg)
   local ns = buf_get_namespace_highlight_receiving()
   if render_state.highlight_receiving.extmark then
     vim.api.nvim_buf_set_extmark(bufnr, ns,
@@ -124,16 +134,7 @@ end
 ---@param msg FacileLLM.Message
 ---@return nil
 local set_highlight_pruned = function (bufnr, render_state, mx, msg)
-  local row = render_state.offsets[mx-1] or 0
-  local col = 0
-  local end_row = render_state.offsets[mx] - 1
-  local end_col
-  if #msg.lines == 0 then
-    end_col = string.len(role_display(msg.role))
-  else
-    end_col = string.len(msg.lines[#msg.lines])
-  end
-
+  local row, col, end_row, end_col = get_message_range(render_state, mx, msg)
   local ns = buf_get_namespace_highlight_pruned()
   if render_state.prune_extmarks[mx] then
     vim.api.nvim_buf_set_extmark(bufnr, ns,
@@ -342,12 +343,17 @@ local prune_message = function (conv, mx, bufnr, render_state)
   end
 end
 
+---@param conv FacileLLM.Conversation
+---@param mx FacileLLM.MsgIndex
+---@param bufnr BufNr
+---@param render_state FacileLLM.RenderState
+---@return nil
 local deprune_message = function (conv, mx, bufnr, render_state)
   local msg = conv[mx]
   if message.ispruned(msg) then
     return
   end
-  if render_state.offsets[mx] and render_state.msg >= mx then
+  if render_state.offsets[mx] and render_state.pos.msg >= mx then
     del_highlight_pruned(bufnr, render_state, mx)
   end
 end

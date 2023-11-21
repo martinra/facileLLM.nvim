@@ -14,15 +14,6 @@ local config = require("facilellm.config")
 ---@field extmark number?
 
 
----@return string
-local get_hl_group_receiving = function ()
-  return "FacileLLMMsgReceiving"
-end
-
----@return string
-local get_hl_group_role = function ()
-  return "FacileLLMRole"
-end
 
 ---@return number
 local buf_get_namespace_highlight_msg_receiving = function ()
@@ -45,7 +36,7 @@ local create_highlight_role = function (bufnr, row, len)
     {
       end_row = row,
       end_col = len,
-      hl_group = get_hl_group_role(),
+      hl_group = "FacileLLMRole",
     })
 end
 
@@ -108,7 +99,7 @@ local create_highlight_msg_receiving = function (bufnr, render_state, mx, msg)
         {
           end_row = end_row,
           end_col = end_col,
-          hl_group = get_hl_group_receiving(),
+          hl_group = "FacileLLMMsgReceiving",
         })
   end
 end
@@ -131,7 +122,7 @@ local update_highlight_msg_receiving = function (bufnr, render_state, msg)
         id = id,
         end_row = end_row,
         end_col = end_col,
-        hl_group = get_hl_group_receiving(),
+        hl_group = "FacileLLMMsgReceiving",
       })
   end
 end

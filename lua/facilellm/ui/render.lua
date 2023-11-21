@@ -46,13 +46,17 @@ local buf_get_namespace_highlight_msg_receiving = function ()
 end
 
 ---@param bufnr BufNr
----@param row number
----@param len number
+---@param render_state FacileLLM.RenderState
+---@param mx FacileLLM.MsgIndex
+---@param msg FacileLLM.Message
 ---@return nil
-local set_highlight_role = function (bufnr, row, len)
+local set_highlight_role = function (bufnr, render_state, mx, msg)
+  local row = render_state.offsets[mx-1] or 0
+  local col = 0
+  local len = string.len(role_display(msg.role))
   local ns = buf_get_namespace_highlight_role()
   vim.api.nvim_buf_set_extmark(bufnr, ns,
-    row, 0,
+    row, col,
     {
       end_row = row,
       end_col = len,
@@ -122,8 +126,8 @@ end
 ---@return FacileLLM.RenderState
 local create_state = function ()
   return {
-    msg = 1,
-    line = 1,
+    msg = 0,
+    line = 0,
     char = 0,
     offsets = {},
     offset_total = 0,
@@ -164,35 +168,65 @@ local render_conversation = function (conv, bufnr, render_state)
 
   vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
 
-  -- Render the remained of the last rendered message
-  do
-    local mx = render_state.msg
+  for mx = render_state.msg, #conv do
     local msg = conv[mx]
-
-    if msg and #msg.lines > 0 then
-      -- Render the remainder of the last rendered line, if it was extended.
-      local line = msg.lines[render_state.line]
-      if render_state.char ~= string.len(line) then
-        vim.api.nvim_buf_set_text(bufnr,
-          render_state.offset_total-1, render_state.char,
-          render_state.offset_total-1, render_state.char,
-          { string.sub(line, render_state.char+1, string.len(line)) })
-      end
-
-      -- Render new lines in the last rendered message, if it was extended.
-      if render_state.line ~= #msg.lines then
-        local new_lines = {}
-        for lx = render_state.line+1, #msg.lines do
-          table.insert(new_lines, msg.lines[lx])
-        end
-        vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, new_lines)
-
-        render_state.offset_total = render_state.offset_total + #new_lines
+    if msg then
+      if not render_state.offsets[mx] then
         render_state.offsets[mx] = render_state.offset_total
       end
 
+      -- Render role
+      if mx ~= render_state.msg then
+        if render_state.offset_total == 0 then
+          -- The very first line in the buffer when inserted needs to overwrite the
+          -- initial one.
+          vim.api.nvim_buf_set_lines(bufnr, -2, -1, false, {role_display(msg.role)})
+        else
+          vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, {role_display(msg.role)})
+        end
+
+        render_state.offset_total = render_state.offset_total + 1
+        render_state.offsets[mx] = render_state.offsets[mx] + 1
+
+        if config.opts.interface.highlight_role then
+          set_highlight_role(bufnr, render_state, mx, msg)
+        end
+      end
+
+      -- Render lines
+      if mx ~= render_state.msg or render_state.line == 0 then
+        vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, msg.lines)
+
+        render_state.offset_total = render_state.offset_total + #msg.lines
+        render_state.offsets[mx] = render_state.offsets[mx] + #msg.lines
+
+      else
+        -- Render the remainder of the last rendered line, if it was extended.
+        local line = msg.lines[render_state.line]
+        if render_state.char ~= string.len(line) then
+          vim.api.nvim_buf_set_text(bufnr,
+            render_state.offsets[mx]-1, render_state.char,
+            render_state.offsets[mx]-1, render_state.char,
+            { string.sub(line, render_state.char+1, string.len(line)) })
+        end
+
+        -- Render new lines in the last rendered message, if it was extended.
+        if render_state.line ~= #msg.lines then
+          local new_lines = {}
+          for lx = render_state.line+1, #msg.lines do
+            table.insert(new_lines, msg.lines[lx])
+          end
+          vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, new_lines)
+
+          render_state.offset_total = render_state.offset_total + #new_lines
+          render_state.offsets[mx] = render_state.offsets[mx] + #new_lines
+        end
+      end
+
+      render_state.msg = mx
       render_state.line = #msg.lines
-      render_state.char = msg.lines and string.len(msg.lines[#msg.lines])
+      local line = msg.lines[#msg.lines]
+      render_state.char = line and string.len(line) or 0
 
       if config.opts.feedback.highlight_message_while_receiving then
         set_highlight_msg_receiving(bufnr, render_state, mx, msg)
@@ -201,40 +235,6 @@ local render_conversation = function (conv, bufnr, render_state)
       if msg.role == "Instruction" or msg.role == "Context" then
         workaround_fold = true
       end
-    end
-  end
-
-  -- Render new messages
-  for mx = render_state.msg+1, #conv do
-    local msg = conv[mx]
-
-    if render_state.offset_total == 0 then
-      -- The very first line in the buffer when inserted needs to overwrite the
-      -- initial one.
-      vim.api.nvim_buf_set_lines(bufnr, -2, -1, false, {role_display(msg.role)})
-    else
-      vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, {role_display(msg.role)})
-    end
-    vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, msg.lines)
-
-    local role_line = render_state.offset_total
-    render_state.offset_total = render_state.offset_total + 1 + #msg.lines
-    render_state.offsets[mx] = render_state.offset_total
-
-    render_state.msg = mx
-    render_state.line = #msg.lines
-    local line = msg.lines[#msg.lines]
-    render_state.char = line and string.len(line) or 0
-
-    if config.opts.interface.highlight_role then
-      set_highlight_role(bufnr, role_line, string.len(role_display(msg.role)))
-    end
-    if config.opts.feedback.highlight_message_while_receiving then
-      set_highlight_msg_receiving(bufnr, render_state, mx, msg)
-    end
-
-    if msg.role == "Instruction" or msg.role == "Context" then
-      workaround_fold = true
     end
   end
 

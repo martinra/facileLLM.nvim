@@ -26,6 +26,7 @@
 ---@field llm string
 
 ---@class FacileLLM.Config.Interface
+---@field telescope boolean
 ---@field unique_session boolean
 ---@field couple_conv_input_windows boolean
 ---@field layout_relative ("editor"| "win")
@@ -188,6 +189,7 @@ local default_opts = function ()
     },
 
     interface = {
+      telescope                 = true,
       unique_session            = false,
       couple_conv_input_windows = true,
       layout_relative           = "editor",
@@ -316,6 +318,7 @@ local validate_facilellm_config = function (opts)
   if opts.interface then
     local interface = opts.interface
     vim.validate({
+      telescope                 = {interface.telescope,                 "b", true},
       unique_session            = {interface.unique_session,            "b", true},
       couple_conv_input_windows = {interface.couple_conv_input_windows, "b", true},
       layout_relative           = {interface.layout_relative,           "s", true},

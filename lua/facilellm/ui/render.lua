@@ -38,31 +38,35 @@ end
 ---@param mx FacileLLM.MsgIndex
 ---@param render_state FacileLLM.RenderState
 ---@return integer
-local previous_offset = function (mx, render_state)
-  for px = mx-1,1,-1 do
-    if render_state.offsets[px] then
-      return render_state.offsets[px]
-    end
-  end
-  return 0
+---@return integer
+local get_message_start = function (mx, render_state)
+  local row = render_state.offsets[mx]
+  local col = 0
+  return row, col
 end
 
----@param render_state FacileLLM.RenderState
+---Following the convention of extmarks, we return 0-based inclusive row
+---indices.
 ---@param mx FacileLLM.MsgIndex
+---@param render_state FacileLLM.RenderState
 ---@param msg FacileLLM.Message
 ---@return integer
 ---@return integer
 ---@return integer
 ---@return integer
-local get_message_range = function (render_state, mx, msg)
-  local row = previous_offset(mx, render_state)
-  local col = 0
-  local end_row = render_state.offsets[mx] - 1
-  local end_col
-  if #msg.lines == 0 then
-    end_col = string.len(role_display(msg.role))
+local get_message_range = function (mx, render_state, msg)
+  local row, col = get_message_start(mx, render_state)
+  local end_row, end_col
+  if render_state.pos.msg == mx then
+    end_row = row + render_state.pos.line
+    end_col = render_state.pos.char
   else
-    end_col = string.len(msg.lines[#msg.lines])
+    end_row = row + #msg.lines
+    if #msg.lines == 0 then
+      end_col = string.len(role_display(msg.role))
+    else
+      end_col = string.len(msg.lines[#msg.lines])
+    end
   end
   return row, col, end_row, end_col
 end
@@ -87,7 +91,7 @@ end
 ---@param msg FacileLLM.Message
 ---@return nil
 local set_highlight_role = function (bufnr, render_state, mx, msg)
-  local row, col = get_message_range(render_state, mx, msg)
+  local row, col = get_message_start(mx, render_state)
   local end_row, end_col = row, string.len(role_display(msg.role))
   local ns = buf_get_namespace_highlight_role()
   vim.api.nvim_buf_set_extmark(bufnr, ns,
@@ -105,7 +109,7 @@ end
 ---@param msg FacileLLM.Message
 ---@return nil
 local set_highlight_receiving = function (bufnr, render_state, mx, msg)
-  local row, col, end_row, end_col = get_message_range(render_state, mx, msg)
+  local row, col, end_row, end_col = get_message_range(mx, render_state, msg)
   local ns = buf_get_namespace_highlight_receiving()
   if render_state.highlight_receiving.extmark then
     vim.api.nvim_buf_set_extmark(bufnr, ns,
@@ -134,7 +138,7 @@ end
 ---@param msg FacileLLM.Message
 ---@return nil
 local set_highlight_pruned = function (bufnr, render_state, mx, msg)
-  local row, col, end_row, end_col = get_message_range(render_state, mx, msg)
+  local row, col, end_row, end_col = get_message_range(mx, render_state, msg)
   local ns = buf_get_namespace_highlight_pruned()
   if render_state.prune_extmarks[mx] then
     vim.api.nvim_buf_set_extmark(bufnr, ns,
@@ -251,7 +255,6 @@ local render_conversation = function (conv, bufnr, render_state)
         end
 
         render_state.offset_total = render_state.offset_total + 1
-        render_state.offsets[mx] = render_state.offsets[mx] + 1
 
         if config.opts.interface.highlight_role then
           set_highlight_role(bufnr, render_state, mx, msg)
@@ -263,15 +266,14 @@ local render_conversation = function (conv, bufnr, render_state)
         vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, msg.lines)
 
         render_state.offset_total = render_state.offset_total + #msg.lines
-        render_state.offsets[mx] = render_state.offsets[mx] + #msg.lines
 
       else
         -- Render the remainder of the last rendered line, if it was extended.
         local line = msg.lines[render_state.pos.line]
         if render_state.pos.char ~= string.len(line) then
           vim.api.nvim_buf_set_text(bufnr,
-            render_state.offsets[mx]-1, render_state.pos.char,
-            render_state.offsets[mx]-1, render_state.pos.char,
+            render_state.offsets[mx]+render_state.pos.line, render_state.pos.char,
+            render_state.offsets[mx]+render_state.pos.line, render_state.pos.char,
             { string.sub(line, render_state.pos.char+1, string.len(line)) })
         end
 
@@ -284,7 +286,6 @@ local render_conversation = function (conv, bufnr, render_state)
           vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, new_lines)
 
           render_state.offset_total = render_state.offset_total + #new_lines
-          render_state.offsets[mx] = render_state.offsets[mx] + #new_lines
         end
       end
 
@@ -381,31 +382,39 @@ local purge_message = function (conv, mx, bufnr, render_state)
     del_highlight_pruned(bufnr, render_state, mx)
   end
 
-  local row = previous_offset(mx, render_state)
-  local row_end = render_state.offsets[mx]
-
+  local row, _, row_end, _ = get_message_range(mx, render_state, msg)
   vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
-  vim.api.nvim_buf_set_lines(bufnr, row, row_end, false, {})
+  vim.api.nvim_buf_set_lines(bufnr, row, row_end+1, false, {})
   vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
 
+  local offset_reduction
   if render_state.pos.msg == mx then
-    render_state.offset_total = render_state.offset_total - 1 - render_state.pos.line
+    offset_reduction = 1 + render_state.pos.line
   else
-    render_state.offset_total = render_state.offset_total - 1 - #conv[mx].lines
+    offset_reduction = 1 + #conv[mx].lines
   end
+  render_state.offset_total = render_state.offset_total - offset_reduction
   render_state.offsets[mx] = nil
+
+  for ox,_ in pairs(render_state.offsets) do
+    if ox > mx then
+      render_state.offsets[ox] = render_state.offsets[ox] - offset_reduction
+    end
+  end
 end
 
----@param row integer
+---@param row integer 0-based
 ---@param render_state FacileLLM.RenderState
+---@param conv FacileLLM.Conversation
 ---@return integer
-local get_message_index = function (row, render_state)
-  for mx,offset in ipairs(render_state.offsets) do
-    if offset >= row then
+local get_message_index = function (row, render_state, conv)
+  for mx,_ in pairs(render_state.offsets) do
+    local mrow, _, end_mrow, _ = get_message_range(mx, render_state, conv[mx])
+    if mrow <= row and row <= end_mrow then
       return mx
     end
   end
-  error("Row past highest offset")
+  error("Row not contained in any message")
 end
 
 

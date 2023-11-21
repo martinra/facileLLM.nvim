@@ -16,6 +16,7 @@ local config = require("facilellm.config")
 
 ---@class FacileLLL.RenderState.PruneState
 ---@field visible boolean
+---@field extmark number?
 
 
 ---@param role FacileLLM.MsgRole
@@ -256,18 +257,26 @@ local render_conversation = function (conv, bufnr, render_state)
   end
 end
 
-local prune_message = function (conv, mx, bufnr, render_state)
+---@param mx FacileLLM.MsgIndex
+---@param render_state FacileLLM.RenderState
+---@return nil
+local prune_message = function (mx, render_state)
   if not render_state.pruned[mx] then
     render_state.pruned[mx] = {
-      visible = true
+      visible = true,
+      extmark = nil,
     }
   end
 end
 
-local purge_message = function (conv, mx, bufnr, render_state)
+---@param mx FacileLLM.MsgIndex
+---@param render_state FacileLLM.RenderState
+---@return nil
+local purge_message = function (mx, render_state)
   if not render_state.pruned[mx] then
     render_state.pruned[mx] = {
-      visible = false
+      visible = false,
+      extmark = nil,
     }
   end
 end

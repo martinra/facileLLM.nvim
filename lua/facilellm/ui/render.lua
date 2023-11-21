@@ -121,8 +121,8 @@ end
 ---@return FacileLLM.RenderState
 local create_state = function ()
   return {
-    msg = 0,
-    line = 0,
+    msg = 1,
+    line = 1,
     char = 0,
     offsets = {},
     offset_total = 0,
@@ -163,36 +163,12 @@ local render_conversation = function (conv, bufnr, render_state)
 
   vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
 
-  if render_state.offset_total == 0 then
-    -- The very first line in the buffer when inserted needs to overwrite the
-    -- initial one.
-    local mx = 1
-    local msg = conv[mx]
-    vim.api.nvim_buf_set_lines(bufnr, -2, -1, false, {role_display(msg.role)})
-    vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, msg.lines)
-
-    render_state.offset_total = 1 + #msg.lines
-    render_state.offsets[mx] = render_state.offset_total
-
-    render_state.msg = 1
-    render_state.line = #msg.lines
-    render_state.char = msg.lines and string.len(msg.lines[#msg.lines])
-
-    if config.opts.interface.highlight_role then
-      set_highlight_role(bufnr, 0, string.len(role_display(msg.role)))
-    end
-    if config.opts.feedback.highlight_message_while_receiving then
-      set_highlight_msg_receiving(bufnr, render_state, mx, msg)
-    end
-
-    if msg.role == "Instruction" or msg.role == "Context" then
-      workaround_fold = true
-    end
-
-  else
+  -- Render the remained of the last rendered message
+  do
     local mx = render_state.msg
     local msg = conv[mx]
-    if #msg.lines > 0 then
+
+    if msg and #msg.lines > 0 then
       -- Render the remainder of the last rendered line, if it was extended.
       local line = msg.lines[render_state.line]
       if render_state.char ~= string.len(line) then
@@ -220,17 +196,24 @@ local render_conversation = function (conv, bufnr, render_state)
       if config.opts.feedback.highlight_message_while_receiving then
         set_highlight_msg_receiving(bufnr, render_state, mx, msg)
       end
-    end
 
-    if msg.role == "Instruction" or msg.role == "Context" then
-      workaround_fold = true
+      if msg.role == "Instruction" or msg.role == "Context" then
+        workaround_fold = true
+      end
     end
   end
 
   -- Render new messages
   for mx = render_state.msg+1, #conv do
     local msg = conv[mx]
-    vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, {role_display(msg.role)})
+
+    if render_state.offset_total == 0 then
+      -- The very first line in the buffer when inserted needs to overwrite the
+      -- initial one.
+      vim.api.nvim_buf_set_lines(bufnr, -2, -1, false, {role_display(msg.role)})
+    else
+      vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, {role_display(msg.role)})
+    end
     vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, msg.lines)
 
     local role_line = render_state.offset_total
@@ -255,7 +238,6 @@ local render_conversation = function (conv, bufnr, render_state)
   end
 
   vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
-  
 
   -- HACK: We recompute all folds. Without this on 0.9.4 when creating from
   -- selection, they are seemingly never applied. This might not be neccessary

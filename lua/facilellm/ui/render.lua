@@ -8,11 +8,14 @@ local config = require("facilellm.config")
 ---@field offsets number[]
 ---@field offset_total number total number of lines rendered
 ---@field highlight_receiving FacileLLM.RenderState.HighlightReceiving?
+---@field pruned table<FacileLLM.MsgIndex, FacileLLL.RenderState.PruneState>
 
 ---@class FacileLLM.RenderState.HighlightReceiving
 ---@field msg FacileLLM.MsgIndex
 ---@field extmark number?
 
+---@class FacileLLL.RenderState.PruneState
+---@field visible boolean
 
 
 ---@param role FacileLLM.MsgRole
@@ -136,6 +139,7 @@ local create_state = function ()
     offsets = {},
     offset_total = 0,
     highlight_receiving = nil,
+    pruned = {},
   }
 end
 
@@ -268,6 +272,22 @@ local render_conversation = function (conv, bufnr, render_state)
   end
 end
 
+local prune_message = function (conv, mx, bufnr, render_state)
+  if not render_state.pruned[mx] then
+    render_state.pruned[mx] = {
+      visible = true
+    }
+  end
+end
+
+local purge_message = function (conv, mx, bufnr, render_state)
+  if not render_state.pruned[mx] then
+    render_state.pruned[mx] = {
+      visible = false
+    }
+  end
+end
+
 
 return {
   create_state = create_state,
@@ -275,4 +295,6 @@ return {
   clear_conversation = clear_conversation,
   start_highlight_msg_receiving = start_highlight_msg_receiving,
   end_highlight_msg_receiving = end_highlight_msg_receiving,
+  prune_message = prune_message,
+  purge_message = purge_message,
 }

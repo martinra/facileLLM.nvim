@@ -15,14 +15,30 @@ local config = require("facilellm.config")
 
 
 
----@return number
-local buf_get_namespace_highlight_msg_receiving = function ()
-  return vim.api.nvim_create_namespace("facilellm-highlight-msg-receiving")
+---@param role FacileLLM.MsgRole
+---@return string
+local role_display = function (role)
+  if role == "Instruction" then
+    return config.opts.naming.role_display.instruction
+  elseif role == "Context" then
+    return config.opts.naming.role_display.context
+  elseif role == "Input" then
+    return config.opts.naming.role_display.input
+  elseif role == "LLM" then
+    return config.opts.naming.role_display.llm
+  else
+    error("unreachable role dispatch")
+  end
 end
 
 ---@return number
 local buf_get_namespace_highlight_role = function ()
   return vim.api.nvim_create_namespace("facilellm-highlight-role")
+end
+
+---@return number
+local buf_get_namespace_highlight_msg_receiving = function ()
+  return vim.api.nvim_create_namespace("facilellm-highlight-msg-receiving")
 end
 
 ---@param bufnr BufNr
@@ -38,41 +54,6 @@ local set_highlight_role = function (bufnr, row, len)
       end_col = len,
       hl_group = "FacileLLMRole",
     })
-end
-
----@param conv FacileLLM.Conversation
----@param render_state FacileLLM.RenderState
----@return nil
-local start_highlight_msg_receiving = function (conv, render_state)
-  render_state.highlight_receiving = {
-    msg = #conv + 1,
-    extmark = nil,
-  }
-end
-
----@param bufnr BufNr
----@param render_state FacileLLM.RenderState
----@return nil
-local end_highlight_msg_receiving = function (bufnr, render_state)
-  render_state.highlight_receiving = nil
-  local ns = buf_get_namespace_highlight_msg_receiving()
-  vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
-end
-
----@param role FacileLLM.MsgRole
----@return string
-local role_display = function (role)
-  if role == "Instruction" then
-    return config.opts.naming.role_display.instruction
-  elseif role == "Context" then
-    return config.opts.naming.role_display.context
-  elseif role == "Input" then
-    return config.opts.naming.role_display.input
-  elseif role == "LLM" then
-    return config.opts.naming.role_display.llm
-  else
-    error("unreachable role dispatch")
-  end
 end
 
 ---@param bufnr BufNr
@@ -102,6 +83,25 @@ local set_highlight_msg_receiving = function (bufnr, render_state, mx, msg)
           hl_group = "FacileLLMMsgReceiving",
         })
   end
+end
+
+---@param conv FacileLLM.Conversation
+---@param render_state FacileLLM.RenderState
+---@return nil
+local start_highlight_msg_receiving = function (conv, render_state)
+  render_state.highlight_receiving = {
+    msg = #conv + 1,
+    extmark = nil,
+  }
+end
+
+---@param bufnr BufNr
+---@param render_state FacileLLM.RenderState
+---@return nil
+local end_highlight_msg_receiving = function (bufnr, render_state)
+  render_state.highlight_receiving = nil
+  local ns = buf_get_namespace_highlight_msg_receiving()
+  vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
 end
 
 ---@param bufnr BufNr

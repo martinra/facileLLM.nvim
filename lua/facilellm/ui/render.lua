@@ -3,13 +3,16 @@ local message = require("facilellm.session.message")
 
 
 ---@class FacileLLM.RenderState
----@field msg FacileLLM.MsgIndex index of the last rendered message
----@field line number index of the last rendered line
----@field char number index of the last rendered character
+---@field pos FacileLLM.RenderState.Position
 ---@field offsets number[]
 ---@field offset_total number total number of lines rendered
 ---@field highlight_receiving FacileLLM.RenderState.HighlightReceiving?
 ---@field prune_extmarks table<FacileLLM.MsgIndex, number>
+
+---@class FacileLLM.RenderState.Position
+---@field msg FacileLLM.MsgIndex index of the last rendered message
+---@field line number index of the last rendered line
+---@field char number index of the last rendered character
 
 ---@class FacileLLM.RenderState.HighlightReceiving
 ---@field msg FacileLLM.MsgIndex
@@ -187,9 +190,9 @@ end
 ---@return FacileLLM.RenderState
 local create_state = function ()
   return {
-    msg = 0,
-    line = 0,
-    char = 0,
+    pos = {
+      msg = 0, line = 0, char = 0
+    },
     offsets = {},
     offset_total = 0,
     highlight_receiving = nil,
@@ -201,9 +204,9 @@ end
 ---@param render_state FacileLLM.RenderState
 ---@return nil
 local clear_conversation = function (bufnr, render_state)
-  render_state.msg = 0
-  render_state.line = 0
-  render_state.char = 0
+  render_state.pos = {
+    msg = 0, line = 0, char = 0
+  }
   render_state.offsets = {}
   render_state.offset_total = 0
 
@@ -229,7 +232,7 @@ local render_conversation = function (conv, bufnr, render_state)
 
   vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
 
-  for mx = render_state.msg, #conv do
+  for mx = render_state.pos.msg, #conv do
     local msg = conv[mx]
     if msg and not message.ispurged(msg) then
       if not render_state.offsets[mx] then
@@ -237,7 +240,7 @@ local render_conversation = function (conv, bufnr, render_state)
       end
 
       -- Render role
-      if mx ~= render_state.msg then
+      if mx ~= render_state.pos.msg then
         if render_state.offset_total == 0 then
           -- The very first line in the buffer when inserted needs to overwrite the
           -- initial one.
@@ -255,7 +258,7 @@ local render_conversation = function (conv, bufnr, render_state)
       end
 
       -- Render lines
-      if mx ~= render_state.msg or render_state.line == 0 then
+      if mx ~= render_state.pos.msg or render_state.pos.line == 0 then
         vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, msg.lines)
 
         render_state.offset_total = render_state.offset_total + #msg.lines
@@ -263,18 +266,18 @@ local render_conversation = function (conv, bufnr, render_state)
 
       else
         -- Render the remainder of the last rendered line, if it was extended.
-        local line = msg.lines[render_state.line]
-        if render_state.char ~= string.len(line) then
+        local line = msg.lines[render_state.pos.line]
+        if render_state.pos.char ~= string.len(line) then
           vim.api.nvim_buf_set_text(bufnr,
-            render_state.offsets[mx]-1, render_state.char,
-            render_state.offsets[mx]-1, render_state.char,
-            { string.sub(line, render_state.char+1, string.len(line)) })
+            render_state.offsets[mx]-1, render_state.pos.char,
+            render_state.offsets[mx]-1, render_state.pos.char,
+            { string.sub(line, render_state.pos.char+1, string.len(line)) })
         end
 
         -- Render new lines in the last rendered message, if it was extended.
-        if render_state.line ~= #msg.lines then
+        if render_state.pos.line ~= #msg.lines then
           local new_lines = {}
-          for lx = render_state.line+1, #msg.lines do
+          for lx = render_state.pos.line+1, #msg.lines do
             table.insert(new_lines, msg.lines[lx])
           end
           vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, new_lines)
@@ -284,10 +287,10 @@ local render_conversation = function (conv, bufnr, render_state)
         end
       end
 
-      render_state.msg = mx
-      render_state.line = #msg.lines
+      render_state.pos.msg = mx
+      render_state.pos.line = #msg.lines
       local line = msg.lines[#msg.lines]
-      render_state.char = line and string.len(line) or 0
+      render_state.pos.char = line and string.len(line) or 0
 
       if config.opts.feedback.highlight_message_while_receiving
         and render_state.highlight_receiving
@@ -334,7 +337,7 @@ local prune_message = function (conv, mx, bufnr, render_state)
   if not message.ispruned(msg) then
     return
   end
-  if render_state.msg >= mx then
+  if render_state.pos.msg >= mx then
     set_highlight_pruned(bufnr, render_state, mx, msg)
   end
 end
@@ -361,7 +364,7 @@ local purge_message = function (conv, mx, bufnr, render_state)
   end
 
   -- In this case the message has not yet been rendered or is already purged.
-  if render_state.msg < mx or render_state.offsets[mx] == nil then
+  if render_state.pos.msg < mx or render_state.offsets[mx] == nil then
     return
   end
 
@@ -379,8 +382,8 @@ local purge_message = function (conv, mx, bufnr, render_state)
   vim.api.nvim_buf_set_lines(bufnr, row, row_end, false, {})
   vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
 
-  if render_state.msg == mx then
-    render_state.offset_total = render_state.offset_total - 1 - render_state.line
+  if render_state.pos.msg == mx then
+    render_state.offset_total = render_state.offset_total - 1 - render_state.pos.line
   else
     render_state.offset_total = render_state.offset_total - 1 - #conv[mx].lines
   end

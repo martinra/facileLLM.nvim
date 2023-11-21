@@ -3,9 +3,12 @@
 -- input is "Input".
 ---@alias FacileLLM.MsgRole ("Instruction"| "Context"| "Input"| "LLM")
 
+---@alias FacileLLM.MsgStatus (nil| "pruned"| "purged")
+
 ---@class FacileLLM.Message
 ---@field role FacileLLM.MsgRole
 ---@field lines string[]
+---@field status FacileLLM.MsgStatus
 
 
 ---@param role FacileLLM.MsgRole
@@ -23,6 +26,7 @@ local create = function (role, content)
   local msg = {
     role = role,
     lines = lines,
+    status = nil,
   }
   return msg
 end
@@ -31,6 +35,18 @@ end
 ---@return boolean
 local isempty = function (msg)
   return #msg.lines == 0
+end
+
+---@param msg FacileLLM.Message
+---@return boolean
+local ispruned = function (msg)
+  return msg.status == "pruned" or msg.status == "purged"
+end
+
+---@param msg FacileLLM.Message
+---@return boolean
+local ispurged = function (msg)
+  return msg.status == "purged"
 end
 
 ---@param msg FacileLLM.Message
@@ -56,10 +72,37 @@ local append_lines = function (msg, lines)
   end
 end
 
+---@param msg FacileLLM.Message
+---@return nil
+local prune = function (msg)
+  if msg.status == nil then
+    msg.status = "pruned"
+  end
+end
+
+---@param msg FacileLLM.Message
+---@return nil
+local deprune = function (msg)
+  if msg.status == "pruned" then
+    msg.status = nil
+  end
+end
+
+---@param msg FacileLLM.Message
+---@return nil
+local purge = function (msg)
+  msg.status = "purged"
+end
+
 
 return {
   create       = create,
   isempty      = isempty,
+  ispruned     = ispruned,
+  ispurged     = ispurged,
   append       = append,
   append_lines = append_lines,
+  prune        = prune,
+  deprune      = deprune,
+  purge        = purge,
 }

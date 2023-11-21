@@ -1,6 +1,7 @@
 local config = require("facilellm.config")
 local session = require("facilellm.session")
 local ui_common = require("facilellm.ui.common")
+local util = require("facilellm.util")
 
 
 ---@return number
@@ -52,7 +53,7 @@ local set_confirm_keymap = function (bufnr, mode, lhs, on_confirm)
       end
 
       local lines = clear_input_buffer(bufnr)
-      if #lines ~= 0 and on_confirm then
+      if on_confirm and not util.isempty_lines(lines) then
         on_confirm(lines)
       end
     end,
@@ -77,7 +78,7 @@ local set_instruction_keymap = function (bufnr, mode, lhs, on_instruction)
       end
 
       local lines = clear_input_buffer(bufnr)
-      if #lines ~= 0 and on_instruction then
+      if on_instruction and not util.isempty_lines(lines) then
         on_instruction(lines)
       end
     end,
@@ -102,7 +103,7 @@ local set_context_keymap = function (bufnr, mode, lhs, on_context)
       end
 
       local lines = clear_input_buffer(bufnr)
-      if #lines ~= 0 and on_context then
+      if on_context and not util.isempty_lines(lines) then
         on_context(lines)
       end
     end,

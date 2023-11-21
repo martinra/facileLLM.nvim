@@ -1,3 +1,14 @@
+---@param lines string[]
+---@return boolean
+local isempty_lines = function (lines)
+  for _,l in ipairs(lines) do
+    if string.len(l) ~= 0 then
+      return false
+    end
+  end
+  return true
+end
+
 ---@param relative ("editor"| "win")
 ---@param direction ("right"| "left")
 ---@return string
@@ -104,6 +115,7 @@ end
 
 
 return {
+  isempty_lines        = isempty_lines,
   win_vsplit_modifier  = win_vsplit_modifier,
   get_visual_selection = get_visual_selection,
   substitute_visual_selection = substitute_visual_selection,

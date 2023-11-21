@@ -29,7 +29,7 @@ end
 ---@param row number
 ---@param len number
 ---@return nil
-local create_highlight_role = function (bufnr, row, len)
+local set_highlight_role = function (bufnr, row, len)
   local ns = buf_get_namespace_highlight_role()
   vim.api.nvim_buf_set_extmark(bufnr, ns,
     row, 0,
@@ -80,7 +80,7 @@ end
 ---@param mx FacileLLM.MsgIndex
 ---@param msg FacileLLM.Message
 ---@return nil
-local create_highlight_msg_receiving = function (bufnr, render_state, mx, msg)
+local set_highlight_msg_receiving = function (bufnr, render_state, mx, msg)
   if render_state.highlight_receiving and render_state.highlight_receiving.msg == mx then
     local ns = buf_get_namespace_highlight_msg_receiving()
     local row = render_state.offset_total - #msg.lines - 1
@@ -185,10 +185,10 @@ local render_conversation = function (conv, bufnr, render_state)
     render_state.char = msg.lines and string.len(msg.lines[#msg.lines])
 
     if config.opts.interface.highlight_role then
-      create_highlight_role(bufnr, 0, string.len(role_display(msg.role)))
+      set_highlight_role(bufnr, 0, string.len(role_display(msg.role)))
     end
     if config.opts.feedback.highlight_message_while_receiving then
-      create_highlight_msg_receiving(bufnr, render_state, mx, msg)
+      set_highlight_msg_receiving(bufnr, render_state, mx, msg)
     end
 
   else
@@ -241,10 +241,10 @@ local render_conversation = function (conv, bufnr, render_state)
     render_state.char = line and string.len(line) or 0
 
     if config.opts.interface.highlight_role then
-      create_highlight_role(bufnr, role_line, string.len(role_display(msg.role)))
+      set_highlight_role(bufnr, role_line, string.len(role_display(msg.role)))
     end
     if config.opts.feedback.highlight_message_while_receiving then
-      create_highlight_msg_receiving(bufnr, render_state, mx, msg)
+      set_highlight_msg_receiving(bufnr, render_state, mx, msg)
     end
   end
 

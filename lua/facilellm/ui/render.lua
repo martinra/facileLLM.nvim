@@ -66,10 +66,9 @@ end
 ---@return nil
 local set_highlight_msg_receiving = function (bufnr, render_state, mx, msg)
   if render_state.highlight_receiving and render_state.highlight_receiving.msg == mx then
-    local ns = buf_get_namespace_highlight_msg_receiving()
-    local row = render_state.offset_total - #msg.lines - 1
+    local row = render_state.offsets[mx-1] or 0
     local col = 0
-    local end_row = render_state.offset_total - 1
+    local end_row = render_state.offsets[mx] - 1
     local end_col
     if #msg.lines == 0 then
       end_col = string.len(role_display(msg.role))
@@ -77,14 +76,26 @@ local set_highlight_msg_receiving = function (bufnr, render_state, mx, msg)
       end_col = string.len(msg.lines[#msg.lines])
     end
 
-    render_state.highlight_receiving.extmark =
+    local ns = buf_get_namespace_highlight_msg_receiving()
+    if render_state.highlight_receiving.extmark then
       vim.api.nvim_buf_set_extmark(bufnr, ns,
         row, col,
         {
+          id = render_state.highlight_receiving.extmark,
           end_row = end_row,
           end_col = end_col,
           hl_group = "FacileLLMMsgReceiving",
         })
+    else
+      render_state.highlight_receiving.extmark =
+        vim.api.nvim_buf_set_extmark(bufnr, ns,
+          row, col,
+          {
+            end_row = end_row,
+            end_col = end_col,
+            hl_group = "FacileLLMMsgReceiving",
+          })
+    end
   end
 end
 
@@ -105,29 +116,6 @@ local end_highlight_msg_receiving = function (bufnr, render_state)
   render_state.highlight_receiving = nil
   local ns = buf_get_namespace_highlight_msg_receiving()
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
-end
-
----@param bufnr BufNr
----@param render_state FacileLLM.RenderState
----@param msg FacileLLM.Message
----@return nil
-local update_highlight_msg_receiving = function (bufnr, render_state, msg)
-  if render_state.highlight_receiving and render_state.highlight_receiving.extmark then
-    local ns = buf_get_namespace_highlight_msg_receiving()
-    local id = render_state.highlight_receiving.extmark
-    local row, col = unpack(vim.api.nvim_buf_get_extmark_by_id(bufnr, ns, id, {}))
-    local end_row = render_state.offset_total-1
-    local end_col = string.len(msg.lines[#msg.lines])
-
-    vim.api.nvim_buf_set_extmark(bufnr, ns,
-      row, col,
-      {
-        id = id,
-        end_row = end_row,
-        end_col = end_col,
-        hl_group = "FacileLLMMsgReceiving",
-      })
-  end
 end
 
 ---@return FacileLLM.RenderState
@@ -230,7 +218,7 @@ local render_conversation = function (conv, bufnr, render_state)
       render_state.char = msg.lines and string.len(msg.lines[#msg.lines])
 
       if config.opts.feedback.highlight_message_while_receiving then
-        update_highlight_msg_receiving(bufnr, render_state, msg)
+        set_highlight_msg_receiving(bufnr, render_state, mx, msg)
       end
     end
 

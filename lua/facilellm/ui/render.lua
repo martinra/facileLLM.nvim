@@ -171,6 +171,8 @@ local render_conversation = function (conv, bufnr, render_state)
     return
   end
 
+  local workaround_fold = false
+
   vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
 
   if render_state.offset_total == 0 then
@@ -193,6 +195,10 @@ local render_conversation = function (conv, bufnr, render_state)
     end
     if config.opts.feedback.highlight_message_while_receiving then
       set_highlight_msg_receiving(bufnr, render_state, mx, msg)
+    end
+
+    if msg.role == "Instruction" or msg.role == "Context" then
+      workaround_fold = true
     end
 
   else
@@ -227,6 +233,10 @@ local render_conversation = function (conv, bufnr, render_state)
         update_highlight_msg_receiving(bufnr, render_state, msg)
       end
     end
+
+    if msg.role == "Instruction" or msg.role == "Context" then
+      workaround_fold = true
+    end
   end
 
   -- Render new messages
@@ -250,6 +260,10 @@ local render_conversation = function (conv, bufnr, render_state)
     if config.opts.feedback.highlight_message_while_receiving then
       set_highlight_msg_receiving(bufnr, render_state, mx, msg)
     end
+
+    if msg.role == "Instruction" or msg.role == "Context" then
+      workaround_fold = true
+    end
   end
 
   vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
@@ -258,7 +272,7 @@ local render_conversation = function (conv, bufnr, render_state)
   -- HACK: We recompute all folds. Without this on 0.9.4 when creating from
   -- selection, they are seemingly never applied. This might not be neccessary
   -- once #18479 of github/neovim is applied (v0.10?).
-  do
+  if workaround_fold then
     local orig_winid = vim.api.nvim_get_current_win()
     local ui_common = require("facilellm.ui.common")
     for _,winid in pairs(vim.api.nvim_list_wins()) do

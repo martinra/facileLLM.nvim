@@ -252,6 +252,23 @@ local render_conversation = function (conv, bufnr, render_state)
   end
 
   vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
+  
+
+  -- HACK: We recompute all folds. Without this on 0.9.4 when creating from
+  -- selection, they are seemingly never applied. This might not be neccessary
+  -- once #18479 of github/neovim is applied (v0.10?).
+  do
+    local orig_winid = vim.api.nvim_get_current_win()
+    local ui_common = require("facilellm.ui.common")
+    for _,winid in pairs(vim.api.nvim_list_wins()) do
+      if ui_common.win_get_session(winid) and ui_common.win_is_conversation(winid) then
+        vim.api.nvim_set_current_win(winid)
+        vim.api.nvim_feedkeys("zx", "nx", false)
+        vim.api.nvim_feedkeys("zc", "nx", false)
+      end
+    end
+    vim.api.nvim_set_current_win(orig_winid)
+  end
 end
 
 

@@ -5,11 +5,11 @@ local config = require("facilellm.config")
 ---@field msg FacileLLM.MsgIndex index of the last rendered message
 ---@field line number index of the last rendered line
 ---@field char number index of the last rendered character
----@field highlight_receiving FacileLLM.RenderHighlight?
 ---@field offsets number[]
 ---@field offset_total number total number of lines rendered
+---@field highlight_receiving FacileLLM.RenderState.HighlightReceiving?
 
----@class FacileLLM.RenderHighlight
+---@class FacileLLM.RenderState.HighlightReceiving
 ---@field msg FacileLLM.MsgIndex
 ---@field extmark number?
 

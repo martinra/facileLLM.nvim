@@ -73,8 +73,8 @@
 
 ---@return nil
 local set_highlights = function ()
-  vim.api.nvim_set_hl(0, "FacileLLMMsgReceiving", {link = "DiffAdd"})
-  vim.api.nvim_set_hl(0, "FacileLLMRole", {link = "markdownH1"})
+  vim.api.nvim_set_hl(0, "FacileLLMMsgReceiving", {link = "DiffAdd", default = true})
+  vim.api.nvim_set_hl(0, "FacileLLMRole", {link = "markdownH1", default = true})
 end
 
 ---@return nil

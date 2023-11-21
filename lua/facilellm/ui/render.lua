@@ -183,8 +183,8 @@ local render_conversation = function (conv, bufnr, render_state)
     vim.api.nvim_buf_set_lines(bufnr, -2, -1, false, {role_display(msg.role)})
     vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, msg.lines)
 
-    render_state.offsets[mx] = 1 + #msg.lines
     render_state.offset_total = 1 + #msg.lines
+    render_state.offsets[mx] = render_state.offset_total
 
     render_state.msg = 1
     render_state.line = #msg.lines
@@ -222,8 +222,8 @@ local render_conversation = function (conv, bufnr, render_state)
         end
         vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, new_lines)
 
-        render_state.offsets[mx] = 1 + #msg.lines
         render_state.offset_total = render_state.offset_total + #new_lines
+        render_state.offsets[mx] = render_state.offset_total
       end
 
       render_state.line = #msg.lines
@@ -246,8 +246,8 @@ local render_conversation = function (conv, bufnr, render_state)
     vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, msg.lines)
 
     local role_line = render_state.offset_total
-    render_state.offsets[mx] = 1 + #msg.lines
     render_state.offset_total = render_state.offset_total + 1 + #msg.lines
+    render_state.offsets[mx] = render_state.offset_total
 
     render_state.msg = mx
     render_state.line = #msg.lines

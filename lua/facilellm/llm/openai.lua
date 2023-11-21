@@ -1,6 +1,8 @@
 -- OpenAI API, not restrict to their product.
 
 local job = require("plenary.job")
+local message = require("facilellm.session.message")
+
 
 ---@alias FacileLLM.OpenAI.MsgRole ("system"| "assistant"| "user")
 
@@ -154,7 +156,9 @@ local response_to = function (conversation, add_message, on_complete, opts)
   data.model = opts.openai_model
   data.messages = {}
   for _,msg in ipairs(conversation) do
-    table.insert(data.messages, convert_msg_to_openai(msg))
+    if not message.isempty(msg) and not message.ispruned(msg) then
+      table.insert(data.messages, convert_msg_to_openai(msg))
+    end
   end
 
   if not opts.api_key then

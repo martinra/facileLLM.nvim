@@ -88,13 +88,13 @@ end
 ---@return nil
 local set_highlight_role = function (bufnr, render_state, mx, msg)
   local row, col = get_message_range(render_state, mx, msg)
-  local len = string.len(role_display(msg.role))
+  local end_row, end_col = row, string.len(role_display(msg.role))
   local ns = buf_get_namespace_highlight_role()
   vim.api.nvim_buf_set_extmark(bufnr, ns,
     row, col,
     {
-      end_row = row,
-      end_col = len,
+      end_row = end_row,
+      end_col = end_col,
       hl_group = "FacileLLMRole",
     })
 end

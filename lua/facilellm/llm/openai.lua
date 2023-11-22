@@ -227,7 +227,34 @@ local create = function (opts)
   return llm
 end
 
+---@param opts table
+---@return string
+local preview = function (opts)
+  opts = opts or {}
+  opts = vim.tbl_extend("force", default_opts(), opts)
+
+  local preview = ""
+
+  if opts.url == "https://api.openai.com/v1/chat/completions" then
+    preview = preview .. "OpenAI ChatGPT "
+    if opts.openai_model == "gpt-3.5-turbo" then
+      preview = preview .. "3.5-Turbo\n"
+    else
+      preview = preview .. "\n"
+    end
+  else
+    preview = preview .. "OpenAI API at " .. opts.url .. "\n"
+  end
+
+  if opts.params.temperature then
+    preview = preview .. "Temperature: " .. opts.params.temperature .. "\n"
+  end
+
+  return preview
+end
+
 
 return {
   create = create,
+  preview = preview,
 }

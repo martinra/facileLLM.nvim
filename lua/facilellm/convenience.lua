@@ -202,5 +202,5 @@ return {
   add_visual_as_input_and_query = add_visual_as_input_and_query,
   add_visual_as_context = add_visual_as_context,
   add_visual_as_instruction = add_visual_as_instruction,
- add_visual_as_input_query_and_insert = add_visual_as_input_query_and_insert
+  add_visual_as_input_query_and_insert = add_visual_as_input_query_and_insert
 }

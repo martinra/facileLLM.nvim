@@ -315,16 +315,18 @@ local render_conversation = function (bufnr, conv, render_state)
   -- selection, they are seemingly never applied. This might not be neccessary
   -- once #18479 of github/neovim is applied (v0.10?).
   if workaround_fold then
-    local orig_winid = vim.api.nvim_get_current_win()
-    local ui_common = require("facilellm.ui.common")
-    for _,winid in pairs(vim.api.nvim_list_wins()) do
-      if ui_common.win_get_session(winid) and ui_common.win_is_conversation(winid) then
-        vim.api.nvim_set_current_win(winid)
-        vim.api.nvim_feedkeys("zx", "nx", false)
-        vim.api.nvim_feedkeys("zc", "nx", false)
+    vim.schedule( function ()
+      local orig_winid = vim.api.nvim_get_current_win()
+      local ui_common = require("facilellm.ui.common")
+      for _,winid in pairs(vim.api.nvim_list_wins()) do
+        if ui_common.win_get_session(winid) and ui_common.win_is_conversation(winid) then
+          vim.api.nvim_set_current_win(winid)
+          vim.api.nvim_feedkeys("zx", "nx", false)
+          vim.api.nvim_feedkeys("zc", "nx", false)
+        end
       end
-    end
-    vim.api.nvim_set_current_win(orig_winid)
+      vim.api.nvim_set_current_win(orig_winid)
+    end)
   end
 end
 

@@ -8,6 +8,7 @@ local M = {}
 M.setup = config.setup
 
 M.select_default_model = convenience.select_default_model
+M.create_from_model = convenience.create_from_model
 M.create_from_model_selection = convenience.create_from_model_selection
 M.create_from_conversation_selection = convenience.create_from_conversation_selection
 M.create_from_model_conversation_selection = convenience.create_from_model_conversation_selection

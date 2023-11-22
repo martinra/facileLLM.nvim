@@ -418,12 +418,9 @@ local on_complete_query = function (sessionid, response_callback)
 end
 
 ---@param sessionid FacileLLM.SessionId
----@param lines string[]
 ---@param response_callback function?(): nil
 ---@return nil
-local add_input_message_and_query = function (sessionid, lines, response_callback)
-  ui_select.touch(sessionid)
-  session.add_message(sessionid, "Input", lines)
+local query = function (sessionid, response_callback)
   local conv = session.get_conversation(sessionid)
   local render_state = get_render_state(sessionid)
   ui_render.start_highlight_receiving(conv, render_state)
@@ -435,6 +432,34 @@ local add_input_message_and_query = function (sessionid, lines, response_callbac
     function ()
       render_conversation(sessionid)
     end)
+end
+
+---@param sessionid FacileLLM.SessionId
+---@param lines string[]
+---@param response_callback function?(): nil
+---@return nil
+local add_input_message_and_query = function (sessionid, lines, response_callback)
+  ui_select.touch(sessionid)
+  session.add_message(sessionid, "Input", lines)
+  query(sessionid, response_callback)
+end
+
+---@param sessionid FacileLLM.SessionId
+---@return nil
+local requery = function (sessionid)
+  local mx, msg = session.get_last_message_with_index(sessionid)
+  if not msg or msg.role ~= "LLM" then
+    return
+  end
+  ---@cast mx FacileLLM.MsgIndex
+
+  local bufnr = get_conversation_buffer(sessionid)
+  local render_state = get_render_state(sessionid)
+
+  ui_select.touch(sessionid)
+  message.purge(msg)
+  ui_render.purge_message(bufnr, mx, msg, render_state)
+  query(sessionid)
 end
 
 ---@param sessionid FacileLLM.SessionId
@@ -572,4 +597,5 @@ return {
   render_conversation                = render_conversation,
   add_message                        = add_message,
   add_input_message_and_query        = add_input_message_and_query,
+  requery                            = requery,
 }

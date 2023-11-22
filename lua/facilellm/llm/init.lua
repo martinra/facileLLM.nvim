@@ -45,12 +45,16 @@ end
 
 ---@param implementation FacileLLM.LLMImplementation | FacileLLM.LLMImplementationName
 ---@param opts table
----@return string
+---@return string?
 local preview = function (implementation, opts)
   if type(implementation) == "string" then
     implementation = dispatch(implementation)
   end
-  return implementation.preview(opts)
+  if implementation.preview then
+    return implementation.preview(opts)
+  else
+    return nil
+  end
 end
 
 ---@return FacileLLM.Config.LLM

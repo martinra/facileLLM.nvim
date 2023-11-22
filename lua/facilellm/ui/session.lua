@@ -419,11 +419,11 @@ local on_complete_query = function (sessionid, response_callback)
   ui_conversation.on_complete_query(bufnr)
   ui_input.on_complete_query(get_input_buffer(sessionid))
 
-  local lines = session.get_last_llm_message_lines(sessionid)
-  if lines then
-    vim.fn.setreg("a", lines, "l")
+  local msg = session.get_last_llm_message(sessionid)
+  if msg then
+    vim.fn.setreg("a", msg.lines, "l")
     if response_callback then
-      response_callback(lines)
+      response_callback(msg.lines)
     end
   end
 end

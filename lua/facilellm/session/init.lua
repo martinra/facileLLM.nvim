@@ -195,10 +195,10 @@ local get_last_message_with_index = function (sessionid)
 end
 
 ---@param sessionid FacileLLM.SessionId
----@return string[]?
-local get_last_llm_message_lines = function (sessionid)
+---@return FacileLLM.Message?
+local get_last_llm_message = function (sessionid)
   local conv = sessions[sessionid].conversation
-  return conversation.get_last_llm_message_lines(conv)
+  return conversation.get_last_llm_message(conv)
 end
 
 ---@param sessionid FacileLLM.SessionId
@@ -347,7 +347,7 @@ return {
   get_model_config       = get_model_config,
   get_conversation       = get_conversation,
   get_last_message_with_index = get_last_message_with_index,
-  get_last_llm_message_lines = get_last_llm_message_lines,
+  get_last_llm_message   = get_last_llm_message,
   add_message            = add_message,
   is_conversation_locked = is_conversation_locked,
   lock_conversation      = lock_conversation,

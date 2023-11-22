@@ -60,6 +60,13 @@ local select_session = function (session_names, callback, prompt)
 
   prompt = prompt or "Select a session"
   if config.opts.interface.telescope and available_telescope then
+    local autocmdid = vim.api.nvim_create_autocmd("User", {
+      pattern = "TelescopePreviewerLoaded",
+      callback = function()
+        vim.wo.wrap = true
+      end,
+
+    })
     pickers.new({
       layout_strategy = "vertical",
     }, {
@@ -95,6 +102,8 @@ local select_session = function (session_names, callback, prompt)
       attach_mappings = function (prompt_bufnr)
         actions.select_default:replace(function ()
           actions.close(prompt_bufnr)
+          vim.api.nvim_del_autocmd(autocmdid)
+
           ---@type FacileLLM.SessionId
           local sessionid = actions_state.get_selected_entry().value
           callback(sessionid)
@@ -125,6 +134,13 @@ end
 local select_model = function (models, callback, prompt)
   prompt = prompt or "Select an LLM model"
   if config.opts.interface.telescope and available_telescope then
+    local autocmdid = vim.api.nvim_create_autocmd("User", {
+      pattern = "TelescopePreviewerLoaded",
+      callback = function()
+        vim.wo.wrap = true
+      end,
+    })
+
     pickers.new({
       layout_strategy = "vertical",
     }, {
@@ -172,6 +188,8 @@ local select_model = function (models, callback, prompt)
       attach_mappings = function (prompt_bufnr)
         actions.select_default:replace(function ()
           actions.close(prompt_bufnr)
+          vim.api.nvim_del_autocmd(autocmdid)
+
           ---@type FacileLLM.Config.LLM
           local model_config = actions_state.get_selected_entry().value
           callback(model_config)
@@ -207,6 +225,13 @@ local select_conversation = function (conversations, callback, prompt)
 
   prompt = prompt or "Select a conversation"
   if config.opts.interface.telescope and available_telescope then
+    local autocmdid = vim.api.nvim_create_autocmd("User", {
+      pattern = "TelescopePreviewerLoaded",
+      callback = function()
+        vim.wo.wrap = true
+      end,
+    })
+
     pickers.new({
       layout_strategy = "vertical",
     }, {
@@ -241,6 +266,8 @@ local select_conversation = function (conversations, callback, prompt)
       attach_mappings = function (prompt_bufnr)
         actions.select_default:replace(function ()
           actions.close(prompt_bufnr)
+          vim.api.nvim_del_autocmd(autocmdid)
+
           ---@type FacileLLM.ConversationName
           local name = actions_state.get_selected_entry().value
           callback(conversations[name])

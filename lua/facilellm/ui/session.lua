@@ -421,7 +421,14 @@ local on_complete_query = function (sessionid, response_callback)
 
   local msg = session.get_last_llm_message(sessionid)
   if msg then
-    vim.fn.setreg("a", msg.lines, "l")
+    local model_config = session.get_model_config(sessionid)
+    for name,reg in pairs(model_config.registers) do
+      local text = message.postprocess(msg, reg)
+      if string.len(text) ~= 0 then
+        vim.fn.setreg(name, text, "l")
+      end
+    end
+
     if response_callback then
       response_callback(msg.lines)
     end

@@ -10,6 +10,7 @@
 ---@field implementation FacileLLM.LLMImplementationName | FacileLLM.LLMImplementation
 ---@field opts table Options that are forwarded to the implementation.
 ---@field initial_conversation FacileLLM.Conversation 
+---@field registers table<string, FacileLLM.Config.Register>
 ---@field autostart boolean
 
 ---@class FacileLLM.Config.Naming
@@ -259,8 +260,31 @@ local default_model_config = function ()
     implementation = "undefined",
     opts = {},
     initial_conversation = {},
+    registers = {
+      ["l"] = { postprocess = "preserve" },
+      ["c"] = { postprocess = "code" },
+    },
     autostart = false,
   }
+end
+
+---@param registers table
+local validate_registers = function (registers)
+  for a,reg in pairs(registers) do
+    vim.validate({
+      register_name                        = {a,               "s",        false},
+      ["register " .. a]                   = {reg,             "t",        false},
+      ["register " .. a .. " postprocess"] = {reg.postprocess, {"s", "f"}, false},
+    })
+    if not string.match(a, "^[%d%l:\\.\\%#=\\*\\+_/]$") then
+      error("invalid register name " .. a)
+    end
+    if type(reg.postprocess) == "string" then
+      if reg.postprocess ~= "preserve" and reg.postprocess ~= "code" then
+        error("invalid postprocessing for register " .. a " : " .. reg.postprocess)
+      end
+    end
+  end
 end
 
 ---@param opts table
@@ -292,10 +316,14 @@ local validate_facilellm_config = function (opts)
         implementation       = {model.implementation,       {"s", "f"}, false},
         opts                 = {model.opts,                 "t",        true},
         initial_conversation = {model.initial_conversation, "t",        true},
+        registers            = {model.registers,            "t",        true},
         autostart            = {model.autostart,            "b",        true},
       })
       if not default_model_available and model.name and opts.default_model == model.name then
         default_model_available = true
+      end
+      if model.registers then
+        validate_registers(model.registers)
       end
     end
 
@@ -424,6 +452,7 @@ M.setup = function (opts)
   opts = opts or {}
   validate_facilellm_config(opts)
   M.opts = extend_facilellm_config(opts)
+  validate_facilellm_config(M.opts)
 
   set_highlights()
   set_global_keymaps()

@@ -1,6 +1,7 @@
 local config = require("facilellm.config")
 local conversation = require("facilellm.session.conversation")
 local llm = require("facilellm.llm")
+local session = require("facilellm.session")
 local ui_common = require("facilellm.ui.common")
 local ui_render = require("facilellm.ui.render")
 
@@ -59,7 +60,9 @@ local select_session = function (session_names, callback, prompt)
 
   prompt = prompt or "Select a session"
   if config.opts.interface.telescope and available_telescope then
-    pickers.new({}, {
+    pickers.new({
+      layout_strategy = "vertical",
+    }, {
       prompt_title = prompt,
       finder = finders.new_table {
         results = sessionids,
@@ -72,6 +75,23 @@ local select_session = function (session_names, callback, prompt)
         end
       },
       sorter = sorters.get_generic_fuzzy_sorter(),
+      previewer = previewers.new_buffer_previewer({
+        title = "Session preview",
+        define_preview = function(self, entry)
+          local bufnr = self.state.bufnr
+          if not bufnr then
+            return
+          end
+
+          ---@type FacileLLM.SessionId
+          local sessionid = entry.value
+
+          local conv = session.get_conversation(sessionid)
+          local lines = ui_render.preview_conversation(conv)
+
+          vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+        end,
+      }),
       attach_mappings = function (prompt_bufnr)
         actions.select_default:replace(function ()
           actions.close(prompt_bufnr)

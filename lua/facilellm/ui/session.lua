@@ -330,6 +330,17 @@ local set_buf_keymaps = function (sessionid)
     end)
   end
 
+  if config.opts.interface.keymaps.requery ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.requery,
+      function () ui_session.requery(sessionid) end,
+      { buffer = conv_bufnr })
+  end
+  if config.opts.interface.keymaps.requery ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.requery,
+      function () ui_session.requery(sessionid) end,
+      { buffer = input_bufnr })
+  end
+
   if config.opts.interface.keymaps.prune_message ~= "" then
     vim.keymap.set("n", config.opts.interface.keymaps.prune_message,
       function ()

@@ -45,6 +45,7 @@
 ---@field input_confirm string
 ---@field input_instruction string
 ---@field input_context string
+---@field requery string
 ---@field prune_message string
 ---@field deprune_message string
 ---@field purge_message string
@@ -211,6 +212,7 @@ local default_opts = function ()
         input_confirm       = "<Enter>",
         input_instruction   = "<C-i>",
         input_context       = "<C-k>",
+        requery             = "<C-r>",
 
         prune_message       = "p",
         deprune_message     = "P",

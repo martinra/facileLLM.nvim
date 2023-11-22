@@ -2,6 +2,7 @@
 ---@field default_model string | integer
 ---@field models FacileLLM.Config.LLM[]
 ---@field conversations table<FacileLLM.ConversationName, FacileLLM.Conversation>
+---@field conversations_csv string?
 ---@field naming FacileLLM.Config.Naming
 ---@field interface FacileLLM.Config.Interface
 ---@field feedback FacileLLM.Config.Feedback
@@ -79,6 +80,9 @@
 
 ---@class FacileLLM.Config.Register
 ---@field postprocess ("preserve"| "code"| function)
+
+
+local util = require("facilellm.util")
 
 
 ---@return nil
@@ -213,6 +217,7 @@ local default_opts = function ()
         },
       },
     },
+    conversation_csv = nil,
 
     naming = {
       role_display = {
@@ -455,11 +460,12 @@ local validate_facilellm_config = function (opts)
   })
   vim.validate({
     -- default_model validated when validating models
-    models        = {opts.models,        "t",        true},
-    conversations = {opts.conversations, "t",        true},
-    naming        = {opts.naming,        "t",        true},
-    interface     = {opts.interface,     "t",        true},
-    feedback      = {opts.feedback,      "t",        true},
+    models            = {opts.models,            "t", true},
+    conversations     = {opts.conversations,     "t", true},
+    conversations_csv = {opts.conversations_csv, "s", true},
+    naming            = {opts.naming,            "t", true},
+    interface         = {opts.interface,         "t", true},
+    feedback          = {opts.feedback,          "t", true},
   })
 
   if opts.models then
@@ -512,6 +518,12 @@ local extend_facilellm_config = function (opts)
   opts = vim.tbl_deep_extend("force", default_opts(), opts)
   for mx,model in ipairs(opts.models) do
     opts.models[mx] = vim.tbl_deep_extend("keep", model, default_model_config())
+  end
+  if opts.conversations_csv then
+    for name, conv in pairs(util.csv_to_conversations(opts.conversations_csv)) do
+      opts.conversations[name] = conv
+    end
+    opts.conversations_csv = nil
   end
   return opts
 end

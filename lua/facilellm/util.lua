@@ -113,6 +113,22 @@ local delete_fold = function (winid, row)
   end
 end
 
+---This is adjusted to the format of "Awesome ChatGPT Prompts"
+---@param text string
+---@return table<FacileLLM.ConversationName, FacileLLM.Conversation>
+local csv_to_conversations = function (text)
+  local conversatations = {}
+  for name, instruction in string.gmatch(text, "^\"(.*)\",\"(.*)\"$") do
+    -- quotes are escaped as double quotes
+    instruction = string.gsub(instruction, '""', '"')
+    conversatations[name] = {
+      role = "Instruction",
+      lines = vim.split(instruction, "\n"),
+    }
+  end
+  return conversatations
+end
+
 
 return {
   isempty_lines        = isempty_lines,
@@ -121,4 +137,5 @@ return {
   substitute_visual_selection = substitute_visual_selection,
   create_fold          = create_fold,
   delete_fold          = delete_fold,
+  csv_to_conversations = csv_to_conversations,
 }

@@ -9,7 +9,7 @@ local util = require("facilellm.util")
 ---@param model_config? FacileLLM.Config.LLM
 ---@return FacileLLM.SessionId
 local create_from_model = function (model_config)
-  model_config = model_config or llm.default_model_config()
+  model_config = model_config or llm.get_default_model_config()
   return ui_session.create(model_config)
 end
 

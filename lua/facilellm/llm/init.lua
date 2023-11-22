@@ -49,22 +49,35 @@ local preview = function (implementation, opts)
   end
 end
 
+---@type integer | string
+local _default_model = nil
+
+---@param default_model integer | string
+---@return nil
+local set_default_model_config = function (default_model)
+  _default_model = default_model
+end
+
 ---@return FacileLLM.Config.LLM
-local default_model_config = function ()
-  local default_model = config.opts.default_model
+local get_default_model_config = function ()
+  local default_model = _default_model or config.opts.default_model
   local models = config.opts.models
 
   if type(default_model) == "number" then
-    return models[default_model]
+    local model_config = models[default_model]
+    if not model_config then
+      error("Invalid default model index " .. default_model)
+    end
+    return model_config
   elseif type(default_model) == "string" then
     for _,model in ipairs(models) do
       if model.name == default_model then
         return model
       end
     end
-    error("Could not find default model with name " .. config.opts.default_model)
+    error("Invalid default model name " .. default_model)
   else
-    error("Default model " .. vim.inspect(config.opts.default_model) .. " must be number (list index) or string (model name)")
+    error("Invalid default model " .. vim.inspect(default_model) .. ", must be number (list index) or string (model name)")
   end
 end
 
@@ -72,5 +85,6 @@ end
 return {
   create = create,
   preview = preview,
-  default_model_config = default_model_config,
+  set_default_model_config = set_default_model_config,
+  get_default_model_config = get_default_model_config,
 }

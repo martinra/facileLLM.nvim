@@ -35,6 +35,20 @@ local create_from_model_selection = function ()
 end
 
 ---@return nil
+local create_from_conversation_selection = function ()
+  ui_select.select_conversation(config.opts.conversations,
+  function (conversation)
+    local model_config = llm.get_default_model_config()
+    model_config = vim.tbl_deep_extend("force", {}, model_config)
+    model_config.conversation = vim.tbl_deep_extend("force", {}, conversation)
+    local sessionid = ui_session.create(model_config)
+    ui_session.set_current_win_conversation_input(sessionid)
+  end,
+  "Select initial conversation of new session"
+  )
+end
+
+---@return nil
 local create_from_model_conversation_selection = function ()
   ui_select.select_model(config.opts.models,
     function (model_config)
@@ -222,6 +236,7 @@ return {
   select_default_model = select_default_model,
   create_from_model = create_from_model,
   create_from_model_selection = create_from_model_selection,
+  create_from_conversation_selection = create_from_conversation_selection,
   create_from_model_conversation_selection = create_from_model_conversation_selection,
   delete_from_selection = delete_from_selection,
   rename_from_selection = rename_from_selection,

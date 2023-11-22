@@ -55,6 +55,7 @@
 ---@field show string
 ---@field select_default_model string
 ---@field create_from_model_selection string
+---@field create_from_conversation_selection string
 ---@field create_from_model_conversation_selection string
 ---@field delete_from_selection string
 ---@field focus_from_selection string
@@ -110,6 +111,10 @@ local set_global_keymaps = function ()
   if config.opts.interface.keymaps.create_from_model_selection ~= "" then
     vim.keymap.set("n", config.opts.interface.keymaps.create_from_model_selection,
       facilellm.create_from_model_selection, {})
+  end
+  if config.opts.interface.keymaps.create_from_conversation_selection ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.create_from_conversation_selection,
+      facilellm.create_from_conversation_selection, {})
   end
   if config.opts.interface.keymaps.create_from_model_conversation_selection ~= "" then
     vim.keymap.set("n", config.opts.interface.keymaps.create_from_model_conversation_selection,
@@ -270,6 +275,7 @@ local default_opts = function ()
         show                                     = "<leader>aiw",
         select_default_model                     = "<leader>aiM",
         create_from_model_selection              = "<leader>ain",
+        create_from_conversation_selection       = "<leader>aib",
         create_from_model_conversation_selection = "<leader>aiN",
         delete_from_selection                    = "<leader>aid",
         focus_from_selection                     = "<leader>aif",

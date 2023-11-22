@@ -1,14 +1,25 @@
+local config = require("facilellm.config")
 local message = require("facilellm.session.message")
 
 
 ---@alias FacileLLM.Conversation FacileLLM.Message[]
 ---@alias FacileLLM.MsgIndex integer
+---@alias FacileLLM.ConversationName string
 
 
----@param initial FacileLLM.Conversation?
+---@param initial nil | FacileLLM.ConversationName | FacileLLM.Conversation
 ---@return FacileLLM.Conversation
 local create = function (initial)
-  return initial or {}
+  if type(initial) == "string" then
+    local conv = config.opts.conversations[initial]
+    if not conv then
+      vim.notify("unavailable conversation " .. initial, vim.log.levels.WARN)
+      return {}
+    end
+    return vim.tbl_deep_extend("force", {}, conv)
+  else
+    return initial or {}
+  end
 end
 
 ---@param conversation FacileLLM.Conversation

@@ -160,6 +160,56 @@ local select_model = function (models, callback, prompt)
   end
 end
 
+---@param conversations table<FacileLLM.ConversationName, FacileLLM.Conversation>
+---@param callback function(FacileLLM.Conversation): nil
+---@param prompt string?
+---@return nil
+local select_conversation = function (conversations, callback, prompt)
+  local names = {}
+  for name,_ in pairs(conversations) do
+    table.insert(names,name)
+  end
+
+  prompt = prompt or "Select a conversation"
+  if config.opts.interface.telescope and available_telescope then
+    pickers.new({}, {
+      prompt_title = prompt,
+      finder = finders.new_table {
+        results = names,
+        entry_maker = function(name)
+          return {
+            value   = name,
+            display = name,
+            ordinal = name,
+          }
+        end
+      },
+      sorter = sorters.get_generic_fuzzy_sorter(),
+      attach_mappings = function (prompt_bufnr)
+        actions.select_default:replace(function ()
+          actions.close(prompt_bufnr)
+          ---@type FacileLLM.ConversationName name
+          local name = actions_state.get_selected_entry().value
+          callback(conversations[name])
+        end)
+        return true
+      end,
+    }):find()
+  else
+    vim.ui.select( names,
+      {
+        prompt = prompt,
+        format_item = function (name)
+          return name
+        end,
+      },
+      function (name)
+        if name ~= nil then
+          callback(conversations[name])
+        end
+      end)
+  end
+end
 
 return {
   delete = delete,
@@ -168,4 +218,5 @@ return {
   get_most_recent = get_most_recent,
   select_session = select_session,
   select_model = select_model,
+  select_conversation = select_conversation,
 }

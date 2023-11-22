@@ -97,7 +97,8 @@ end
 ---@return FacileLLM.SessionId
 local create = function (model_config)
   local sessionid = new_sessionid()
-  local model = llm.dispatch(model_config.implementation)(model_config.opts)
+
+  local model = llm.create(model_config.implementation, model_config.opts)
   local name = model_config.name or model.name
   name = unique_name_variant(name)
 
@@ -175,8 +176,7 @@ end
 ---@param model_config FacileLLM.Config.LLM
 local set_model = function (sessionid, model_config)
   local sess = sessions[sessionid]
-  local model = llm.dispatch(model_config.implementation)(model_config.opts)
-  sess.model = model
+  sess.model = llm.create(model_config.implementation, model_config.opts)
   sess.config = vim.tbl_deep_extend("force", {}, model_config)
 end
 

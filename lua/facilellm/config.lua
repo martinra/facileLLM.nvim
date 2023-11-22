@@ -7,8 +7,7 @@
 
 ---@class FacileLLM.Config.LLM
 ---@field name string? Name of the model.
----@field implementation FacileLLM.LLMImplementation Name of an implementation. Must be accepted by
----    the function facilelll.llm.dispatch.
+---@field implementation FacileLLM.LLMImplementationName | FacileLLM.LLMImplementation
 ---@field opts table Options that are forwarded to the implementation.
 ---@field initial_conversation FacileLLM.Conversation 
 ---@field autostart boolean

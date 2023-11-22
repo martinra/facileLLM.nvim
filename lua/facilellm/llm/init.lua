@@ -6,19 +6,51 @@ local config = require("facilellm.config")
 ---@field params table
 ---@field response_to function(conv: Conversation, add_msg: function, on_cmpl: function, opt:table)
 
----@alias FacileLLM.LLMImplementation ("OpenAI API"| "The Void Mock LLM")
+---@class FacileLLM.LLMImplementation
+---@field create function(opts: table): FacileLLM.LLM
+---@field preview function?(opts: table): string
+
+---@alias FacileLLM.LLMImplementationName ("OpenAI API"| "The Void Mock LLM")
 
 
----@param implementation FacileLLM.LLMImplementation
----@return function(opts: table): FacileLLM.LLM
-local dispatch = function (implementation)
-  if implementation == "OpenAI API" then
-    return require("facilellm.llm.openai").create
-  elseif implementation == "The Void Mock LLM" then
-    return require("facilellm.llm.void").create
+---@param name FacileLLM.LLMImplementationName
+---@return FacileLLM.LLMImplementation
+local dispatch = function (name)
+  if name == "OpenAI API" then
+    local openai = require("facilellm.llm.openai")
+    return {
+      create = openai.create,
+      preview = nil,
+    }
+  elseif name == "The Void Mock LLM" then
+    local void = require("facilellm.llm.void")
+    return {
+      create = void.create,
+      preview = nil,
+    }
   else
-    error("Unknown LLM implementation " .. vim.inspect(implementation))
+    error("Unknown LLM implementation " .. vim.inspect(name))
   end
+end
+
+---@param implementation FacileLLM.LLMImplementation | FacileLLM.LLMImplementationName
+---@param opts table
+---@return FacileLLM.LLM
+local create = function (implementation, opts)
+  if type(implementation) == "string" then
+    implementation = dispatch(implementation)
+  end
+  return implementation.create(opts)
+end
+
+---@param implementation FacileLLM.LLMImplementation | FacileLLM.LLMImplementationName
+---@param opts table
+---@return string
+local preview = function (implementation, opts)
+  if type(implementation) == "string" then
+    implementation = dispatch(implementation)
+  end
+  return implementation.preview(opts)
 end
 
 ---@return FacileLLM.Config.LLM
@@ -42,6 +74,7 @@ end
 
 
 return {
-  dispatch = dispatch,
+  create = create,
+  preview = preview,
   default_model_config = default_model_config,
 }

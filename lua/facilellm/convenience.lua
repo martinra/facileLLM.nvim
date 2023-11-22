@@ -17,7 +17,7 @@ end
 local create_from_model_selection = function ()
   ui_select.select_model(config.opts.models,
     function (model_config)
-      local sessionid = create_from_model(model_config)
+      local sessionid = ui_session.create(model_config)
       ui_session.set_current_win_conversation_input(sessionid)
     end,
     "Select model to create new session from"
@@ -32,7 +32,7 @@ local create_from_model_conversation_selection = function ()
         function (conversation)
           model_config = vim.tbl_deep_extend("force", {}, model_config)
           model_config.conversation = vim.tbl_deep_extend("force", {}, conversation)
-          local sessionid = create_from_model(model_config)
+          local sessionid = ui_session.create(model_config)
           ui_session.set_current_win_conversation_input(sessionid)
         end,
         "Select initial conversation of new session"

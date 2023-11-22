@@ -9,7 +9,7 @@
 ---@field name string? Name of the model.
 ---@field implementation FacileLLM.LLMImplementationName | FacileLLM.LLMImplementation
 ---@field opts table Options that are forwarded to the implementation.
----@field initial_conversation FacileLLM.Conversation 
+---@field conversation FacileLLM.Conversation 
 ---@field registers table<string, FacileLLM.Config.Register>
 ---@field autostart boolean
 
@@ -259,7 +259,7 @@ local default_model_config = function ()
     name = nil,
     implementation = "undefined",
     opts = {},
-    initial_conversation = {},
+    conversation = {},
     registers = {
       ["l"] = { postprocess = "preserve" },
       ["c"] = { postprocess = "code" },
@@ -315,7 +315,7 @@ local validate_facilellm_config = function (opts)
         name                 = {model.name,                 "s",        true},
         implementation       = {model.implementation,       {"s", "f"}, false},
         opts                 = {model.opts,                 "t",        true},
-        initial_conversation = {model.initial_conversation, "t",        true},
+        conversation         = {model.conversation,         "t",        true},
         registers            = {model.registers,            "t",        true},
         autostart            = {model.autostart,            "b",        true},
       })

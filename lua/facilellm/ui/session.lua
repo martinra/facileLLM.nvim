@@ -588,7 +588,7 @@ end
 local fork = function (sessionid)
   local model_config = {
     name = session.fork_name_variant(session.get_name(sessionid)),
-    initial_conversation =
+    conversation =
       vim.tbl_deep_extend("force", {}, session.get_conversation(sessionid)),
   }
   model_config =

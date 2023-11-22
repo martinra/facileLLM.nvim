@@ -1,12 +1,13 @@
 ---@class FacileLLM.Config
 ---@field default_model string | integer
 ---@field models FacileLLM.Config.LLM[]
+---@field conversations table<string, FacileLLM.Conversation>
 ---@field naming FacileLLM.Config.Naming
 ---@field interface FacileLLM.Config.Interface
 ---@field feedback FacileLLM.Config.Feedback
 
 ---@class FacileLLM.Config.LLM
----@field name string? Name of the model.
+---@field name string?
 ---@field implementation FacileLLM.LLMImplementationName | FacileLLM.LLMImplementation
 ---@field opts table Options that are forwarded to the implementation.
 ---@field conversation FacileLLM.Conversation 
@@ -155,6 +156,20 @@ local autostart_sessions = function (models)
   end
 end
 
+---@return FacileLLM.Config.LLM
+local default_model_config = function ()
+  return {
+    name           = nil,
+    implementation = "undefined",
+    opts           = {},
+    conversation   = {},
+    registers      = {
+      ["l"] = { postprocess = "preserve" },
+      ["c"] = { postprocess = "code" },
+    },
+    autostart      = false,
+  }
+end
 
 ---@return FacileLLM.Config
 local default_opts = function ()
@@ -180,6 +195,21 @@ local default_opts = function ()
         implementation = "OpenAI API",
         opts = {
           openai_model = "gpt-4-32k",
+        },
+      },
+    },
+
+    conversations = {
+      ["Concise answers"] = {
+        {
+          role = "Instruction",
+          lines = { "Give short and concise answers." }
+        },
+      },
+      ["Detailed answers"] = {
+        {
+          role = "Instruction",
+          lines = { "Give detailed answers that scrutinize many aspects of the topic." }
         },
       },
     },
@@ -253,22 +283,31 @@ local default_opts = function ()
   }
 end
 
----@return FacileLLM.Config.LLM
-local default_model_config = function ()
-  return {
-    name = nil,
-    implementation = "undefined",
-    opts = {},
-    conversation = {},
-    registers = {
-      ["l"] = { postprocess = "preserve" },
-      ["c"] = { postprocess = "code" },
-    },
-    autostart = false,
-  }
+---@param conv table
+---@return nil
+local validate_conversation = function (conv)
+  for _,msg in ipairs(conv) do
+    vim.validate({
+      message = {msg,        "t", false},
+      role    = {msg.role,   "s", false},
+      lines   = {msg.lines,  "t", false},
+      status  = {msg.status, "s", true},
+    })
+    for _,line in ipairs(msg.lines) do
+      vim.validate({
+        line = {line, "s", false}
+      })
+    end
+    if msg.status then
+      if msg.status ~= "pruned" and msg.status ~= "purged" then
+        error("invalid message status " .. msg.status)
+      end
+    end
+  end
 end
 
 ---@param registers table
+---@return nil
 local validate_registers = function (registers)
   for a,reg in pairs(registers) do
     vim.validate({
@@ -287,6 +326,127 @@ local validate_registers = function (registers)
   end
 end
 
+---@param model table
+---@return nil
+local validate_model_config = function (model)
+  vim.validate({
+    model                = {model, "t", false}
+  })
+  vim.validate({
+    name           = {model.name,           "s",        true},
+    implementation = {model.implementation, {"s", "f"}, false},
+    opts           = {model.opts,           "t",        true},
+    conversation   = {model.conversation,   {"s", "t"}, true},
+    registers      = {model.registers,      "t",        true},
+    autostart      = {model.autostart,      "b",        true},
+  })
+  if model.conversation and type(model.conversation) == "table" then
+    validate_conversation(model.conversation)
+  end
+  if model.registers then
+    validate_registers(model.registers)
+  end
+end
+
+---@param naming table
+---@return nil
+local validate_naming = function (naming)
+  vim.validate({
+    role_display               = {naming.role_display,               "t", true},
+    conversation_buffer_prefix = {naming.conversation_buffer_prefix, "s", true},
+    input_buffer_prefix        = {naming.input_buffer_prefix,        "s", true},
+    fork_suffix                = {naming.fork_suffix,                "s", true},
+  })
+
+  if naming.role_display then
+    local role_display = naming.role_display
+    vim.validate({
+      instruction = {role_display.instruction, "s", true},
+      context     = {role_display.context,     "s", true},
+      input       = {role_display.input,       "s", true},
+      llm         = {role_display.llm,         "s", true},
+    })
+  end
+end
+
+---@param interface table
+---@return nil
+local validate_interface = function (interface)
+  vim.validate({
+    telescope                 = {interface.telescope,                 "b", true},
+    unique_session            = {interface.unique_session,            "b", true},
+    couple_conv_input_windows = {interface.couple_conv_input_windows, "b", true},
+    layout_relative           = {interface.layout_relative,           "s", true},
+    layout_direction          = {interface.layout_direction,          "s", true},
+    input_relative_height     = {interface.input_relative_height,     "n", true},
+    highlight_role            = {interface.highlight_role,            "b", true},
+    fold_instruction          = {interface.fold_instruction,          "b", true},
+    fold_context              = {interface.fold_context,              "b", true},
+    keymaps                   = {interface.keymaps,                   "t", true},
+  })
+
+  if interface.keymaps then
+    local keymaps = interface.keymaps
+    vim.validate({
+      delete_interaction   = {keymaps.delete_interaction,  "s", true},
+      delete_conversation  = {keymaps.delete_conversation, "s", true},
+      delete_session       = {keymaps.delete_session,      "s", true},
+      fork_session         = {keymaps.fork_session,        "s", true},
+      rename_session       = {keymaps.rename_session,      "s", true},
+
+      input_confirm        = {keymaps.input_confirm,       "s", true},
+      input_instruction    = {keymaps.input_instruction,   "s", true},
+      input_context        = {keymaps.input_context,       "s", true},
+
+      prune_message        = {keymaps.prune_message,       "s", true},
+      deprune_message      = {keymaps.deprune_message,     "s", true},
+      purge_message        = {keymaps.purge_message,       "s", true},
+
+      show                     = {keymaps.show,                     "s", true},
+      create_from_selection    = {keymaps.create_from_selection,    "s", true},
+      delete_from_selection    = {keymaps.delete_from_selection,    "s", true},
+      focus_from_selection     = {keymaps.focus_from_selection,     "s", true},
+      rename_from_selection    = {keymaps.rename_from_selection,    "s", true},
+      set_model_from_selection = {keymaps.set_model_from_selection, "s", true},
+
+      add_visual_as_input_and_query             =
+        {keymaps.add_visual_as_input_and_query,            "s", true},
+      add_visual_as_context                     =
+        {keymaps.add_visual_as_context,                    "s", true},
+      add_visual_as_instruction                 =
+        {keymaps.add_visual_as_instruction,                "s", true},
+      add_visual_as_input_query_and_append      =
+        {keymaps.add_visual_as_input_query_and_append,     "s", true},
+      add_visual_as_input_query_and_prepend     =
+        {keymaps.add_visual_as_input_query_and_prepend,    "s", true},
+      add_visual_as_input_query_and_substitute  =
+        {keymaps.add_visual_as_input_query_and_substitute, "s", true},
+    })
+  end
+end
+
+---@param feedback table
+---@return nil
+local validate_feedback = function (feedback)
+  vim.validate({
+    highlight_message_while_receiving  = {feedback.highlight_message_while_receiving,  "b", true},
+    pending_insertion_feedback         = {feedback.pending_insertion_feedback,         "b", true},
+    pending_insertion_feedback_message = {feedback.pending_insertion_feedback_message, "s", true},
+    conversation_lock                  = {feedback.conversation_lock,                  "t", true},
+  })
+
+  if feedback.conversation_lock then
+    local conversation_lock = feedback.conversation_lock
+    vim.validate({
+      input_confirm     = {conversation_lock.input_confirm    , "b", true},
+      input_instruction = {conversation_lock.input_instruction, "b", true},
+      input_context     = {conversation_lock.input_context    , "b", true},
+      warn_on_query     = {conversation_lock.warn_on_query    , "b", true},
+      warn_on_clear     = {conversation_lock.warn_on_clear    , "b", true},
+    })
+  end
+end
+
 ---@param opts table
 ---@return nil
 local validate_facilellm_config = function (opts)
@@ -296,6 +456,7 @@ local validate_facilellm_config = function (opts)
   vim.validate({
     -- default_model validated when validating models
     models        = {opts.models,        "t",        true},
+    conversations = {opts.conversations, "t",        true},
     naming        = {opts.naming,        "t",        true},
     interface     = {opts.interface,     "t",        true},
     feedback      = {opts.feedback,      "t",        true},
@@ -305,25 +466,16 @@ local validate_facilellm_config = function (opts)
     vim.validate({
       default_model = {opts.default_model, {"s", "n"}, false},
     })
-    local default_model_available = opts.models[opts.default_model] ~= nil
+
+    local default_model_available = false
+    if type(opts.default_model) == "number" then
+      default_model_available = opts.models[opts.default_model] == nil
+    end
 
     for _,model in ipairs(opts.models) do
-      vim.validate({
-        model                = {model, "t", false}
-      })
-      vim.validate({
-        name                 = {model.name,                 "s",        true},
-        implementation       = {model.implementation,       {"s", "f"}, false},
-        opts                 = {model.opts,                 "t",        true},
-        conversation         = {model.conversation,         "t",        true},
-        registers            = {model.registers,            "t",        true},
-        autostart            = {model.autostart,            "b",        true},
-      })
-      if not default_model_available and model.name and opts.default_model == model.name then
-        default_model_available = true
-      end
-      if model.registers then
-        validate_registers(model.registers)
+      validate_model_config(model)
+      if not default_model_available and model.name then
+        default_model_available = model.name == opts.default_model
       end
     end
 
@@ -335,101 +487,22 @@ local validate_facilellm_config = function (opts)
     error("default model but no model defined")
   end
 
-  if opts.naming then
-    local naming = opts.naming
-    vim.validate({
-      role_display               = {naming.role_display,               "t", true},
-      conversation_buffer_prefix = {naming.conversation_buffer_prefix, "s", true},
-      input_buffer_prefix        = {naming.input_buffer_prefix,        "s", true},
-      fork_suffix                = {naming.fork_suffix,                "s", true},
-    })
-
-    if naming.role_display then
-      local role_display = naming.role_display
-      vim.validate({
-        instruction = {role_display.instruction, "s", true},
-        context     = {role_display.context,     "s", true},
-        input       = {role_display.input,       "s", true},
-        llm         = {role_display.llm,         "s", true},
-      })
+  if opts.conversations then
+    for _,conv in pairs(opts.conversations) do
+      validate_conversation(conv)
     end
+  end
 
+  if opts.naming then
+    validate_naming(opts.naming)
   end
 
   if opts.interface then
-    local interface = opts.interface
-    vim.validate({
-      telescope                 = {interface.telescope,                 "b", true},
-      unique_session            = {interface.unique_session,            "b", true},
-      couple_conv_input_windows = {interface.couple_conv_input_windows, "b", true},
-      layout_relative           = {interface.layout_relative,           "s", true},
-      layout_direction          = {interface.layout_direction,          "s", true},
-      input_relative_height     = {interface.input_relative_height,     "n", true},
-      highlight_role            = {interface.highlight_role,            "b", true},
-      fold_instruction          = {interface.fold_instruction,          "b", true},
-      fold_context              = {interface.fold_context,              "b", true},
-      keymaps                   = {interface.keymaps,                   "t", true},
-    })
-
-    if interface.keymaps then
-      local keymaps = interface.keymaps
-      vim.validate({
-        delete_interaction   = {keymaps.delete_interaction,  "s", true},
-        delete_conversation  = {keymaps.delete_conversation, "s", true},
-        delete_session       = {keymaps.delete_session,      "s", true},
-        fork_session         = {keymaps.fork_session,        "s", true},
-        rename_session       = {keymaps.rename_session,      "s", true},
-
-        input_confirm        = {keymaps.input_confirm,       "s", true},
-        input_instruction    = {keymaps.input_instruction,   "s", true},
-        input_context        = {keymaps.input_context,       "s", true},
-
-        prune_message        = {keymaps.prune_message,       "s", true},
-        deprune_message      = {keymaps.deprune_message,       "s", true},
-        purge_message        = {keymaps.purge_message,       "s", true},
-
-        show                     = {keymaps.show,                     "s", true},
-        create_from_selection    = {keymaps.create_from_selection,    "s", true},
-        delete_from_selection    = {keymaps.delete_from_selection,    "s", true},
-        focus_from_selection     = {keymaps.focus_from_selection,     "s", true},
-        rename_from_selection    = {keymaps.rename_from_selection,    "s", true},
-        set_model_from_selection = {keymaps.set_model_from_selection, "s", true},
-
-        add_visual_as_input_and_query             =
-          {keymaps.add_visual_as_input_and_query,            "s", true},
-        add_visual_as_context                     =
-          {keymaps.add_visual_as_context,                    "s", true},
-        add_visual_as_instruction                 =
-          {keymaps.add_visual_as_instruction,                "s", true},
-        add_visual_as_input_query_and_append      =
-          {keymaps.add_visual_as_input_query_and_append,     "s", true},
-        add_visual_as_input_query_and_prepend     =
-          {keymaps.add_visual_as_input_query_and_prepend,    "s", true},
-        add_visual_as_input_query_and_substitute  =
-          {keymaps.add_visual_as_input_query_and_substitute, "s", true},
-      })
-    end
+    validate_interface(opts.interface)
   end
 
   if opts.feedback then
-    local feedback = opts.feedback
-    vim.validate({
-      highlight_message_while_receiving  = {feedback.highlight_message_while_receiving,  "b", true},
-      pending_insertion_feedback         = {feedback.pending_insertion_feedback,         "b", true},
-      pending_insertion_feedback_message = {feedback.pending_insertion_feedback_message, "s", true},
-      conversation_lock                  = {feedback.conversation_lock,                  "t", true},
-    })
-
-    if feedback.conversation_lock then
-      local conversation_lock = feedback.conversation_lock
-      vim.validate({
-        input_confirm     = {conversation_lock.input_confirm    , "b", true},
-        input_instruction = {conversation_lock.input_instruction, "b", true},
-        input_context     = {conversation_lock.input_context    , "b", true},
-        warn_on_query     = {conversation_lock.warn_on_query    , "b", true},
-        warn_on_clear     = {conversation_lock.warn_on_clear    , "b", true},
-      })
-    end
+    validate_feedback(opts.feedback)
   end
 end
 

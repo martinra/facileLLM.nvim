@@ -207,7 +207,9 @@ local select_conversation = function (conversations, callback, prompt)
 
   prompt = prompt or "Select a conversation"
   if config.opts.interface.telescope and available_telescope then
-    pickers.new({}, {
+    pickers.new({
+      layout_strategy = "vertical",
+    }, {
       prompt_title = prompt,
       finder = finders.new_table {
         results = names,
@@ -220,6 +222,22 @@ local select_conversation = function (conversations, callback, prompt)
         end
       },
       sorter = sorters.get_generic_fuzzy_sorter(),
+      previewer = previewers.new_buffer_previewer({
+        title = "Initial conversation preview",
+        define_preview = function(self, entry)
+          local bufnr = self.state.bufnr
+          if not bufnr then
+            return
+          end
+
+          ---@type FacileLLM.ConversationName
+          local name = entry.value
+          local conv = conversation.create(conversations[name])
+          local lines = ui_render.preview_conversation(conv)
+
+          vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+        end,
+      }),
       attach_mappings = function (prompt_bufnr)
         actions.select_default:replace(function ()
           actions.close(prompt_bufnr)

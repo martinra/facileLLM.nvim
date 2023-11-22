@@ -54,6 +54,7 @@
 ---@field purge_message string
 ---@field show string
 ---@field create_from_model_selection string
+---@field create_from_model_conversation_selection string
 ---@field delete_from_selection string
 ---@field focus_from_selection string
 ---@field rename_from_selection string
@@ -104,6 +105,10 @@ local set_global_keymaps = function ()
   if config.opts.interface.keymaps.create_from_model_selection ~= "" then
     vim.keymap.set("n", config.opts.interface.keymaps.create_from_model_selection,
       facilellm.create_from_model_selection, {})
+  end
+  if config.opts.interface.keymaps.create_from_model_conversation_selection ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.create_from_model_conversation_selection,
+      facilellm.create_from_model_conversation_selection, {})
   end
   if config.opts.interface.keymaps.delete_from_selection ~= "" then
     vim.keymap.set("n", config.opts.interface.keymaps.delete_from_selection,
@@ -259,6 +264,7 @@ local default_opts = function ()
 
         show                                     = "<leader>aiw",
         create_from_model_selection              = "<leader>ain",
+        create_from_model_conversation_selection = "<leader>aiN",
         delete_from_selection                    = "<leader>aid",
         focus_from_selection                     = "<leader>aif",
         rename_from_selection                    = "<leader>air",
@@ -409,6 +415,8 @@ local validate_interface = function (interface)
 
       show                        = {keymaps.show,                        "s", true},
       create_from_model_selection = {keymaps.create_from_model_selection, "s", true},
+      create_from_model_conversation_selection =
+        {keymaps.create_from_model_conversation_selection, "s", true},
       delete_from_selection       = {keymaps.delete_from_selection,       "s", true},
       focus_from_selection        = {keymaps.focus_from_selection,        "s", true},
       rename_from_selection       = {keymaps.rename_from_selection,       "s", true},

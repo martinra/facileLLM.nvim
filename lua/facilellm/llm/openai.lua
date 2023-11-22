@@ -211,7 +211,7 @@ end
 ---@return FacileLLM.LLM
 local create = function (opts)
   opts = opts or {}
-  opts = vim.tbl_extend("force", default_opts(), opts)
+  opts = vim.tbl_deep_extend("force", default_opts(), opts)
 
   -- We expose name and model parameters to the caller for later
   -- modification.
@@ -231,7 +231,7 @@ end
 ---@return string
 local preview = function (opts)
   opts = opts or {}
-  opts = vim.tbl_extend("force", default_opts(), opts)
+  opts = vim.tbl_deep_extend("force", default_opts(), opts)
 
   local preview = ""
 

@@ -75,6 +75,9 @@
 ---@field warn_on_query boolean
 ---@field warn_on_clear boolean
 
+---@class FacileLLM.Config.Register
+---@field postprocess ("preserve"| "code"| function)
+
 
 ---@return nil
 local set_highlights = function ()

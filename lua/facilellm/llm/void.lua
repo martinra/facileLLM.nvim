@@ -1,3 +1,6 @@
+local conversation = require("facilellm.session.conversation")
+
+
 local R = {}
 
 ---@param add_message function
@@ -76,13 +79,12 @@ end
 ---@param opts table
 ---@return nil
 local response_to = function (conv, add_message, on_complete, opts)
-  if #conv == 0 then
+  local _, msg = conversation.get_last_message_with_index(conv)
+  if not msg then
     add_message("LLM", "The void tried to hear your message, but there is nothing to be heard.")
     on_complete()
     return
   end
-
-  local lines = conv[#conv].lines
 
   local response_lines = {
     "The void heard your message.",
@@ -93,7 +95,7 @@ local response_to = function (conv, add_message, on_complete, opts)
   local major_delay = opts.params.major_delay
   local minor_delay = opts.params.minor_delay
   R.send_response(conv, add_message, on_complete,
-    lines, response_lines, major_delay, minor_delay)
+    msg.lines, response_lines, major_delay, minor_delay)
 end
 
 ---@return table

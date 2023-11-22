@@ -31,7 +31,7 @@ local role_display = function (role)
   elseif role == "LLM" then
     return config.opts.naming.role_display.llm
   else
-    error("unreachable role dispatch")
+    error("unreachable role")
   end
 end
 

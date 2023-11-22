@@ -1,17 +1,14 @@
 local config = require("facilellm.config")
+local llm = require("facilellm.llm")
 local ui_common = require("facilellm.ui.common")
 
-local available_actions, actions = pcall(require, "telescope.actions")
-local available_actions_state, actions_state = pcall(require, "telescope.actions.state")
-local available_sorters, sorters = pcall(require, "telescope.sorters")
-local available_finders, finders = pcall(require, "telescope.finders")
-local available_pickers, pickers = pcall(require, "telescope.pickers")
-
-local available_telescope = available_actions
-  and available_actions_state
-  and available_sorters
-  and available_finders
-  and available_pickers
+local available_telescope, _ = pcall(require, "telescope")
+local _, pickers = pcall(require, "telescope.pickers")
+local _, actions = pcall(require, "telescope.actions")
+local _, actions_state = pcall(require, "telescope.actions.state")
+local _, finders = pcall(require, "telescope.finders")
+local _, sorters = pcall(require, "telescope.sorters")
+local _, previewers = pcall(require, "telescope.previewers")
 
 
 ---@type FacileLLM.SessionId?
@@ -106,7 +103,9 @@ end
 local select_model = function (models, callback, prompt)
   prompt = prompt or "Select an LLM model"
   if config.opts.interface.telescope and available_telescope then
-    pickers.new({}, {
+    pickers.new({
+      layout_strategy = "vertical",
+    }, {
       prompt_title = prompt,
       finder = finders.new_table {
         results = models,
@@ -119,6 +118,22 @@ local select_model = function (models, callback, prompt)
         end
       },
       sorter = sorters.get_generic_fuzzy_sorter(),
+      previewer = previewers.new_buffer_previewer({
+        title = "LLM Model Preview",
+        define_preview = function(self, entry)
+          local bufnr = self.state.bufnr
+          if not bufnr then
+            return
+          end
+
+          local model_config = entry.value
+          local preview = llm.preview(model_config.implementation, model_config.opts)
+          preview = preview or "Preview not available."
+
+          local lines = vim.split(preview, "\n", {keepempty = true})
+          vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+        end,
+      }),
       attach_mappings = function (prompt_bufnr)
         actions.select_default:replace(function ()
           actions.close(prompt_bufnr)

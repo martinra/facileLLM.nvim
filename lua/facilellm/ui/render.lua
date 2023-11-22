@@ -35,6 +35,24 @@ local role_display = function (role)
   end
 end
 
+---@param conv FacileLLM.Conversation
+---@return string[] lines
+local preview_conversation = function (conv)
+  local lines = {}
+
+  for mx = 1, #conv do
+    local msg = conv[mx]
+    if not message.ispruned(msg) then
+      table.insert(lines, role_display(msg.role))
+      for _,l in ipairs(msg.lines) do
+        table.insert(lines, l)
+      end
+    end
+  end
+
+  return lines
+end
+
 ---@param mx FacileLLM.MsgIndex
 ---@param render_state FacileLLM.RenderState
 ---@return integer
@@ -419,6 +437,7 @@ end
 return {
   create_state = create_state,
   render_conversation = render_conversation,
+  preview_conversation = preview_conversation,
   clear_conversation = clear_conversation,
   start_highlight_receiving = start_highlight_receiving,
   end_highlight_receiving = end_highlight_receiving,

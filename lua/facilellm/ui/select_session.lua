@@ -1,6 +1,8 @@
 local config = require("facilellm.config")
+local conversation = require("facilellm.session.conversation")
 local llm = require("facilellm.llm")
 local ui_common = require("facilellm.ui.common")
+local ui_render = require("facilellm.ui.render")
 
 local available_telescope, _ = pcall(require, "telescope")
 local _, pickers = pcall(require, "telescope.pickers")
@@ -73,7 +75,7 @@ local select_session = function (session_names, callback, prompt)
       attach_mappings = function (prompt_bufnr)
         actions.select_default:replace(function ()
           actions.close(prompt_bufnr)
-          ---@type FacileLLM.SessionId sessionid 
+          ---@type FacileLLM.SessionId
           local sessionid = actions_state.get_selected_entry().value
           callback(sessionid)
         end)
@@ -126,18 +128,31 @@ local select_model = function (models, callback, prompt)
             return
           end
 
+          ---@type FacileLLM.Config.LLM
           local model_config = entry.value
-          local preview = llm.preview(model_config.implementation, model_config.opts)
-          preview = preview or "Preview not available."
 
+          local preview = llm.preview(model_config.implementation, model_config.opts)
+          preview = preview or "Model preview not available.\n"
           local lines = vim.split(preview, "\n", {keepempty = true})
+          table.insert(lines, 1, "")
+          table.insert(lines, 1, "# Model")
+
+          local conv = conversation.create(model_config.conversation)
+          if conv ~= {} then
+            table.insert(lines, "# Initial Conversation")
+            table.insert(lines, "")
+            for _,l in pairs(ui_render.preview_conversation(conv)) do
+              table.insert(lines, l)
+            end
+          end
+
           vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
         end,
       }),
       attach_mappings = function (prompt_bufnr)
         actions.select_default:replace(function ()
           actions.close(prompt_bufnr)
-          ---@type FacileLLM.Config.LLM model
+          ---@type FacileLLM.Config.LLM
           local model_config = actions_state.get_selected_entry().value
           callback(model_config)
         end)
@@ -188,7 +203,7 @@ local select_conversation = function (conversations, callback, prompt)
       attach_mappings = function (prompt_bufnr)
         actions.select_default:replace(function ()
           actions.close(prompt_bufnr)
-          ---@type FacileLLM.ConversationName name
+          ---@type FacileLLM.ConversationName
           local name = actions_state.get_selected_entry().value
           callback(conversations[name])
         end)

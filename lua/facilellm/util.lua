@@ -118,13 +118,13 @@ end
 ---@return table<FacileLLM.ConversationName, FacileLLM.Conversation>
 local csv_to_conversations = function (text)
   local conversatations = {}
-  for name, instruction in string.gmatch(text, "^\"(.*)\",\"(.*)\"$") do
+  for name, instruction in string.gmatch(text, "\"([^\n]*)\",\"([^\n]*)\"") do
     -- quotes are escaped as double quotes
     instruction = string.gsub(instruction, '""', '"')
-    conversatations[name] = {
+    conversatations[name] = { {
       role = "Instruction",
       lines = vim.split(instruction, "\n"),
-    }
+    }, }
   end
   return conversatations
 end

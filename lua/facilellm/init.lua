@@ -7,7 +7,7 @@ local M = {}
 
 M.setup = config.setup
 
-M.create_from_selection = convenience.create_from_selection
+M.create_from_model_selection = convenience.create_from_model_selection
 M.delete_from_selection = convenience.delete_from_selection
 M.rename_from_selection = convenience.rename_from_selection
 M.set_model_from_selection = convenience.set_model_from_selection

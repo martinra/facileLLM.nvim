@@ -53,7 +53,7 @@
 ---@field deprune_message string
 ---@field purge_message string
 ---@field show string
----@field create_from_selection string
+---@field create_from_model_selection string
 ---@field delete_from_selection string
 ---@field focus_from_selection string
 ---@field rename_from_selection string
@@ -101,9 +101,9 @@ local set_global_keymaps = function ()
     vim.keymap.set("n", config.opts.interface.keymaps.show,
       facilellm.show, {})
   end
-  if config.opts.interface.keymaps.create_from_selection ~= "" then
-    vim.keymap.set("n", config.opts.interface.keymaps.create_from_selection,
-      facilellm.create_from_selection, {})
+  if config.opts.interface.keymaps.create_from_model_selection ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.create_from_model_selection,
+      facilellm.create_from_model_selection, {})
   end
   if config.opts.interface.keymaps.delete_from_selection ~= "" then
     vim.keymap.set("n", config.opts.interface.keymaps.delete_from_selection,
@@ -258,7 +258,7 @@ local default_opts = function ()
         purge_message       = "<C-p>",
 
         show                                     = "<leader>aiw",
-        create_from_selection                    = "<leader>ain",
+        create_from_model_selection              = "<leader>ain",
         delete_from_selection                    = "<leader>aid",
         focus_from_selection                     = "<leader>aif",
         rename_from_selection                    = "<leader>air",
@@ -407,12 +407,12 @@ local validate_interface = function (interface)
       deprune_message      = {keymaps.deprune_message,     "s", true},
       purge_message        = {keymaps.purge_message,       "s", true},
 
-      show                     = {keymaps.show,                     "s", true},
-      create_from_selection    = {keymaps.create_from_selection,    "s", true},
-      delete_from_selection    = {keymaps.delete_from_selection,    "s", true},
-      focus_from_selection     = {keymaps.focus_from_selection,     "s", true},
-      rename_from_selection    = {keymaps.rename_from_selection,    "s", true},
-      set_model_from_selection = {keymaps.set_model_from_selection, "s", true},
+      show                        = {keymaps.show,                        "s", true},
+      create_from_model_selection = {keymaps.create_from_model_selection, "s", true},
+      delete_from_selection       = {keymaps.delete_from_selection,       "s", true},
+      focus_from_selection        = {keymaps.focus_from_selection,        "s", true},
+      rename_from_selection       = {keymaps.rename_from_selection,       "s", true},
+      set_model_from_selection    = {keymaps.set_model_from_selection,    "s", true},
 
       add_visual_as_input_and_query             =
         {keymaps.add_visual_as_input_and_query,            "s", true},
@@ -443,11 +443,11 @@ local validate_feedback = function (feedback)
   if feedback.conversation_lock then
     local conversation_lock = feedback.conversation_lock
     vim.validate({
-      input_confirm     = {conversation_lock.input_confirm    , "b", true},
+      input_confirm     = {conversation_lock.input_confirm,     "b", true},
       input_instruction = {conversation_lock.input_instruction, "b", true},
-      input_context     = {conversation_lock.input_context    , "b", true},
-      warn_on_query     = {conversation_lock.warn_on_query    , "b", true},
-      warn_on_clear     = {conversation_lock.warn_on_clear    , "b", true},
+      input_context     = {conversation_lock.input_context,     "b", true},
+      warn_on_query     = {conversation_lock.warn_on_query,     "b", true},
+      warn_on_clear     = {conversation_lock.warn_on_clear,     "b", true},
     })
   end
 end

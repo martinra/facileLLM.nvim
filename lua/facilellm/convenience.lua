@@ -14,7 +14,7 @@ local create_from_model = function (model_config)
 end
 
 ---@return nil
-local create_from_selection = function ()
+local create_from_model_selection = function ()
   ui_select.select_model(config.opts.models,
     function (model_config)
       local sessionid = create_from_model(model_config)
@@ -192,7 +192,7 @@ end
 
 return {
   create_from_model = create_from_model,
-  create_from_selection = create_from_selection,
+  create_from_model_selection = create_from_model_selection,
   delete_from_selection = delete_from_selection,
   rename_from_selection = rename_from_selection,
   set_model_from_selection = set_model_from_selection,

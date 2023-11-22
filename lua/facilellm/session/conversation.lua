@@ -28,8 +28,31 @@ local add_message = function (conversation, role, content)
   end
 end
 
+---@param conv FacileLLM.Conversation
+---@return FacileLLM.MsgIndex?
+---@return FacileLLM.Message?
+local get_last_message_with_index = function (conv)
+  for mx = #conv,1,-1 do
+    if not message.ispurged(conv[mx]) then
+      return mx, conv[mx]
+    end
+  end
+end
+
+---@param conv FacileLLM.Conversation
+---@return string[]?
+local get_last_llm_message_lines = function (conv)
+  for mx = #conv,1,-1 do
+    if not message.ispurged(conv[mx]) and conv[mx].role == "LLM" then
+      return conv[mx].lines
+    end
+  end
+end
+
 
 return {
   create = create,
   add_message = add_message,
+  get_last_message_with_index = get_last_message_with_index,
+  get_last_llm_message_lines = get_last_llm_message_lines,
 }

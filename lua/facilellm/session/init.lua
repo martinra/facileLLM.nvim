@@ -187,14 +187,18 @@ local get_conversation = function (sessionid)
 end
 
 ---@param sessionid FacileLLM.SessionId
----@return string[]?
-local get_last_llm_message = function (sessionid)
+---@return FacileLLM.MsgIndex?
+---@return FacileLLM.Message?
+local get_last_message_with_index = function (sessionid)
   local conv = sessions[sessionid].conversation
-  for mx = #conv,1,-1 do
-    if conv[mx].role == "LLM" then
-      return conv[mx].lines
-    end
-  end
+  return conversation.get_last_message_with_index(conv)
+end
+
+---@param sessionid FacileLLM.SessionId
+---@return string[]?
+local get_last_llm_message_lines = function (sessionid)
+  local conv = sessions[sessionid].conversation
+  return conversation.get_last_llm_message_lines(conv)
 end
 
 ---@param sessionid FacileLLM.SessionId
@@ -342,11 +346,12 @@ return {
   set_model              = set_model,
   get_model_config       = get_model_config,
   get_conversation       = get_conversation,
-  get_last_llm_message   = get_last_llm_message,
+  get_last_message_with_index = get_last_message_with_index,
+  get_last_llm_message_lines = get_last_llm_message_lines,
   add_message            = add_message,
   is_conversation_locked = is_conversation_locked,
   lock_conversation      = lock_conversation,
   unlock_conversation    = unlock_conversation,
-  clear_conversation = clear_conversation,
+  clear_conversation     = clear_conversation,
   query_model            = query_model,
 }

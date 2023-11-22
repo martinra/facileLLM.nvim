@@ -6,6 +6,16 @@ local ui_session = require("facilellm.ui.session")
 local util = require("facilellm.util")
 
 
+---@return nil
+local select_default_model = function ()
+  ui_select.select_model(config.opts.models,
+    function (model_config)
+      llm.set_default_model_config(model_config.name)
+    end,
+    "Select default model"
+  )
+end
+
 ---@param model_config? FacileLLM.Config.LLM
 ---@return FacileLLM.SessionId
 local create_from_model = function (model_config)
@@ -209,6 +219,7 @@ end
 
 
 return {
+  select_default_model = select_default_model,
   create_from_model = create_from_model,
   create_from_model_selection = create_from_model_selection,
   create_from_model_conversation_selection = create_from_model_conversation_selection,

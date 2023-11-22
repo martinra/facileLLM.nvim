@@ -53,6 +53,7 @@
 ---@field deprune_message string
 ---@field purge_message string
 ---@field show string
+---@field select_default_model string
 ---@field create_from_model_selection string
 ---@field create_from_model_conversation_selection string
 ---@field delete_from_selection string
@@ -101,6 +102,10 @@ local set_global_keymaps = function ()
   if config.opts.interface.keymaps.show ~= "" then
     vim.keymap.set("n", config.opts.interface.keymaps.show,
       facilellm.show, {})
+  end
+  if config.opts.interface.keymaps.select_default_model ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.select_default_model,
+      facilellm.select_default_model, {})
   end
   if config.opts.interface.keymaps.create_from_model_selection ~= "" then
     vim.keymap.set("n", config.opts.interface.keymaps.create_from_model_selection,
@@ -263,6 +268,7 @@ local default_opts = function ()
         purge_message       = "<C-p>",
 
         show                                     = "<leader>aiw",
+        select_default_model                     = "<leader>aiM",
         create_from_model_selection              = "<leader>ain",
         create_from_model_conversation_selection = "<leader>aiN",
         delete_from_selection                    = "<leader>aid",
@@ -414,6 +420,7 @@ local validate_interface = function (interface)
       purge_message        = {keymaps.purge_message,       "s", true},
 
       show                        = {keymaps.show,                        "s", true},
+      select_default_model        = {keymaps.select_default_model,        "s", true},
       create_from_model_selection = {keymaps.create_from_model_selection, "s", true},
       create_from_model_conversation_selection =
         {keymaps.create_from_model_conversation_selection, "s", true},

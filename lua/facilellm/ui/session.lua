@@ -205,7 +205,7 @@ local clear_conversation = function (sessionid, instruction, context)
   local conv_bufnr = get_conversation_buffer(sessionid)
   local render_state = get_render_state(sessionid)
   ui_render.clear_conversation(conv_bufnr, render_state)
-  ui_render.render_conversation(conv, conv_bufnr, render_state)
+  ui_render.render_conversation(conv_bufnr, conv, render_state)
 end
 
 ---@param sessionid FacileLLM.SessionId
@@ -214,7 +214,7 @@ local render_conversation = function (sessionid)
   local conv = session.get_conversation(sessionid)
   local bufnr = get_conversation_buffer(sessionid)
   local render_state = get_render_state(sessionid)
-  ui_render.render_conversation(conv, bufnr, render_state)
+  ui_render.render_conversation(bufnr, conv, render_state)
   for _,winid in pairs(vim.api.nvim_list_wins()) do
     if does_follow_conversation(sessionid, winid) then
       ui_conversation.follow(bufnr, winid)
@@ -344,7 +344,7 @@ local set_buf_keymaps = function (sessionid)
         end
 
         message.prune(conv[mx])
-        ui_render.prune_message(conv, mx, bufnr, render_state)
+        ui_render.prune_message(bufnr, mx, conv, render_state)
       end,
       { buffer = conv_bufnr })
   end
@@ -362,7 +362,7 @@ local set_buf_keymaps = function (sessionid)
         end
 
         message.deprune(conv[mx])
-        ui_render.deprune_message(conv, mx, bufnr, render_state)
+        ui_render.deprune_message(bufnr, mx, conv, render_state)
       end,
       { buffer = conv_bufnr })
   end
@@ -380,7 +380,7 @@ local set_buf_keymaps = function (sessionid)
         end
 
         message.purge(conv[mx])
-        ui_render.purge_message(conv, mx, bufnr, render_state)
+        ui_render.purge_message(bufnr, mx, conv, render_state)
       end,
       { buffer = conv_bufnr })
   end
@@ -424,8 +424,9 @@ end
 local add_input_message_and_query = function (sessionid, lines, response_callback)
   ui_select.touch(sessionid)
   session.add_message(sessionid, "Input", lines)
-  ui_render.start_highlight_receiving(
-    session.get_conversation(sessionid), get_render_state(sessionid))
+  local conv = session.get_conversation(sessionid)
+  local render_state = get_render_state(sessionid)
+  ui_render.start_highlight_receiving(conv, render_state)
   session.query_model(sessionid, render_conversation,
     function (sessionid__loc)
       on_complete_query(sessionid__loc, response_callback)
@@ -533,8 +534,8 @@ local create = function (model_config)
   set_buf_autocmds(sessionid)
   set_buf_keymaps(sessionid)
 
-  ui_render.render_conversation(session.get_conversation(sessionid),
-    sess.conv_bufnr, sess.render_state)
+  local conv = session.get_conversation(sessionid)
+  ui_render.render_conversation(sess.conv_bufnr, conv, sess.render_state)
 
   return sessionid
 end

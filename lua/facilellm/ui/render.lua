@@ -48,13 +48,13 @@ end
 ---Following the convention of extmarks, we return 0-based inclusive row
 ---indices.
 ---@param mx FacileLLM.MsgIndex
----@param render_state FacileLLM.RenderState
 ---@param msg FacileLLM.Message
+---@param render_state FacileLLM.RenderState
 ---@return integer
 ---@return integer
 ---@return integer
 ---@return integer
-local get_message_range = function (mx, render_state, msg)
+local get_message_range = function (mx, msg, render_state)
   local row, col = get_message_start(mx, render_state)
   local end_row, end_col
   if render_state.pos.msg == mx then
@@ -86,11 +86,11 @@ local buf_get_namespace_highlight_pruned = function ()
 end
 
 ---@param bufnr BufNr
----@param render_state FacileLLM.RenderState
 ---@param mx FacileLLM.MsgIndex
 ---@param msg FacileLLM.Message
+---@param render_state FacileLLM.RenderState
 ---@return nil
-local set_highlight_role = function (bufnr, render_state, mx, msg)
+local set_highlight_role = function (bufnr, mx, msg, render_state)
   local row, col = get_message_start(mx, render_state)
   local end_row, end_col = row, string.len(role_display(msg.role))
   local ns = buf_get_namespace_highlight_role()
@@ -104,12 +104,12 @@ local set_highlight_role = function (bufnr, render_state, mx, msg)
 end
 
 ---@param bufnr BufNr
----@param render_state FacileLLM.RenderState
 ---@param mx FacileLLM.MsgIndex
 ---@param msg FacileLLM.Message
+---@param render_state FacileLLM.RenderState
 ---@return nil
-local set_highlight_receiving = function (bufnr, render_state, mx, msg)
-  local row, col, end_row, end_col = get_message_range(mx, render_state, msg)
+local set_highlight_receiving = function (bufnr, mx, msg, render_state)
+  local row, col, end_row, end_col = get_message_range(mx, msg, render_state)
   local ns = buf_get_namespace_highlight_receiving()
   if render_state.highlight_receiving.extmark then
     vim.api.nvim_buf_set_extmark(bufnr, ns,
@@ -133,12 +133,12 @@ local set_highlight_receiving = function (bufnr, render_state, mx, msg)
 end
 
 ---@param bufnr BufNr
----@param render_state FacileLLM.RenderState
 ---@param mx FacileLLM.MsgIndex
 ---@param msg FacileLLM.Message
+---@param render_state FacileLLM.RenderState
 ---@return nil
-local set_highlight_pruned = function (bufnr, render_state, mx, msg)
-  local row, col, end_row, end_col = get_message_range(mx, render_state, msg)
+local set_highlight_pruned = function (bufnr, mx, msg, render_state)
+  local row, col, end_row, end_col = get_message_range(mx, msg, render_state)
   local ns = buf_get_namespace_highlight_pruned()
   if render_state.prune_extmarks[mx] then
     vim.api.nvim_buf_set_extmark(bufnr, ns,
@@ -162,10 +162,10 @@ local set_highlight_pruned = function (bufnr, render_state, mx, msg)
 end
 
 ---@param bufnr BufNr
----@param render_state FacileLLM.RenderState
 ---@param mx FacileLLM.MsgIndex
+---@param render_state FacileLLM.RenderState
 ---@return nil
-local del_highlight_pruned = function (bufnr, render_state, mx)
+local del_highlight_pruned = function (bufnr, mx, render_state)
   if render_state.prune_extmarks[mx] then
     local ns = buf_get_namespace_highlight_pruned()
     vim.api.nvim_buf_del_extmark(bufnr, ns, render_state.prune_extmarks[mx])
@@ -224,11 +224,11 @@ local clear_conversation = function (bufnr, render_state)
   vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
 end
 
----@param conv FacileLLM.Conversation
 ---@param bufnr BufNr
+---@param conv FacileLLM.Conversation
 ---@param render_state FacileLLM.RenderState
 ---@return nil
-local render_conversation = function (conv, bufnr, render_state)
+local render_conversation = function (bufnr, conv, render_state)
   if #conv == 0 then
     return
   end
@@ -257,7 +257,7 @@ local render_conversation = function (conv, bufnr, render_state)
         render_state.offset_total = render_state.offset_total + 1
 
         if config.opts.interface.highlight_role then
-          set_highlight_role(bufnr, render_state, mx, msg)
+          set_highlight_role(bufnr, mx, msg, render_state)
         end
       end
 
@@ -297,10 +297,10 @@ local render_conversation = function (conv, bufnr, render_state)
       if config.opts.feedback.highlight_message_while_receiving
         and render_state.highlight_receiving
         and render_state.highlight_receiving.msg == mx then
-        set_highlight_receiving(bufnr, render_state, mx, msg)
+        set_highlight_receiving(bufnr, mx, msg, render_state)
       end
       if message.ispruned(msg) then
-        set_highlight_pruned(bufnr, render_state, mx, msg)
+        set_highlight_pruned(bufnr, mx, msg, render_state)
       end
 
       if msg.role == "Instruction" or msg.role == "Context" then
@@ -328,44 +328,40 @@ local render_conversation = function (conv, bufnr, render_state)
   end
 end
 
-
----@param conv FacileLLM.Conversation
----@param mx FacileLLM.MsgIndex
 ---@param bufnr BufNr
+---@param mx FacileLLM.MsgIndex
+---@param msg FacileLLM.Message
 ---@param render_state FacileLLM.RenderState
 ---@return nil
-local prune_message = function (conv, mx, bufnr, render_state)
-  local msg = conv[mx]
+local prune_message = function (bufnr, mx, msg, render_state)
   if not message.ispruned(msg) then
     return
   end
   if render_state.pos.msg >= mx then
-    set_highlight_pruned(bufnr, render_state, mx, msg)
+    set_highlight_pruned(bufnr, mx, msg, render_state)
   end
 end
 
----@param conv FacileLLM.Conversation
----@param mx FacileLLM.MsgIndex
 ---@param bufnr BufNr
+---@param msg FacileLLM.Message
+---@param mx FacileLLM.MsgIndex
 ---@param render_state FacileLLM.RenderState
 ---@return nil
-local deprune_message = function (conv, mx, bufnr, render_state)
-  local msg = conv[mx]
+local deprune_message = function (bufnr, mx, msg, render_state)
   if message.ispruned(msg) then
     return
   end
   if render_state.offsets[mx] and render_state.pos.msg >= mx then
-    del_highlight_pruned(bufnr, render_state, mx)
+    del_highlight_pruned(bufnr, mx, render_state)
   end
 end
 
----@param conv FacileLLM.Conversation
----@param mx FacileLLM.MsgIndex
 ---@param bufnr BufNr
+---@param msg FacileLLM.Message
+---@param mx FacileLLM.MsgIndex
 ---@param render_state FacileLLM.RenderState
 ---@return nil
-local purge_message = function (conv, mx, bufnr, render_state)
-  local msg = conv[mx]
+local purge_message = function (bufnr, mx, msg, render_state)
   if not message.ispurged(msg) then
     return
   end
@@ -379,10 +375,10 @@ local purge_message = function (conv, mx, bufnr, render_state)
     end_highlight_receiving(bufnr, render_state)
   end
   if render_state.prune_extmarks[mx] then
-    del_highlight_pruned(bufnr, render_state, mx)
+    del_highlight_pruned(bufnr, mx, render_state)
   end
 
-  local row, _, row_end, _ = get_message_range(mx, render_state, msg)
+  local row, _, row_end, _ = get_message_range(mx, msg, render_state)
   vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
   vim.api.nvim_buf_set_lines(bufnr, row, row_end+1, false, {})
   vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
@@ -391,7 +387,7 @@ local purge_message = function (conv, mx, bufnr, render_state)
   if render_state.pos.msg == mx then
     offset_reduction = 1 + render_state.pos.line
   else
-    offset_reduction = 1 + #conv[mx].lines
+    offset_reduction = 1 + #msg.lines
   end
   render_state.offset_total = render_state.offset_total - offset_reduction
   render_state.offsets[mx] = nil
@@ -404,12 +400,12 @@ local purge_message = function (conv, mx, bufnr, render_state)
 end
 
 ---@param row integer 0-based
----@param render_state FacileLLM.RenderState
 ---@param conv FacileLLM.Conversation
+---@param render_state FacileLLM.RenderState
 ---@return integer
-local get_message_index = function (row, render_state, conv)
+local get_message_index = function (row, conv, render_state)
   for mx,_ in pairs(render_state.offsets) do
-    local mrow, _, end_mrow, _ = get_message_range(mx, render_state, conv[mx])
+    local mrow, _, end_mrow, _ = get_message_range(mx, conv[mx], render_state)
     if mrow <= row and row <= end_mrow then
       return mx
     end

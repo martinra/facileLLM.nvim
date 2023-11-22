@@ -17,7 +17,8 @@ end
 ---@return nil
 local add_message = function (conversation, role, content)
   local last_msg = conversation[#conversation]
-  if role == nil or last_msg and role == last_msg.role then
+  if role == nil or last_msg and not message.ispruned(last_msg)
+    and role == last_msg.role then
     if type(content) == "string" then
       message.append(last_msg, content)
     else

@@ -4,19 +4,19 @@ local message = require("facilellm.session.message")
 
 ---@class FacileLLM.RenderState
 ---@field pos FacileLLM.RenderState.Position
----@field offsets number[]
----@field offset_total number total number of lines rendered
+---@field offsets integer[]
+---@field offset_total integer total number of lines rendered
 ---@field highlight_receiving FacileLLM.RenderState.HighlightReceiving?
----@field prune_extmarks table<FacileLLM.MsgIndex, number>
+---@field prune_extmarks table<FacileLLM.MsgIndex, integer>
 
 ---@class FacileLLM.RenderState.Position
 ---@field msg FacileLLM.MsgIndex index of the last rendered message
----@field line number index of the last rendered line
----@field char number index of the last rendered character
+---@field line integer index of the last rendered line
+---@field char integer index of the last rendered character
 
 ---@class FacileLLM.RenderState.HighlightReceiving
 ---@field msg FacileLLM.MsgIndex
----@field extmark number?
+---@field extmark integer?
 
 
 ---@param role FacileLLM.MsgRole
@@ -71,12 +71,12 @@ local get_message_range = function (mx, msg, render_state)
   return row, col, end_row, end_col
 end
 
----@return number
+---@return integer
 local buf_get_namespace_highlight_role = function ()
   return vim.api.nvim_create_namespace("facilellm-highlight-role")
 end
 
----@return number
+---@return integer
 local buf_get_namespace_highlight_receiving = function ()
   return vim.api.nvim_create_namespace("facilellm-highlight-receiving")
 end

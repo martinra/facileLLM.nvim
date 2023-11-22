@@ -76,7 +76,7 @@ local select_session = function (session_names, callback, prompt)
       attach_mappings = function (prompt_bufnr)
         actions.select_default:replace(function ()
           actions.close(prompt_bufnr)
-          ---@type number sessionid 
+          ---@type FacileLLM.SessionId sessionid 
           local sessionid = actions_state.get_selected_entry().value
           callback(sessionid)
         end)

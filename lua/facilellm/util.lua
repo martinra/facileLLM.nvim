@@ -79,8 +79,8 @@ local substitute_visual_selection = function ()
 end
 
 ---@param winid WinId
----@param row_start number
----@param row_end number
+---@param row_start integer
+---@param row_end integer
 ---@return nil
 local create_fold = function (winid, row_start, row_end)
   local winid_orig = vim.api.nvim_get_current_win()
@@ -94,7 +94,7 @@ local create_fold = function (winid, row_start, row_end)
 end
 
 ---@param winid WinId
----@param row number
+---@param row integer
 ---@return nil
 local delete_fold = function (winid, row)
   local winid_orig = vim.api.nvim_get_current_win()

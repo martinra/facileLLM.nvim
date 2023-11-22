@@ -2,7 +2,7 @@ local message = require("facilellm.session.message")
 
 
 ---@alias FacileLLM.Conversation FacileLLM.Message[]
----@alias FacileLLM.MsgIndex number
+---@alias FacileLLM.MsgIndex integer
 
 
 ---@param initial FacileLLM.Conversation?

@@ -4,12 +4,12 @@ local ui_common = require("facilellm.ui.common")
 local util = require("facilellm.util")
 
 
----@return number
+---@return integer
 local buf_get_namespace_confirm_feedback = function ()
   return vim.api.nvim_create_namespace("facilellm-confirm-feedback")
 end
 
----@type number?
+---@type integer?
 local signal_response_not_yet_complete_extmark = nil
 
 ---@param bufnr BufNr

@@ -1,5 +1,5 @@
 ---@class FacileLLM.Config
----@field default_model string | number Name or index of the default model.
+---@field default_model string | integer
 ---@field models FacileLLM.Config.LLM[]
 ---@field naming FacileLLM.Config.Naming
 ---@field interface FacileLLM.Config.Interface

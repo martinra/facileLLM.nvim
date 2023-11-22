@@ -4,7 +4,7 @@ local llm = require("facilellm.llm")
 local message = require("facilellm.session.message")
 
 
----@alias FacileLLM.SessionId number
+---@alias FacileLLM.SessionId integer
 
 ---@class FacileLLM.Session
 ---@field name string

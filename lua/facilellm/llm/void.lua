@@ -3,7 +3,7 @@ local R = {}
 ---@param add_message function
 ---@param on_complete function
 ---@param lines (string[] | string)[]
----@param delay number
+---@param delay integer
 ---@return nil
 R.send_word_by_word = function (conv, add_message, on_complete, lines, delay)
   if #lines == 0 then
@@ -42,8 +42,8 @@ end
 ---@param on_complete function
 ---@param lines string[]
 ---@param response_lines string[]
----@param major_delay number
----@param minor_delay number
+---@param major_delay integer
+---@param minor_delay integer
 ---@return nil
 R.send_response = function(conv, add_message, on_complete, lines, response_lines, major_delay, minor_delay)
   if #response_lines == 0 then

@@ -97,7 +97,7 @@ opts = {
 },
 ```
 
-## Global Commands
+## Global commands
 
 ### `show`
 
@@ -198,6 +198,90 @@ Same as `add_visual_as_input_query_and_append`, but delete the selection and
 substitute the response once completely received.
 
 Bound by default to `<leader>ais`.
+
+## Local commands
+
+Local commands are the ones awailable in the conversation and/or input buffer
+of a session.
+
+### `delete_interaction`
+
+Delete the user input and the LLM responses of a session, but not the
+instructions and the context.
+
+Bound by default to `<C-d>i`.
+
+### `delete_conversation`
+
+Delete the whole conversation of a session.
+
+Bound by default to `<C-d>c`.
+
+### `delete_session`
+
+Delete a session.
+
+Bound by default to `<C-d>s`.
+
+### `fork_session`
+
+Fork a session, replicating its current model configuration and conversation.
+
+Bound by default to `<C-f>`.
+
+### `rename_session`
+
+Rename a session.
+
+Bound by default to `<C-r>`.
+
+### `input_confirm`
+
+Include the provided input into the session conversation and query the LLM for
+a response.
+
+Bound by default to `<Enter>`. Only available in the input buffer. Consider
+using `<C-o><Enter>` when in insert mode.
+
+### `input_instruction`
+
+Include the provided input as an instruction into the session conversation.
+
+Bound by default to `<C-i>`. Only available in the input buffer. Consider
+using `<C-o><C-i>` when in insert mode.
+
+
+### `input_context`
+
+Include the provided input as an instruction into the session conversation.
+
+Bound by default to `<C-k>`. Only available in the input buffer. Consider
+using `<C-o><C-k>` when in insert mode.
+
+### `requery`
+
+Purge the last LLM response and re-query it.
+
+Bound by default to `<C-r>`.
+
+### `prune_message`
+
+Prune the message under the cursor. Pruned messages are usually not provided to
+the LLM when querying it.
+
+Bound by default to `p`. Only availabe in the conversation buffer.
+
+### `deprune_message`
+
+De-prune the message under the cursor. 
+
+Bound by default to `P`. Only availabe in the conversation buffer.
+
+### `purge_message`
+
+Purge the message under the cursor. Purged messages cannot be recovered.
+
+Bound by default to `<C-p>`. Only availabe in the conversation buffer.
 
 ## Setup
 
@@ -444,3 +528,10 @@ FacileLLMRole: markdownH1
 FacileLLMMsgReceiving: DiffAdd
 FacileLLMMsgPruned: DiffDelete
 ```
+
+## Example usage
+
+FacileLLM intentionally does not include prebuilt complex workflows. This is
+the bussiness of more integrated solutions like LunarVIM once they include an
+LLM interface. The plan is to include in this place a list of possible usage to
+illustrate the possibilities.

@@ -300,6 +300,46 @@ calling the API. Changes to fields of `params` after initializing a session
 take effect on future API calls. This allows for exmaple to adjust the
 temperature of a model without having to setup many of them.
 
+### Conversation configuration
+
+Conversations can be given in two ways. To explicitly configure a list of them
+use the field `conversations`. For example, the default configuration includes:
+
+```lua
+conversations = {
+  ["Concise answers"] = {
+    {
+      role = "Instruction",
+      lines = { "Give short and concise answers." }
+    },
+  },
+  ["Detailed answers"] = {
+    {
+      role = "Instruction",
+      lines = { "Give detailed answers that scrutinize many aspects of the topic." }
+    },
+  },
+},
+```
+
+To amend this list by further options that are extracted from a CSV file use
+`conversations_csv`. The intention behind this option is to accommodate the use of
+["Awesome ChatGPT Prompts"](`https://raw.githubusercontent.com/f/awesome-chatgpt-prompts/main/prompts.csv`)
+and similar prompt files. They are intentionally not included in facileLLM, but
+those who wish to use them can download the CSV file to a path of their choice
+and use the following code to load it:
+
+```lua
+conversations_csv = (function ()
+  io.input(path .. "/promts.csv")
+  local csv = io.read("*a")
+  io.input()
+  local fst_linebreak = string.find(csv, "\n")
+  csv = string.sub(csv, fst_linebreak+1, string.len(csv))
+  return csv
+end)(),
+```
+
 ### Naming configuration
 
 These options determine the text displayed by facileLLM. The default is

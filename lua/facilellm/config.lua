@@ -33,6 +33,7 @@
 ---@field couple_conv_input_windows boolean
 ---@field layout_relative ("editor"| "win")
 ---@field layout_direction ("right"| "left")
+---@field width integer
 ---@field input_relative_height number
 ---@field highlight_role boolean
 ---@field fold_instruction boolean
@@ -252,6 +253,7 @@ local default_opts = function ()
       couple_conv_input_windows = true,
       layout_relative           = "editor",
       layout_direction          = "right",
+      width                     = 0,
       input_relative_height     = 0.15,
       highlight_role            = true,
       fold_instruction          = true,
@@ -401,6 +403,7 @@ local validate_interface = function (interface)
     couple_conv_input_windows = {interface.couple_conv_input_windows, "b", true},
     layout_relative           = {interface.layout_relative,           "s", true},
     layout_direction          = {interface.layout_direction,          "s", true},
+    width                     = {interface.width,                     "n", true},
     input_relative_height     = {interface.input_relative_height,     "n", true},
     highlight_role            = {interface.highlight_role,            "b", true},
     fold_instruction          = {interface.fold_instruction,          "b", true},

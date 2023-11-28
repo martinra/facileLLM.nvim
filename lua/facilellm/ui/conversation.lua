@@ -78,6 +78,10 @@ local create_window = function (bufnr)
   vim.cmd(string.format("noau %s vsplit", split_modifier))
   local winid = vim.api.nvim_get_current_win()
 
+  if config.opts.interface.width ~= 0 then
+    vim.api.nvim_win_set_width(winid, config.opts.interface.width)
+  end
+
   fold_messages(winid)
 
   vim.api.nvim_win_set_buf(winid, bufnr)

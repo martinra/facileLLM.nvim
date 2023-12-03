@@ -1,3 +1,27 @@
+local M = {}
+
+---@param tbl table
+---@param copied table?
+---@return table
+M.deep_copy_values = function (tbl, copied)
+  copied = copied or {}
+  local copy
+  if type(tbl) == 'table' then
+    if copied[tbl] then
+      return copied[tbl]
+    else
+      copy = {}
+      copied[tbl] = copy
+      for k,v in pairs(tbl) do
+        copy[k] = M.deep_copy_values(v, copied)
+      end
+    end
+    return copy
+  else
+    return tbl
+  end
+end
+
 ---@param lines string[]
 ---@return boolean
 local isempty_lines = function (lines)
@@ -131,6 +155,7 @@ end
 
 
 return {
+  deep_copy_values     = M.deep_copy_values,
   isempty_lines        = isempty_lines,
   win_vsplit_modifier  = win_vsplit_modifier,
   get_visual_selection = get_visual_selection,

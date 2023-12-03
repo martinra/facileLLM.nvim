@@ -1,5 +1,6 @@
 local config = require("facilellm.config")
 local message = require("facilellm.session.message")
+local util = require("facilellm.util")
 
 
 ---@alias FacileLLM.Conversation FacileLLM.Message[]
@@ -16,7 +17,7 @@ local create = function (initial)
       vim.notify("unavailable conversation " .. initial, vim.log.levels.WARN)
       return {}
     end
-    return vim.tbl_deep_extend("force", {}, conv)
+    return util.deep_copy_values(conv)
   else
     return initial or {}
   end

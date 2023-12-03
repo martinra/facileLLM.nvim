@@ -2,6 +2,7 @@ local config = require("facilellm.config")
 local conversation = require("facilellm.session.conversation")
 local llm = require("facilellm.llm")
 local message = require("facilellm.session.message")
+local util = require("facilellm.util")
 
 
 ---@alias FacileLLM.SessionId integer
@@ -108,7 +109,7 @@ local create = function (model_config)
     model = model,
     conversation = conversation.create(model_config.conversation),
     conversation_locked = false,
-    config = vim.tbl_deep_extend("force", {}, model_config),
+    config = util.deep_copy_values(model_config),
   }
   sessions[sessionid] = sess
 

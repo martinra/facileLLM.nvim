@@ -39,8 +39,8 @@ local create_from_conversation_selection = function ()
   ui_select.select_conversation(config.opts.conversations,
   function (conversation)
     local model_config = llm.get_default_model_config()
-    model_config = vim.tbl_deep_extend("force", {}, model_config)
-    model_config.conversation = vim.tbl_deep_extend("force", {}, conversation)
+    model_config = util.deep_copy_values(model_config)
+    model_config.conversation = util.deep_copy_values(conversation)
     local sessionid = ui_session.create(model_config)
     ui_session.set_current_win_conversation_input(sessionid)
   end,
@@ -54,8 +54,8 @@ local create_from_model_conversation_selection = function ()
     function (model_config)
       ui_select.select_conversation(config.opts.conversations,
         function (conversation)
-          model_config = vim.tbl_deep_extend("force", {}, model_config)
-          model_config.conversation = vim.tbl_deep_extend("force", {}, conversation)
+          model_config = util.deep_copy_values(model_config)
+          model_config.conversation = util.deep_copy_values(conversation)
           local sessionid = ui_session.create(model_config)
           ui_session.set_current_win_conversation_input(sessionid)
         end,

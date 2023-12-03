@@ -2,6 +2,7 @@
 
 local job = require("plenary.job")
 local message = require("facilellm.session.message")
+local util = require("facilellm.util")
 
 
 ---@alias FacileLLM.OpenAI.MsgRole ("system"| "assistant"| "user")
@@ -151,7 +152,7 @@ local response_to = function (conversation, add_message, on_complete, opts)
     end
   end
 
-  local data = vim.tbl_deep_extend("force", {}, opts.params)
+  local data = util.deep_copy_values(opts.params)
   data.stream = true
   data.model = opts.openai_model
   data.messages = {}

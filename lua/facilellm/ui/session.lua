@@ -6,6 +6,7 @@ local ui_conversation = require("facilellm.ui.conversation")
 local ui_input = require("facilellm.ui.input")
 local ui_render = require("facilellm.ui.render")
 local ui_select = require("facilellm.ui.select_session")
+local util = require("facilellm.util")
 
 
 ---@class FacileLLM.SessionUI
@@ -588,8 +589,7 @@ end
 local fork = function (sessionid)
   local model_config = {
     name = session.fork_name_variant(session.get_name(sessionid)),
-    conversation =
-      vim.tbl_deep_extend("force", {}, session.get_conversation(sessionid)),
+    conversation = util.deep_copy_values(session.get_conversation(sessionid))
   }
   model_config =
     vim.tbl_deep_extend("keep", model_config, session.get_model_config(sessionid))

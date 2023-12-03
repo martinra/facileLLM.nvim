@@ -541,7 +541,7 @@ end
 local extend_facilellm_config = function (opts)
   opts = vim.tbl_deep_extend("force", default_opts(), opts)
   for mx,model in ipairs(opts.models) do
-    opts.models[mx] = vim.tbl_deep_extend("keep", model, default_model_config())
+    opts.models[mx] = vim.tbl_deep_extend("force", default_model_config(), model)
   end
   if opts.conversations_csv then
     for name, conv in pairs(util.csv_to_conversations(opts.conversations_csv)) do

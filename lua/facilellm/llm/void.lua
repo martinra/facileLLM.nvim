@@ -113,7 +113,7 @@ end
 ---@return FacileLLM.LLM
 local create = function (opts)
   opts = opts or {}
-  opts = vim.tbl_extend("force", default_opts(), opts)
+  opts = vim.tbl_deep_extend("force", default_opts(), opts)
 
   ---@type FacileLLM.LLM
   local llm = {

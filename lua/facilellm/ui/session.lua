@@ -349,7 +349,7 @@ local set_buf_keymaps = function (sessionid)
         local render_state = get_render_state(sessionid)
 
         local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
-        local mx = ui_render.get_message_index(row-1, render_state, conv)
+        local mx = ui_render.get_message_index(row-1, conv, render_state)
         if not mx then
           return
         end
@@ -367,7 +367,7 @@ local set_buf_keymaps = function (sessionid)
         local render_state = get_render_state(sessionid)
 
         local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
-        local mx = ui_render.get_message_index(row-1, render_state, conv)
+        local mx = ui_render.get_message_index(row-1, conv, render_state)
         if not mx then
           return
         end
@@ -385,7 +385,7 @@ local set_buf_keymaps = function (sessionid)
         local render_state = get_render_state(sessionid)
 
         local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
-        local mx = ui_render.get_message_index(row-1, render_state, conv)
+        local mx = ui_render.get_message_index(row-1, conv, render_state)
         if not mx then
           return
         end

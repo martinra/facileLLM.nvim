@@ -355,6 +355,7 @@ end
 ---@return nil
 local prune_message = function (bufnr, mx, msg, render_state)
   if not message.ispruned(msg) then
+    vim.notify("only rendering pruned messages as such", vim.log.levels.WARN)
     return
   end
   if render_state.pos.msg >= mx then
@@ -369,6 +370,7 @@ end
 ---@return nil
 local deprune_message = function (bufnr, mx, msg, render_state)
   if message.ispruned(msg) then
+    vim.notify("only rendering unpruned messages as such", vim.log.levels.WARN)
     return
   end
   if render_state.offsets[mx] and render_state.pos.msg >= mx then
@@ -383,6 +385,7 @@ end
 ---@return nil
 local purge_message = function (bufnr, mx, msg, render_state)
   if not message.ispurged(msg) then
+    vim.notify("only rendering purged messages as such", vim.log.levels.WARN)
     return
   end
 

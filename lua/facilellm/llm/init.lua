@@ -77,7 +77,8 @@ local get_default_model_config = function ()
     end
     error("Invalid default model name " .. default_model)
   else
-    error("Invalid default model " .. vim.inspect(default_model) .. ", must be number (list index) or string (model name)")
+    error("Invalid default model " .. vim.inspect(default_model)
+           .. ", must be number (list index) or string (model name)")
   end
 end
 

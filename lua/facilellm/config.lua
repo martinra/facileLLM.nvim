@@ -11,7 +11,7 @@
 ---@field name string?
 ---@field implementation FacileLLM.LLMImplementationName | FacileLLM.LLMImplementation
 ---@field opts table Options that are forwarded to the implementation.
----@field conversation FacileLLM.ConversationName | FacileLLM.Conversation 
+---@field conversation FacileLLM.ConversationName | FacileLLM.Conversation
 ---@field registers table<string, FacileLLM.Config.Register>
 ---@field autostart boolean
 

@@ -136,9 +136,8 @@ local get_some_session = function ()
   if #sessions == 0 then
     return nil
   else
-    for id,_ in pairs(sessions) do
-      return id
-    end
+    local id, _ = next(sessions)
+    return id
   end
 end
 

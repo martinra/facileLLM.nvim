@@ -356,7 +356,7 @@ local set_buf_keymaps = function (sessionid)
         end
 
         message.prune(conv[mx])
-        ui_render.prune_message(bufnr, mx, conv, render_state)
+        ui_render.prune_message(bufnr, mx, conv[mx], render_state)
       end,
       { buffer = conv_bufnr })
   end
@@ -374,7 +374,7 @@ local set_buf_keymaps = function (sessionid)
         end
 
         message.deprune(conv[mx])
-        ui_render.deprune_message(bufnr, mx, conv, render_state)
+        ui_render.deprune_message(bufnr, mx, conv[mx], render_state)
       end,
       { buffer = conv_bufnr })
   end
@@ -392,7 +392,7 @@ local set_buf_keymaps = function (sessionid)
         end
 
         message.purge(conv[mx])
-        ui_render.purge_message(bufnr, mx, conv, render_state)
+        ui_render.purge_message(bufnr, mx, conv[mx], render_state)
       end,
       { buffer = conv_bufnr })
   end

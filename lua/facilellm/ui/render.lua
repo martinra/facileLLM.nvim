@@ -363,8 +363,8 @@ local prune_message = function (bufnr, mx, msg, render_state)
 end
 
 ---@param bufnr BufNr
----@param msg FacileLLM.Message
 ---@param mx FacileLLM.MsgIndex
+---@param msg FacileLLM.Message
 ---@param render_state FacileLLM.RenderState
 ---@return nil
 local deprune_message = function (bufnr, mx, msg, render_state)
@@ -377,8 +377,8 @@ local deprune_message = function (bufnr, mx, msg, render_state)
 end
 
 ---@param bufnr BufNr
----@param msg FacileLLM.Message
 ---@param mx FacileLLM.MsgIndex
+---@param msg FacileLLM.Message
 ---@param render_state FacileLLM.RenderState
 ---@return nil
 local purge_message = function (bufnr, mx, msg, render_state)

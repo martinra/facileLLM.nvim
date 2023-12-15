@@ -132,6 +132,15 @@ end
 ---@param opts table
 ---@return nil
 local response_to = function (conversation, add_message, on_complete, opts)
+  if not opts.api_key then
+    opts.api_key = opts.get_api_key()
+    print(vim.inspect(opts.api_key))
+    if opts.api_key == nil then
+      vim.notify("Error on acquiring API key for " .. opts.name, vim.log.levels.ERROR)
+      return
+    end
+  end
+
   ---@type FacileLLM.OpenAI.StdOutRecord
   local stdout_record = {
     lines = {},
@@ -160,10 +169,6 @@ local response_to = function (conversation, add_message, on_complete, opts)
     if not message.isempty(msg) and not message.ispruned(msg) then
       table.insert(data.messages, convert_msg_to_openai(msg))
     end
-  end
-
-  if not opts.api_key then
-    opts.api_key = opts.get_api_key()
   end
 
   ---@diagnostic disable-next-line missing-fields

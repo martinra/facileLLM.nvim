@@ -220,6 +220,7 @@ local default_opts = function ()
     },
 
     conversations = {
+      ["Blank conversation"] = {},
       ["Concise answers"] = {
         {
           role = "Instruction",

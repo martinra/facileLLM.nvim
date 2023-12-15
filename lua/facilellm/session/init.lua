@@ -307,24 +307,24 @@ local query_model = function (sessionid, render_conversation, on_complete)
     return
   end
 
-  ---@param role FacileLLM.MsgRole
-  ---@param content string | string[]
-  ---@return nil
-  local add_message_and_render = function (role, content)
-    add_message(sessionid, role, content)
-    vim.schedule(function ()
+  -- The model may use asynchronous calls, so we wrap this function.
+  local add_message_and_render = vim.schedule_wrap(
+    ---@param role FacileLLM.MsgRole
+    ---@param content string | string[]
+    ---@return nil
+    function (role, content)
+      add_message(sessionid, role, content)
       render_conversation(sessionid)
     end)
-  end
 
+  -- The model may use asynchronous calls, so we wrap this function.
   ---@return nil
-  local on_complete__loc = function ()
-    unlock_conversation(sessionid)
-    vim.schedule(function ()
+  local on_complete__loc = vim.schedule_wrap(
+    function ()
+      unlock_conversation(sessionid)
       on_complete(sessionid)
       render_conversation(sessionid)
     end)
-  end
 
   lock_conversation(sessionid)
   local model = get_model(sessionid)

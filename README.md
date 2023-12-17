@@ -227,19 +227,19 @@ Bound by default to `<C-d>c`.
 
 Delete a session.
 
-Bound by default to `<C-d>s`.
+Bound by default to `<C-s>d`.
 
 ### `fork_session`
 
 Fork a session, replicating its current model configuration and conversation.
 
-Bound by default to `<C-f>`.
+Bound by default to `<C-s>f`.
 
 ### `rename_session`
 
 Rename a session.
 
-Bound by default to `<C-r>`.
+Bound by default to `<C-s>r`.
 
 ### `input_confirm`
 
@@ -482,9 +482,9 @@ interface = {
 keymaps = {
   delete_interaction  = "<C-d>i",
   delete_conversation = "<C-d>c",
-  delete_session      = "<C-d>s",
-  fork_session        = "<C-f>",
-  rename_session      = "<C-r>",
+  delete_session      = "<C-s>d",
+  fork_session        = "<C-s>f",
+  rename_session      = "<C-s>r",
 
   input_confirm       = "<Enter>",
   input_instruction   = "<C-i>",

@@ -262,9 +262,9 @@ local default_opts = function ()
       keymaps = {
         delete_interaction  = "<C-d>i",
         delete_conversation = "<C-d>c",
-        delete_session      = "<C-d>s",
-        fork_session        = "<C-f>",
-        rename_session      = "<C-r>",
+        delete_session      = "<C-s>d",
+        fork_session        = "<C-s>f",
+        rename_session      = "<C-s>r",
 
         input_confirm       = "<Enter>",
         input_instruction   = "<C-i>",

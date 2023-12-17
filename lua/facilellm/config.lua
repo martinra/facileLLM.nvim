@@ -24,6 +24,7 @@
 ---@class FacileLLM.Config.Naming.RoleDisplay
 ---@field instruction string
 ---@field context string
+---@field example string
 ---@field input string
 ---@field llm string
 
@@ -38,6 +39,7 @@
 ---@field highlight_role boolean
 ---@field fold_instruction boolean
 ---@field fold_context boolean
+---@field fold_example boolean
 ---@field keymaps FacileLLM.Config.Interface.Keymaps
 
 ---@class FacileLLM.Config.Interface.Keymaps
@@ -49,6 +51,7 @@
 ---@field input_confirm string
 ---@field input_instruction string
 ---@field input_context string
+---@field input_example string
 ---@field requery string
 ---@field prune_message string
 ---@field deprune_message string
@@ -63,8 +66,9 @@
 ---@field rename_from_selection string
 ---@field set_model_from_selection string
 ---@field add_visual_as_input_and_query string
----@field add_visual_as_context string
 ---@field add_visual_as_instruction string
+---@field add_visual_as_context string
+---@field add_visual_as_example string
 ---@field add_visual_as_input_query_and_append string
 ---@field add_visual_as_input_query_and_prepend string
 ---@field add_visual_as_input_query_and_substitute string
@@ -83,6 +87,7 @@
 ---@field input_confirm boolean
 ---@field input_instruction boolean
 ---@field input_context boolean
+---@field input_example boolean
 ---@field warn_on_query boolean
 ---@field warn_on_clear boolean
 
@@ -146,13 +151,17 @@ local set_global_keymaps = function ()
     vim.keymap.set("v", config.opts.interface.keymaps.add_visual_as_input_and_query,
       facilellm.add_visual_as_input_and_query, {})
   end
+  if config.opts.interface.keymaps.add_visual_as_instruction ~= "" then
+    vim.keymap.set("v", config.opts.interface.keymaps.add_visual_as_instruction,
+      facilellm.add_visual_as_instruction, {})
+  end
   if config.opts.interface.keymaps.add_visual_as_context ~= "" then
     vim.keymap.set("v", config.opts.interface.keymaps.add_visual_as_context,
       facilellm.add_visual_as_context, {})
   end
-  if config.opts.interface.keymaps.add_visual_as_instruction ~= "" then
-    vim.keymap.set("v", config.opts.interface.keymaps.add_visual_as_instruction,
-      facilellm.add_visual_as_instruction, {})
+  if config.opts.interface.keymaps.add_visual_as_example ~= "" then
+    vim.keymap.set("v", config.opts.interface.keymaps.add_visual_as_example,
+      facilellm.add_visual_as_example, {})
   end
   if config.opts.interface.keymaps.add_visual_as_input_query_and_append ~= "" then
     vim.keymap.set("v", config.opts.interface.keymaps.add_visual_as_input_query_and_append,
@@ -262,6 +271,7 @@ local default_opts = function ()
       role_display = {
         instruction = "Instruction:",
         context     = "Context:",
+        example     = "Example:",
         input       = "Input:",
         llm         = "LLM:",
       },
@@ -281,6 +291,7 @@ local default_opts = function ()
       highlight_role            = true,
       fold_instruction          = true,
       fold_context              = true,
+      fold_example              = true,
       keymaps = {
         delete_interaction  = "<C-d>i",
         delete_conversation = "<C-d>c",
@@ -291,6 +302,7 @@ local default_opts = function ()
         input_confirm       = "<Enter>",
         input_instruction   = "<C-i>",
         input_context       = "<C-k>",
+        input_example       = "<C-e>",
         requery             = "<C-r>",
 
         prune_message       = "p",
@@ -308,8 +320,9 @@ local default_opts = function ()
         set_model_from_selection                 = "<leader>aim",
 
         add_visual_as_input_and_query            = "<leader>ai<Enter>",
-        add_visual_as_context                    = "<leader>aik",
         add_visual_as_instruction                = "<leader>aii",
+        add_visual_as_context                    = "<leader>aik",
+        add_visual_as_example                    = "<leader>aie",
         add_visual_as_input_query_and_append     = "<leader>aip",
         add_visual_as_input_query_and_prepend    = "<leader>aiP",
         add_visual_as_input_query_and_substitute = "<leader>ais",
@@ -328,6 +341,7 @@ local default_opts = function ()
         input_confirm     = true,
         input_instruction = true,
         input_context     = true,
+        input_example     = true,
         warn_on_query     = true,
         warn_on_clear     = true,
       },
@@ -415,6 +429,7 @@ local validate_naming = function (naming)
     vim.validate({
       instruction = {role_display.instruction, "s", true},
       context     = {role_display.context,     "s", true},
+      example     = {role_display.example,     "s", true},
       input       = {role_display.input,       "s", true},
       llm         = {role_display.llm,         "s", true},
     })
@@ -435,6 +450,7 @@ local validate_interface = function (interface)
     highlight_role            = {interface.highlight_role,            "b", true},
     fold_instruction          = {interface.fold_instruction,          "b", true},
     fold_context              = {interface.fold_context,              "b", true},
+    fold_example              = {interface.fold_example,              "b", true},
     keymaps                   = {interface.keymaps,                   "t", true},
   })
 
@@ -450,6 +466,7 @@ local validate_interface = function (interface)
       input_confirm        = {keymaps.input_confirm,       "s", true},
       input_instruction    = {keymaps.input_instruction,   "s", true},
       input_context        = {keymaps.input_context,       "s", true},
+      input_example        = {keymaps.input_example,       "s", true},
 
       prune_message        = {keymaps.prune_message,       "s", true},
       deprune_message      = {keymaps.deprune_message,     "s", true},
@@ -467,10 +484,12 @@ local validate_interface = function (interface)
 
       add_visual_as_input_and_query             =
         {keymaps.add_visual_as_input_and_query,            "s", true},
-      add_visual_as_context                     =
-        {keymaps.add_visual_as_context,                    "s", true},
       add_visual_as_instruction                 =
         {keymaps.add_visual_as_instruction,                "s", true},
+      add_visual_as_context                     =
+        {keymaps.add_visual_as_context,                    "s", true},
+      add_visual_as_example                     =
+        {keymaps.add_visual_as_example,                    "s", true},
       add_visual_as_input_query_and_append      =
         {keymaps.add_visual_as_input_query_and_append,     "s", true},
       add_visual_as_input_query_and_prepend     =
@@ -506,6 +525,7 @@ local validate_feedback = function (feedback)
       input_confirm     = {conversation_lock.input_confirm,     "b", true},
       input_instruction = {conversation_lock.input_instruction, "b", true},
       input_context     = {conversation_lock.input_context,     "b", true},
+      input_example     = {conversation_lock.input_example,     "b", true},
       warn_on_query     = {conversation_lock.warn_on_query,     "b", true},
       warn_on_clear     = {conversation_lock.warn_on_clear,     "b", true},
     })

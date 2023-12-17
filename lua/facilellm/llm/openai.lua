@@ -25,6 +25,8 @@ local convert_role_to_openai = function (role)
     return "system"
   elseif role == "Context" then
     return "system"
+  elseif role == "Example" then
+    return "system"
   elseif role == "LLM" then
     return "assistant"
   elseif role == "Input" then
@@ -37,12 +39,16 @@ end
 ---@param role FacileLLM.OpenAI.MsgRole
 ---@return FacileLLM.MsgRole
 local convert_role_from_openai = function (role)
-  if role == "system" then
-    return "Instruction"
-  elseif role == "assistant" then
+  if role == "assistant" then
     return "LLM"
   elseif role == "user" then
     return "Input"
+  elseif role == "system" then
+    vim.schedule(vim.notify,
+        "Warning in OpenAI API:\n" .. "Abmiguous role \"system\".\n",
+        vim.log.levels.WARN
+      )
+    return "Instruction"
   else
     error("unknown role " .. role)
   end
@@ -61,6 +67,12 @@ local convert_msg_to_openai = function (msg)
       '"""\n' ..
       msg_openai.content .. "\n" ..
       '"""'
+    elseif msg.role == "Example" then
+    msg_openai.content =
+      "This is an example of how you should respond:\n" ..
+      '"""\n' ..
+      msg_openai.content .. "\n" ..
+      '"""'
   end
   return msg_openai
 end
@@ -74,7 +86,7 @@ local append_to_stdout_record = function (stdout_record, data)
   -- NOTE: We here assume that stdout does not break along the data prefixes.
   elseif string.sub(data, 1,6) ~= "data: " then
     vim.schedule(vim.notify,
-        "Error oi OpenAI API:\n" .. "Received string not prefixed by data.\n" .. data,
+        "Error in OpenAI API:\n" .. "Received string not prefixed by data.\n" .. data,
         vim.log.levels.ERROR
       )
 

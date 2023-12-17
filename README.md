@@ -13,8 +13,8 @@ workflow of NeoVim. Some of the key points during design were:
 * Initial conversations (sometimes referred to "persona") are separate from
   models and thus modular.
 
-* Separate recording of LLM instructions, context, and input allow for more
-  flexible, semi-automated prompt design.
+* Separate recording of LLM instructions, context, examples, and input allow
+  for more flexible, semi-automated prompt design.
 
 * Pruning can help to make the best our of models of limited context length.
 
@@ -165,17 +165,23 @@ then query the model for a response.
 
 Bound by default to `<leader>ai<Enter>`.
 
+### `add_visual_as_instruction`
+
+In visual mode, add the selected text as an instruction to the current session.
+
+Bound by default to `<leader>aii`.
+
 ### `add_visual_as_context`
 
 In visual mode, add the selected text as context to the current session.
 
 Bound by default to `<leader>aik`.
 
-### `add_visual_as_instruction`
+### `add_visual_as_example`
 
-In visual mode, add the selected text as an instruction to the current session.
+In visual mode, add the selected text as example to the current session.
 
-Bound by default to `<leader>aii`.
+Bound by default to `<leader>aie`.
 
 ### `add_visual_as_input_query_and_append`
 
@@ -207,7 +213,7 @@ of a session.
 ### `delete_interaction`
 
 Delete the user input and the LLM responses of a session, but not the
-instructions and the context.
+instructions, the context, and the examples.
 
 Bound by default to `<C-d>i`.
 
@@ -253,10 +259,17 @@ using `<C-o><C-i>` when in insert mode.
 
 ### `input_context`
 
-Include the provided input as an instruction into the session conversation.
+Include the provided input as context into the session conversation.
 
 Bound by default to `<C-k>`. Only available in the input buffer. Consider
 using `<C-o><C-k>` when in insert mode.
+
+### `input_example`
+
+Include the provided input as an example into the session conversation.
+
+Bound by default to `<C-e>`. Only available in the input buffer. Consider
+using `<C-o><C-e>` when in insert mode.
 
 ### `requery`
 
@@ -433,6 +446,7 @@ naming = {
   role_display = {
     instruction = "Instruction:",
     context     = "Context:",
+    example     = "Example:",
     input       = "Input:",
     llm         = "LLM:",
   },
@@ -457,6 +471,7 @@ interface = {
   highlight_role            = true,
   fold_instruction          = true,
   fold_context              = true,
+  fold_example              = true,
   keymaps = {},
 },
 ```
@@ -474,6 +489,7 @@ keymaps = {
   input_confirm       = "<Enter>",
   input_instruction   = "<C-i>",
   input_context       = "<C-k>",
+  input_example       = "<C-e>",
   requery             = "<C-r>",
 
   prune_message       = "p",
@@ -491,8 +507,9 @@ keymaps = {
   set_model_from_selection                 = "<leader>aim",
 
   add_visual_as_input_and_query            = "<leader>ai<Enter>",
-  add_visual_as_context                    = "<leader>aik",
   add_visual_as_instruction                = "<leader>aii",
+  add_visual_as_context                    = "<leader>aik",
+  add_visual_as_example                    = "<leader>aie",
   add_visual_as_input_query_and_append     = "<leader>aip",
   add_visual_as_input_query_and_prepend    = "<leader>aiP",
   add_visual_as_input_query_and_substitute = "<leader>ais",
@@ -512,6 +529,7 @@ feedback = {
     input_confirm     = true,
     input_instruction = true,
     input_context     = true,
+    input_example     = true,
     warn_on_query     = true,
     warn_on_clear     = true,
   },

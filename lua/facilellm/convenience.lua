@@ -148,6 +148,19 @@ local add_visual_as_input_and_query = function ()
 end
 
 ---@return nil
+local add_visual_as_instruction = function ()
+  local sessionid = ui_select.get_most_recent()
+  if not sessionid then
+    return
+  end
+
+  local lines = util.get_visual_selection()
+  if lines then
+    ui_session.add_message(sessionid, "Instruction", lines)
+  end
+end
+
+---@return nil
 local add_visual_as_context = function ()
   local sessionid = ui_select.get_most_recent()
   if not sessionid then
@@ -161,7 +174,7 @@ local add_visual_as_context = function ()
 end
 
 ---@return nil
-local add_visual_as_instruction = function ()
+local add_visual_as_example = function ()
   local sessionid = ui_select.get_most_recent()
   if not sessionid then
     return
@@ -169,7 +182,7 @@ local add_visual_as_instruction = function ()
 
   local lines = util.get_visual_selection()
   if lines then
-    ui_session.add_message(sessionid, "Instruction", lines)
+    ui_session.add_message(sessionid, "Example", lines)
   end
 end
 
@@ -297,8 +310,9 @@ return {
   focus_from_selection = focus_from_selection,
   add_visual_as_input_and_query = add_visual_as_input_and_query,
   add_line_as_input_and_query = add_line_as_input_and_query,
-  add_visual_as_context = add_visual_as_context,
   add_visual_as_instruction = add_visual_as_instruction,
+  add_visual_as_context = add_visual_as_context,
+  add_visual_as_example = add_visual_as_example,
   add_visual_as_input_query_and_insert = add_visual_as_input_query_and_insert,
   add_line_as_input_query_and_insert = add_line_as_input_query_and_insert,
 }

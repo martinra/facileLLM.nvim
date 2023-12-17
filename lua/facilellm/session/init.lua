@@ -235,22 +235,23 @@ end
 ---@param sessionid FacileLLM.SessionId
 ---@param instruction ("delete"| "preserve"| "combine")
 ---@param context ("delete"| "preserve"| "combine")
+---@param example ("delete"| "preserve"| "combine")
 ---@return boolean
-local clear_conversation = function (sessionid, instruction, context)
+local clear_conversation = function (sessionid, instruction, context, example)
   if is_conversation_locked(sessionid) and config.opts.feedback.conversation_lock.warn_on_clear then
     vim.notify("clearing conversation despite lock", vim.log.levels.WARN)
     return false
   end
 
-  if context == "delete" and instruction == "delete" then
+  if instruction == "delete" and context == "delete" and example == "delete" then
     sessions[sessionid].conversation = {}
     return true
   end
 
-  if instruction == "preserve" and context == "preserve" then
+  if instruction == "preserve" and context == "preserve" and example == "preserve" then
     local conv = {}
     for _,msg in ipairs(sessions[sessionid].conversation) do
-      if msg.role == "Instruction" or msg.role == "Context" then
+      if msg.role == "Instruction" or msg.role == "Context" or msg.role == "Example" then
         table.insert(conv, msg)
       end
     end
@@ -266,6 +267,10 @@ local clear_conversation = function (sessionid, instruction, context)
   if context == "combine" then
     context_msgs[1] = message.create("Instruction")
   end
+  local example_msgs = {}
+  if context == "combine" then
+    example_msgs[1] = message.create("Example")
+  end
 
   for _,msg in ipairs(sessions[sessionid].conversation) do
     if msg.role == "Instruction" then
@@ -280,6 +285,12 @@ local clear_conversation = function (sessionid, instruction, context)
       elseif context == "combine" then
         message.append_lines(context_msgs[1], msg.lines)
       end
+    elseif msg.role == "Example" then
+      if context == "preserve" then
+        table.insert(example_msgs, msg)
+      elseif context == "combine" then
+        message.append_lines(example_msgs[1], msg.lines)
+      end
     end
   end
 
@@ -289,12 +300,18 @@ local clear_conversation = function (sessionid, instruction, context)
   if context == "combine" and message.isempty(context_msgs[1]) then
     context_msgs[1] = nil
   end
+  if example == "combine" and message.isempty(example_msgs[1]) then
+    example_msgs[1] = nil
+  end
 
   local conv = {}
   for _,msg in ipairs(instruction_msgs) do
     table.insert(conv, msg)
   end
   for _,msg in ipairs(context_msgs) do
+    table.insert(conv, msg)
+  end
+  for _,msg in ipairs(example_msgs) do
     table.insert(conv, msg)
   end
   sessions[sessionid].conversation = conversation.create(conv)

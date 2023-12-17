@@ -27,7 +27,8 @@ end
 ---@return nil
 local fold_messages = function (winid)
   if not config.opts.interface.fold_instruction
-    and not config.opts.interface.fold_context then
+    and not config.opts.interface.fold_context
+    and not config.opts.interface.fold_example then
     vim.api.nvim_win_set_option(winid, "foldenable", false)
     return
   end
@@ -36,12 +37,18 @@ local fold_messages = function (winid)
   if config.opts.interface.fold_instruction then
     hlroleexpr = hlroleexpr .. config.opts.naming.role_display.instruction
   end
-  if config.opts.interface.fold_instruction
-    and config.opts.interface.fold_context then
-    hlroleexpr = hlroleexpr .. "\\|"
-  end
   if config.opts.interface.fold_context then
+    if config.opts.interface.fold_instruction then
+      hlroleexpr = hlroleexpr .. "\\|"
+    end
     hlroleexpr = hlroleexpr .. config.opts.naming.role_display.context
+  end
+  if config.opts.interface.fold_example then
+    if config.opts.interface.fold_instruction
+      or config.opts.interface.fold_context then
+      hlroleexpr = hlroleexpr .. "\\|"
+    end
+    hlroleexpr = hlroleexpr .. config.opts.naming.role_display.example
   end
   hlroleexpr = hlroleexpr .. "\\)$'"
 
@@ -49,6 +56,8 @@ local fold_messages = function (winid)
   allroleexpr = allroleexpr .. config.opts.naming.role_display.instruction
   allroleexpr = allroleexpr .. "\\|"
   allroleexpr = allroleexpr .. config.opts.naming.role_display.context
+  allroleexpr = allroleexpr .. "\\|"
+  allroleexpr = allroleexpr .. config.opts.naming.role_display.example
   allroleexpr = allroleexpr .. "\\|"
   allroleexpr = allroleexpr .. config.opts.naming.role_display.input
   allroleexpr = allroleexpr .. "\\|"

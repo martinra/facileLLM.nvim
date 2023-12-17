@@ -19,8 +19,9 @@ return {
   focus_from_selection = convenience.focus_from_selection,
 
   add_visual_as_input_and_query        = convenience.add_visual_as_input_and_query,
-  add_visual_as_context                = convenience.add_visual_as_context,
   add_visual_as_instruction            = convenience.add_visual_as_instruction,
+  add_visual_as_context                = convenience.add_visual_as_context,
+  add_visual_as_example                = convenience.add_visual_as_example,
   add_visual_as_input_query_and_insert = convenience.add_visual_as_input_query_and_insert,
 
   add_line_as_input_and_query        = convenience.add_line_as_input_and_query,

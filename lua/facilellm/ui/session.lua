@@ -245,9 +245,10 @@ end
 ---@param sessionid FacileLLM.SessionId
 ---@param instruction ("delete"| "preserve"| "combine")
 ---@param context ("delete"| "preserve"| "combine")
+---@param example ("delete"| "preserve"| "combine")
 ---@return nil
-local clear_conversation = function (sessionid, instruction, context)
-  if not session.clear_conversation(sessionid, instruction, context) then
+local clear_conversation = function (sessionid, instruction, context, example)
+  if not session.clear_conversation(sessionid, instruction, context, example) then
     return
   end
   local conv = session.get_conversation(sessionid)
@@ -318,19 +319,19 @@ local set_buf_keymaps = function (sessionid)
 
   if config.opts.interface.keymaps.delete_interaction ~= "" then
     vim.keymap.set("n", config.opts.interface.keymaps.delete_interaction,
-      function () ui_session.clear_conversation(sessionid, "preserve", "preserve") end,
+      function () ui_session.clear_conversation(sessionid, "preserve", "preserve", "preserve") end,
       { buffer = conv_bufnr })
     vim.keymap.set("n", config.opts.interface.keymaps.delete_interaction,
-      function () ui_session.clear_conversation(sessionid, "preserve", "preserve") end,
+      function () ui_session.clear_conversation(sessionid, "preserve", "preserve", "preserve") end,
       { buffer = input_bufnr })
   end
 
   if config.opts.interface.keymaps.delete_conversation ~= "" then
     vim.keymap.set("n", config.opts.interface.keymaps.delete_conversation,
-      function () ui_session.clear_conversation(sessionid, "delete", "delete") end,
+      function () ui_session.clear_conversation(sessionid, "delete", "delete", "delete") end,
       { buffer = conv_bufnr })
     vim.keymap.set("n", config.opts.interface.keymaps.delete_conversation,
-      function () ui_session.clear_conversation(sessionid, "delete", "delete") end,
+      function () ui_session.clear_conversation(sessionid, "delete", "delete", "delete") end,
       { buffer = input_bufnr })
   end
 
@@ -377,6 +378,12 @@ local set_buf_keymaps = function (sessionid)
     ui_input.set_context_keymap(input_bufnr,
       "n", config.opts.interface.keymaps.input_context, function (lines)
       ui_session.add_message(sessionid, "Context", lines)
+    end)
+  end
+  if config.opts.interface.keymaps.input_example ~= "" then
+    ui_input.set_example_keymap(input_bufnr,
+      "n", config.opts.interface.keymaps.input_example, function (lines)
+      ui_session.add_message(sessionid, "Example", lines)
     end)
   end
 

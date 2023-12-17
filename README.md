@@ -404,6 +404,7 @@ use the field `conversations`. For example, the default configuration includes:
 
 ```lua
 conversations = {
+  ["Empty"] = {},
   ["Concise answers"] = {
     {
       role = "Instruction",

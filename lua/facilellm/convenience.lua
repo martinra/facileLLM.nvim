@@ -210,25 +210,7 @@ local add_visual_as_input_query_and_insert = function (mode)
     return
   end
 
-  local bufnr = vim.api.nvim_get_current_buf()
-  local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
-  local nspc_pending_insert = vim.api.nvim_create_namespace("facilellm-pending-insert")
-
-  ---@param lines__loc string[]
-  local response_callback = function (lines__loc)
-    vim.api.nvim_buf_clear_namespace(bufnr, nspc_pending_insert, row-1, row)
-    vim.api.nvim_buf_set_lines(bufnr, row-1, row, false, lines__loc)
-  end
-
-  if config.opts.feedback.pending_insertion_feedback then
-    vim.api.nvim_buf_set_extmark(bufnr, nspc_pending_insert, row-1, 0,
-    {
-      virt_text = { {config.opts.feedback.pending_insertion_feedback_message, "WarningMsg"} },
-      virt_text_pos = "overlay"
-    })
-  end
-
-  ui_session.add_input_message_and_query(sessionid, lines, response_callback)
+  ui_session.add_input_message_query_and_insert(sessionid, lines)
 end
 
 

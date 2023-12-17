@@ -14,6 +14,11 @@ local util = require("facilellm.util")
 ---@field input_bufnr BufNr
 ---@field render_state FacileLLM.RenderState
 ---@field follow_conversation_flags table<WinId,boolean>
+---@field pending_insertion_feedback FacileLLM.SessionUI.PendingInsertionFeedback?
+
+---@class FacileLLM.SessionUI.PendingInsertionFeedback
+---@field bufnr BufNr
+---@field mark integer
 
 
 ---@type FacileLLM.SessionUI[]
@@ -194,6 +199,49 @@ local set_current_win_input = function (sessionid)
   return input_winid
 end
 
+---@return integer
+local get_namespace_pending_insertion = function ()
+  return vim.api.nvim_create_namespace("facilellm-pending-insertion")
+end
+
+---@param sessionid FacileLLM.SessionId
+---@param row integer
+---@return nil
+local set_pending_insertion_feedback = function (sessionid, bufnr, row)
+  if not config.opts.feedback.pending_insertion_feedback then
+    return
+  end
+  if session_uis[sessionid].pending_insertion_feedback ~= nil then
+    return
+  end
+
+  local ns = get_namespace_pending_insertion()
+  local mark = vim.api.nvim_buf_set_extmark(bufnr, ns, row, 0,
+  {
+    virt_text = { {config.opts.feedback.pending_insertion_feedback_message, "WarningMsg"} },
+    virt_text_pos = "overlay"
+  })
+
+  session_uis[sessionid].pending_insertion_feedback = {
+    bufnr = bufnr,
+    mark = mark,
+  }
+end
+
+---@param sessionid FacileLLM.SessionId
+local del_pending_insertion_feedback = function (sessionid)
+  if session_uis[sessionid].pending_insertion_feedback == nil then
+    return
+  end
+  local bufnr = session_uis[sessionid].pending_insertion_feedback.bufnr
+  local mark = session_uis[sessionid].pending_insertion_feedback.mark
+
+  local ns = get_namespace_pending_insertion()
+  vim.api.nvim_buf_del_extmark(bufnr, ns, mark)
+
+  session_uis[sessionid].pending_insertion_feedback = nil
+end
+
 ---@param sessionid FacileLLM.SessionId
 ---@param instruction ("delete"| "preserve"| "combine")
 ---@param context ("delete"| "preserve"| "combine")
@@ -242,6 +290,7 @@ local delete = function (sessionid)
       vim.api.nvim_win_close(winid, true)
     end
   end
+  del_pending_insertion_feedback(sessionid)
   vim.api.nvim_buf_delete(session_uis[sessionid].conv_bufnr, {force = true})
   vim.api.nvim_buf_delete(session_uis[sessionid].input_bufnr, {force = true})
   session.delete(sessionid)
@@ -464,6 +513,24 @@ local add_input_message_and_query = function (sessionid, lines, response_callbac
 end
 
 ---@param sessionid FacileLLM.SessionId
+---@param lines string[]
+---@return nil
+local add_input_message_query_and_insert = function (sessionid, lines)
+  local bufnr = vim.api.nvim_get_current_buf()
+  local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
+
+  set_pending_insertion_feedback(sessionid, bufnr, row-1)
+
+  ---@param lines__loc string[]
+  local response_callback = function (lines__loc)
+    del_pending_insertion_feedback(sessionid)
+    vim.api.nvim_buf_set_lines(bufnr, row-1, row, false, lines__loc)
+  end
+
+  add_input_message_and_query(sessionid, lines, response_callback)
+end
+
+---@param sessionid FacileLLM.SessionId
 ---@return nil
 local requery = function (sessionid)
   local mx, msg = session.get_last_message_with_index(sessionid)
@@ -615,5 +682,6 @@ return {
   render_conversation                = render_conversation,
   add_message                        = add_message,
   add_input_message_and_query        = add_input_message_and_query,
+  add_input_message_query_and_insert = add_input_message_query_and_insert,
   requery                            = requery,
 }

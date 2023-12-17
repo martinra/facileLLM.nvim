@@ -130,7 +130,7 @@ end
 ---@param add_message function
 ---@param on_complete function
 ---@param opts table
----@return nil
+---@return function?
 local response_to = function (conversation, add_message, on_complete, opts)
   if not opts.api_key then
     opts.api_key = opts.get_api_key()
@@ -147,7 +147,13 @@ local response_to = function (conversation, add_message, on_complete, opts)
     json_records = {},
   }
 
+  local cancelled = { false }
+
   local on_stdout = function (_, data)
+    if cancelled[1] then
+      return
+    end
+
     append_to_stdout_record(stdout_record, data)
     local json_records = parse_new_json_records(stdout_record)
     for _,json in pairs(json_records) do
@@ -198,6 +204,11 @@ local response_to = function (conversation, add_message, on_complete, opts)
     end)
 
   curl_job:start()
+
+  return function ()
+    curl_job:_stop()
+    cancelled[1] = true
+  end
 end
 
 ---@return table
@@ -227,7 +238,7 @@ local create = function (opts)
     name = opts.name,
     params = opts.params,
     response_to = function (conversation, add_message, on_complete)
-      response_to(conversation, add_message, on_complete, opts)
+      return response_to(conversation, add_message, on_complete, opts)
     end,
   }
   return llm

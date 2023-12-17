@@ -4,7 +4,7 @@ local config = require("facilellm.config")
 ---@class FacileLLM.LLM
 ---@field name string
 ---@field params table
----@field response_to function(conv: Conversation, add_msg: function, on_cmpl: function, opt:table)
+---@field response_to function(conv: Conversation, add_msg: function, on_cmpl: function, opt:table): function?
 
 ---@class FacileLLM.LLMImplementation
 ---@field create function(opts: table): FacileLLM.LLM

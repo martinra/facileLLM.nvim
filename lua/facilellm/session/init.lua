@@ -12,6 +12,7 @@ local util = require("facilellm.util")
 ---@field model FacileLLM.LLM
 ---@field conversation FacileLLM.Conversation
 ---@field conversation_locked boolean
+---@field cancel_query function?
 ---@field config FacileLLM.Config.LLM
 
 
@@ -109,6 +110,7 @@ local create = function (model_config)
     model = model,
     conversation = conversation.create(model_config.conversation),
     conversation_locked = false,
+    cancel_query = nil,
     config = util.deep_copy_values(model_config),
   }
   sessions[sessionid] = sess
@@ -119,6 +121,9 @@ end
 ---@param sessionid FacileLLM.SessionId
 ---@return nil
 local delete = function (sessionid)
+  if sessions[sessionid].cancel_query ~= nil then
+    sessions[sessionid].cancel_query()
+  end
   sessions[sessionid] = nil
 end
 
@@ -307,6 +312,11 @@ local query_model = function (sessionid, render_conversation, on_complete)
     return
   end
 
+  if sessions[sessionid].cancel_query ~= nil then
+    vim.notify("querying model despite ongoing query", vim.log.levels.WARN)
+    return
+  end
+
   -- The model may use asynchronous calls, so we wrap this function.
   local add_message_and_render = vim.schedule_wrap(
     ---@param role FacileLLM.MsgRole
@@ -321,6 +331,7 @@ local query_model = function (sessionid, render_conversation, on_complete)
   ---@return nil
   local on_complete__loc = vim.schedule_wrap(
     function ()
+      sessions[sessionid].cancel_query = nil
       unlock_conversation(sessionid)
       on_complete(sessionid)
       render_conversation(sessionid)
@@ -328,8 +339,10 @@ local query_model = function (sessionid, render_conversation, on_complete)
 
   lock_conversation(sessionid)
   local model = get_model(sessionid)
-  model.response_to(get_conversation(sessionid),
-    add_message_and_render, on_complete__loc)
+  sessions[sessionid].cancel_query = model.response_to(
+    get_conversation(sessionid),
+    add_message_and_render, on_complete__loc
+  )
 end
 
 

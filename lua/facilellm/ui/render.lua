@@ -90,16 +90,16 @@ local get_message_range = function (mx, msg, render_state)
 end
 
 ---@return integer
-local buf_get_namespace_highlight_role = function ()
+local get_namespace_highlight_role = function ()
   return vim.api.nvim_create_namespace("facilellm-highlight-role")
 end
 
 ---@return integer
-local buf_get_namespace_highlight_receiving = function ()
+local get_namespace_highlight_receiving = function ()
   return vim.api.nvim_create_namespace("facilellm-highlight-receiving")
 end
 
-local buf_get_namespace_highlight_pruned = function ()
+local get_namespace_highlight_pruned = function ()
   return vim.api.nvim_create_namespace("facilellm-highlight-pruned")
 end
 
@@ -111,7 +111,7 @@ end
 local set_highlight_role = function (bufnr, mx, msg, render_state)
   local row, col = get_message_start(mx, render_state)
   local end_row, end_col = row, string.len(role_display(msg.role))
-  local ns = buf_get_namespace_highlight_role()
+  local ns = get_namespace_highlight_role()
   vim.api.nvim_buf_set_extmark(bufnr, ns,
     row, col,
     {
@@ -128,7 +128,7 @@ end
 ---@return nil
 local set_highlight_receiving = function (bufnr, mx, msg, render_state)
   local row, col, end_row, end_col = get_message_range(mx, msg, render_state)
-  local ns = buf_get_namespace_highlight_receiving()
+  local ns = get_namespace_highlight_receiving()
   if render_state.highlight_receiving.extmark then
     vim.api.nvim_buf_set_extmark(bufnr, ns,
     row, col,
@@ -157,7 +157,7 @@ end
 ---@return nil
 local set_highlight_pruned = function (bufnr, mx, msg, render_state)
   local row, col, end_row, end_col = get_message_range(mx, msg, render_state)
-  local ns = buf_get_namespace_highlight_pruned()
+  local ns = get_namespace_highlight_pruned()
   if render_state.prune_extmarks[mx] then
     vim.api.nvim_buf_set_extmark(bufnr, ns,
       row, col,
@@ -185,7 +185,7 @@ end
 ---@return nil
 local del_highlight_pruned = function (bufnr, mx, render_state)
   if render_state.prune_extmarks[mx] then
-    local ns = buf_get_namespace_highlight_pruned()
+    local ns = get_namespace_highlight_pruned()
     vim.api.nvim_buf_del_extmark(bufnr, ns, render_state.prune_extmarks[mx])
     render_state.prune_extmarks[mx] = nil
   end
@@ -206,7 +206,7 @@ end
 ---@return nil
 local end_highlight_receiving = function (bufnr, render_state)
   render_state.highlight_receiving = nil
-  local ns = buf_get_namespace_highlight_receiving()
+  local ns = get_namespace_highlight_receiving()
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
 end
 

@@ -5,7 +5,7 @@ local util = require("facilellm.util")
 
 
 ---@return integer
-local buf_get_namespace_confirm_feedback = function ()
+local get_namespace_confirm_feedback = function ()
   return vim.api.nvim_create_namespace("facilellm-confirm-feedback")
 end
 
@@ -15,7 +15,7 @@ local signal_response_not_yet_complete_extmark = nil
 ---@param bufnr BufNr
 ---@return nil
 local signal_response_not_yet_complete = function (bufnr)
-  local nspc_confirm_feedback = buf_get_namespace_confirm_feedback()
+  local nspc_confirm_feedback = get_namespace_confirm_feedback()
   if signal_response_not_yet_complete_extmark == nil then
     signal_response_not_yet_complete_extmark =
       vim.api.nvim_buf_set_extmark(bufnr, nspc_confirm_feedback, 0, 0,
@@ -153,7 +153,7 @@ end
 ---@param bufnr BufNr
 ---@return nil
 local on_complete_query = function (bufnr)
-  local nspc_confirm_feedback = buf_get_namespace_confirm_feedback()
+  local nspc_confirm_feedback = get_namespace_confirm_feedback()
   vim.api.nvim_buf_clear_namespace(bufnr, nspc_confirm_feedback, 0, -1)
 end
 

@@ -173,32 +173,101 @@ local add_visual_as_instruction = function ()
   end
 end
 
--- Use the visual line selection as input. Depending on the value of mode
--- * substitute the selection by the LLM output,
--- * append the LLM output after the selection, or
--- * prepend the LLM output before the selection.
----@param mode ("substitute"| "append"| "prepend")
 ---@return nil
-local add_visual_as_input_query_and_insert = function (mode)
+local add_line_as_input_and_query = function ()
   local sessionid = ui_select.get_most_recent()
   if not sessionid then
     return
   end
 
+  local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
+  local lines = vim.api.nvim_buf_get_lines(0, row-1, row, false)
+  if lines and #lines ~= 0 then
+    ui_session.add_input_message_and_query(sessionid, lines)
+  end
+end
+
+-- Use the visual line selection as input. Depending on the value of method
+-- * substitute the selection by the LLM output,
+-- * append the LLM output after the selection, or
+-- * prepend the LLM output before the selection.
+---@param method ("substitute"| "append"| "prepend")
+---@return nil
+local add_visual_as_input_query_and_insert = function (method)
+  local sessionid = ui_select.get_most_recent()
+  if not sessionid then
+    return
+  end
+
+  local mode_init = string.sub(vim.fn.mode(), 1,1)
+
   local lines
-  if mode == "substitute" then
-    if vim.fn.mode() ~= "V" then
+  if method == "substitute" then
+    if vim.fn.mode() == "V" then
+      lines = util.substitute_visual_selection()
+    else
+      -- There is no good heuristic to deside what substitution of a
+      -- arbitrary LLM response to a character or block selection should
+      -- be. So we do not provide that option.
       return
     end
-    lines = util.substitute_visual_selection()
-  else
-    if mode == "append" then
+  elseif method == "append" then
+    if mode_init == "v" or mode_init == "V" or mode_init == "" then
       lines = util.get_visual_selection("bottom")
-      vim.api.nvim_feedkeys("o", "nx", false)
     else
-      lines = util.get_visual_selection("top")
-      vim.api.nvim_feedkeys("O", "nx", false)
+      return
     end
+    vim.api.nvim_feedkeys("o", "nx", false)
+  elseif method == "prepend" then
+    if mode_init == "v" or mode_init == "V" or mode_init == "" then
+      lines = util.get_visual_selection("top")
+    else
+      return
+    end
+    vim.api.nvim_feedkeys("O", "nx", false)
+  else
+    error("unsupported method " .. method)
+  end
+  ---@cast lines string[]
+
+  local esckey = vim.api.nvim_replace_termcodes("<Esc>", true, true, true)
+  vim.api.nvim_feedkeys(esckey, "nx", false)
+
+  -- This can happen when only one empty line is selected.
+  if not lines or #lines == 0 then
+    return
+  end
+
+  ui_session.add_input_message_query_and_insert(sessionid, lines)
+end
+
+-- In normal mode use current line as input. Depending on the value of method
+-- * substitute the current line by the LLM output,
+-- * append the LLM output after the current line, or
+-- * prepend the LLM output before the current line.
+---@param method ("substitute"| "append"| "prepend")
+---@return nil
+local add_line_as_input_query_and_insert = function (method)
+  local sessionid = ui_select.get_most_recent()
+  if not sessionid then
+    return
+  end
+
+  local mode_init = string.sub(vim.fn.mode(), 1,1)
+  if mode_init ~= "n" then
+    return
+  end
+
+  local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
+  local lines = vim.api.nvim_buf_get_lines(0, row-1, row, false)
+  if method == "substitute" then
+      vim.api.nvim_feedkeys("S", "nx", false)
+  elseif method == "append" then
+    vim.api.nvim_feedkeys("o", "nx", false)
+  elseif method == "prepend" then
+    vim.api.nvim_feedkeys("O", "nx", false)
+  else
+    error("unsupported method " .. method)
   end
   ---@cast lines string[]
 
@@ -227,7 +296,9 @@ return {
   focus = focus,
   focus_from_selection = focus_from_selection,
   add_visual_as_input_and_query = add_visual_as_input_and_query,
+  add_line_as_input_and_query = add_line_as_input_and_query,
   add_visual_as_context = add_visual_as_context,
   add_visual_as_instruction = add_visual_as_instruction,
-  add_visual_as_input_query_and_insert = add_visual_as_input_query_and_insert
+  add_visual_as_input_query_and_insert = add_visual_as_input_query_and_insert,
+  add_line_as_input_query_and_insert = add_line_as_input_query_and_insert,
 }

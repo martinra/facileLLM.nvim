@@ -68,6 +68,10 @@
 ---@field add_visual_as_input_query_and_append string
 ---@field add_visual_as_input_query_and_prepend string
 ---@field add_visual_as_input_query_and_substitute string
+---@field add_line_as_input_and_query string
+---@field add_line_as_input_query_and_append string
+---@field add_line_as_input_query_and_prepend string
+---@field add_line_as_input_query_and_substitute string
 
 ---@class FacileLLM.Config.Feedback
 ---@field highlight_message_while_receiving boolean
@@ -161,6 +165,24 @@ local set_global_keymaps = function ()
   if config.opts.interface.keymaps.add_visual_as_input_query_and_substitute ~= "" then
     vim.keymap.set("v", config.opts.interface.keymaps.add_visual_as_input_query_and_substitute,
       function () facilellm.add_visual_as_input_query_and_insert("substitute") end, {}
+    )
+  end
+
+  if config.opts.interface.keymaps.add_line_as_input_and_query ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.add_line_as_input_and_query,
+      facilellm.add_line_as_input_and_query, {})
+  end
+  if config.opts.interface.keymaps.add_line_as_input_query_and_append ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.add_line_as_input_query_and_append,
+      function () facilellm.add_line_as_input_query_and_insert("append") end, {})
+  end
+  if config.opts.interface.keymaps.add_line_as_input_query_and_prepend ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.add_line_as_input_query_and_prepend,
+      function () facilellm.add_line_as_input_query_and_insert("prepend") end, {})
+  end
+  if config.opts.interface.keymaps.add_line_as_input_query_and_substitute ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.add_line_as_input_query_and_substitute,
+      function () facilellm.add_line_as_input_query_and_insert("substitute") end, {}
     )
   end
 end
@@ -291,6 +313,10 @@ local default_opts = function ()
         add_visual_as_input_query_and_append     = "<leader>aip",
         add_visual_as_input_query_and_prepend    = "<leader>aiP",
         add_visual_as_input_query_and_substitute = "<leader>ais",
+        add_line_as_input_and_query              = "<leader>ai<Enter>",
+        add_line_as_input_query_and_append       = "<leader>aip",
+        add_line_as_input_query_and_prepend      = "<leader>aiP",
+        add_line_as_input_query_and_substitute   = "<leader>ais",
       },
     },
 
@@ -451,6 +477,15 @@ local validate_interface = function (interface)
         {keymaps.add_visual_as_input_query_and_prepend,    "s", true},
       add_visual_as_input_query_and_substitute  =
         {keymaps.add_visual_as_input_query_and_substitute, "s", true},
+
+      add_line_as_input_and_query             =
+        {keymaps.add_line_as_input_and_query,            "s", true},
+      add_line_as_input_query_and_append      =
+        {keymaps.add_line_as_input_query_and_append,     "s", true},
+      add_line_as_input_query_and_prepend     =
+        {keymaps.add_line_as_input_query_and_prepend,    "s", true},
+      add_line_as_input_query_and_substitute  =
+        {keymaps.add_line_as_input_query_and_substitute, "s", true},
     })
   end
 end

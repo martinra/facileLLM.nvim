@@ -185,7 +185,7 @@ Bound by default to `<leader>aie`.
 
 ### `add_visual_as_input_query_and_append`
 
-In visual mode, add the selected text as inputfor the current session, then
+In visual mode, add the selected text as input for the current session, then
 query the model for a response, and once this response is completed insert it
 after the selection.
 
@@ -201,6 +201,35 @@ Bound by default to `<leader>aiP`.
 ### `add_visual_as_input_query_and_substitute`
 
 Same as `add_visual_as_input_query_and_append`, but delete the selection and
+substitute the response once completely received.
+
+Bound by default to `<leader>ais`.
+
+### `add_line_as_input_and_query`
+
+In normal mode, add the current line as input for the current session and
+then query the model for a response.
+
+Bound by default to `<leader>ai<Enter>`.
+
+### `add_input_as_input_query_and_append`
+
+In normal mode, add the current line as input for the current session, then
+query the model for a response, and once this response is completed insert it
+after the current line.
+
+Bound by default to `<leader>aip`.
+
+### `add_input_as_input_query_and_prepend`
+
+Same as `add_input_as_input_query_and_append`, but insert the response before
+the current lint.
+
+Bound by default to `<leader>aiP`.
+
+### `add_input_as_input_query_and_substitute`
+
+Same as `add_input_as_input_query_and_append`, but delete the current line and
 substitute the response once completely received.
 
 Bound by default to `<leader>ais`.

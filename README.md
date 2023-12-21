@@ -454,13 +454,13 @@ To amend this list by further options that are extracted from a CSV file use
 ["Awesome ChatGPT Prompts"](`https://raw.githubusercontent.com/f/awesome-chatgpt-prompts/main/prompts.csv`)
 and similar prompt files. They are intentionally not included in facileLLM, but
 those who wish to use them can download the CSV file to a path of their choice
-and use the following code to load it:
+(referenced in the following code as `path`) and use the following code to load
+it:
 
 ```lua
 conversations_csv = (function ()
-  io.input(path .. "/promts.csv")
-  local csv = io.read("*a")
-  io.input()
+  local plenary_path = require("plenary.path")
+  local csv = plenary_path:new(path .. "/promts.csv"):read()
   local fst_linebreak = string.find(csv, "\n")
   csv = string.sub(csv, fst_linebreak+1, string.len(csv))
   return csv

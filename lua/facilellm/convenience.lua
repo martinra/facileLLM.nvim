@@ -23,33 +23,38 @@ local create_from_model = function (model_config)
   return ui_session.create(model_config)
 end
 
+---@params opts table? options passed through to telescope
 ---@return nil
-local create_from_model_selection = function ()
+local create_from_model_selection = function (opts)
   ui_select.select_model(config.opts.models,
     function (model_config)
       local sessionid = ui_session.create(model_config)
       ui_session.set_current_win_conversation_input(sessionid)
     end,
-    "Select model to create new session from"
+    "Select model to create new session from",
+    opts
   )
 end
 
+---@params opts table? options passed through to telescope
 ---@return nil
-local create_from_conversation_selection = function ()
+local create_from_conversation_selection = function (opts)
   ui_select.select_conversation(config.opts.conversations,
-  function (conversation)
-    local model_config = llm.get_default_model_config()
-    model_config = util.deep_copy_values(model_config)
-    model_config.conversation = util.deep_copy_values(conversation)
-    local sessionid = ui_session.create(model_config)
-    ui_session.set_current_win_conversation_input(sessionid)
-  end,
-  "Select initial conversation of new session"
+    function (conversation)
+      local model_config = llm.get_default_model_config()
+      model_config = util.deep_copy_values(model_config)
+      model_config.conversation = util.deep_copy_values(conversation)
+      local sessionid = ui_session.create(model_config)
+      ui_session.set_current_win_conversation_input(sessionid)
+    end,
+    "Select initial conversation of new session",
+    opts
   )
 end
 
+---@params opts table? options passed through to telescope
 ---@return nil
-local create_from_model_conversation_selection = function ()
+local create_from_model_conversation_selection = function (opts)
   ui_select.select_model(config.opts.models,
     function (model_config)
       ui_select.select_conversation(config.opts.conversations,
@@ -62,32 +67,38 @@ local create_from_model_conversation_selection = function ()
         "Select initial conversation of new session"
       )
     end,
-    "Select model to create new session from"
+    "Select model to create new session from",
+    opts
   )
 end
 
+---@params opts table? options passed through to telescope
 ---@return nil
-local delete_from_selection = function ()
+local delete_from_selection = function (opts)
   ui_select.select_session(session.get_session_names(),
     function (sessionid)
       ui_session.delete(sessionid)
     end,
-    "Select session to delete"
+    "Select session to delete",
+    opts
   )
 end
 
+---@params opts table? options passed through to telescope
 ---@return nil
-local rename_from_selection = function ()
+local rename_from_selection = function (opts)
   ui_select.select_session(session.get_session_names(),
     function (sessionid)
       ui_session.rename(sessionid)
     end,
-    "Select session to rename"
+    "Select session to rename",
+    opts
   )
 end
 
+---@params opts table? options passed through to telescope
 ---@return nil
-local set_model_from_selection = function ()
+local set_model_from_selection = function (opts)
   ui_select.select_session(session.get_session_names(),
     function (sessionid)
       local name = session.get_name(sessionid)
@@ -95,10 +106,12 @@ local set_model_from_selection = function ()
         function (model_config)
           session.set_model(sessionid, model_config)
         end,
-        "Select model for session " .. name
+        "Select model for session " .. name,
+        opts
       )
     end,
-    "Select session to change model of"
+    "Select session to change model of",
+    opts
   )
 end
 
@@ -124,13 +137,15 @@ local focus = function (sessionid)
   ui_session.set_current_win_conversation_input(sessionid)
 end
 
+---@params opts table? options passed through to telescope
 ---@return nil
-local focus_from_selection = function ()
+local focus_from_selection = function (opts)
   ui_select.select_session(session.get_session_names(),
     function (sessionid)
       ui_session.set_current_win_conversation_input(sessionid)
     end,
-    "Select session to focus"
+    "Select session to focus",
+    opts
   )
 end
 

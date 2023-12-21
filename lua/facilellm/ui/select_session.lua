@@ -51,8 +51,9 @@ end
 ---@param session_names table<FacileLLM.SessionId, string>
 ---@param callback function(FacileLLM.SessionId): nil
 ---@param prompt string?
+---@param opts table? options passed through to telescope
 ---@return nil
-local select_session = function (session_names, callback, prompt)
+local select_session = function (session_names, callback, prompt, opts)
   local sessionids = {}
   for id,_ in pairs(session_names) do
     table.insert(sessionids,id)
@@ -67,9 +68,9 @@ local select_session = function (session_names, callback, prompt)
       end,
 
     })
-    pickers.new({
-      layout_strategy = "vertical",
-    }, {
+
+    opts = vim.tbl_deep_extend("keep", opts or {}, {layout_strategy = "vertical"})
+    pickers.new(opts, {
       prompt_title = prompt,
       finder = finders.new_table {
         results = sessionids,
@@ -130,8 +131,9 @@ end
 ---@param models FacileLLM.Config.LLM[]
 ---@param callback function(FacileLLM.Config.LLM): nil
 ---@param prompt string?
+---@param opts table? options passed through to telescope
 ---@return nil
-local select_model = function (models, callback, prompt)
+local select_model = function (models, callback, prompt, opts)
   prompt = prompt or "Select an LLM model"
   if config.opts.interface.telescope and available_telescope then
     local autocmdid = vim.api.nvim_create_autocmd("User", {
@@ -141,9 +143,8 @@ local select_model = function (models, callback, prompt)
       end,
     })
 
-    pickers.new({
-      layout_strategy = "vertical",
-    }, {
+    opts = vim.tbl_deep_extend("keep", opts or {}, {layout_strategy = "vertical"})
+    pickers.new(opts, {
       prompt_title = prompt,
       finder = finders.new_table {
         results = models,
@@ -216,8 +217,9 @@ end
 ---@param conversations table<FacileLLM.ConversationName, FacileLLM.Conversation>
 ---@param callback function(FacileLLM.Conversation): nil
 ---@param prompt string?
+---@param opts table? options passed through to telescope
 ---@return nil
-local select_conversation = function (conversations, callback, prompt)
+local select_conversation = function (conversations, callback, prompt, opts)
   local names = {}
   for name,_ in pairs(conversations) do
     table.insert(names,name)
@@ -232,9 +234,8 @@ local select_conversation = function (conversations, callback, prompt)
       end,
     })
 
-    pickers.new({
-      layout_strategy = "vertical",
-    }, {
+    opts = vim.tbl_deep_extend("keep", opts or {}, {layout_strategy = "vertical"})
+    pickers.new(opts, {
       prompt_title = prompt,
       finder = finders.new_table {
         results = names,

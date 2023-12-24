@@ -547,6 +547,122 @@ One might feel tempted to instruct to remove the headline and quotes, but since
 you are using an efficient text editor, just quickly make that change yourself
 after pasting from register `l` into a work buffer.
 
+### Instructions and examples: Creating vocabulary lists
+
+We now use the previously obtained system prompt, but amend it by examples.
+This particularly helpful when handling fixed formats like the CSV format that
+we will request for import into Anki.
+
+Starting a blank conversation, insert the prompt into the input buffer and
+submit as instruction by `<C-i>` in normal mode:
+
+```
+Imagine you are a Spanish teacher guiding a student at level C1 in their vocabulary development. Initiate the conversation by asking the student to express their interest in a particular field or topic they would like to expand their vocabulary in. Once they provide the topic, make sure to create a vocabulary list that includes a CSV file for easy import into Anki, a flashcard application.
+```
+
+When providing examples, ideally all common variation are coverted. In the
+example these are words with several translations and idiomatic expressions.
+Tweak this example also to match the type of vocabulary that you would prefer
+to see. You submit it as an example by `<C-e>`:
+
+```
+auricular; ear phones
+ruborizarse; to blush
+un micro; a local bus
+ser corto de vista; to be short sighted
+puño; fist, handle
+```
+
+To give the setup a try provide as input:
+
+```
+Suggest 20 words around typical Chilean food and drinks.
+```
+
+The answer displays some weakness that one can try to work out by refining the
+prompt.
+
+```
+¡Claro! Aquí tienes una lista de 20 palabras relacionadas con la comida y las bebidas típicas chilenas:
+
+1. Empanada; empanada
+2. Completo; hot dog chileno
+3. Pebre; salsa picante tradicional chilena
+4. Chorrillana; plato de carne y papas fritas
+5. Asado; barbecue
+6. Caldillo de congrio; sopa de congrio
+7. Mote con huesillo; bebida tradicional de mote y durazno deshidratado
+8. Cazuela; guiso chileno
+9. Curanto; plato típico de la Región de los Lagos
+10. Sopaipilla; pan frito de masa de calabaza
+11. Chicha; bebida alcohólica de maíz fermentado
+12. Marraqueta; tipo de pan chileno
+13. Porotos con rienda; plato de porotos con tallarines
+14. Pastel de choclo; pastel de maíz
+15. Pisco sour; cóctel chileno hecho con pisco
+16. Pan amasado; pan casero chileno
+17. Curanto en hoyo; curanto cocinado en un hoyo en la tierra
+18. Chancho en piedra; salsa picante de tomate
+19. Alfajor; dulce típico chileno
+20. Chupe de mariscos; sopa de mariscos
+
+Aquí tienes el archivo CSV para importarlo fácilmente en Anki:
+\```
+Empanada; empanada
+Completo; hot dog chileno
+Pebre; salsa picante tradicional chilena
+Chorrillana; plato de carne y papas fritas
+Asado; barbecue
+Caldillo de congrio; sopa de congrio
+Mote con huesillo; bebida tradicional de mote y durazno deshidratado
+Cazuela; guiso chileno
+Curanto; plato típico de la Región de los Lagos
+Sopaipilla; pan frito de masa de calabaza
+Chicha; bebida alcohólica de maíz fermentado
+Marraqueta; tipo de pan chileno
+Porotos con rienda; plato de porotos con tallarines
+Pastel de choclo; pastel de maíz
+Pisco sour; cóctel chileno hecho con pisco
+Pan amasado; pan casero chileno
+Curanto en hoyo; curanto cocinado en un hoyo en la tierra
+Chancho en piedra; salsa picante de tomate
+Alfajor; dulce típico chileno
+Chupe de mariscos; sopa de mariscos
+\```
+
+Espero que esta lista te ayude a expandir tu vocabulario sobre la comida y bebidas chilenas. ¡Buena suerte!
+```
+
+Remember that it is possible to include initial conversations in the
+configuration. You can see the respective section on details how to do this,
+but here is a conversation entry that would provide the setup that we have
+prepared:
+
+```lua
+["Spanish Teacher: Vocabulary"] = {
+  {
+    role = "Instruction",
+    lines = {
+         "Imagine you are a Spanish teacher guiding a student at level C1 in "
+      .. "their vocabulary development. Initiate the conversation by asking the "
+      .. "student to express their interest in a particular field or topic they "
+      .. "would like to expand their vocabulary in. Once they provide the topic, "
+      .. "make sure to create a vocabulary list that includes a CSV file for "
+      .. "easy import into Anki, a flashcard application."
+    },
+  },
+  {
+    role = "Example",
+    lines = {
+      "auricular; ear phones",
+      "ruborizarse; to blush",
+      "un micro; a local bus",
+      "ser corto de vista; to be short sighted",
+      "puño; fist, handle",
+    }
+  },
+},
+```
 
 ## Global commands
 

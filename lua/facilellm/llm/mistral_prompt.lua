@@ -79,7 +79,16 @@ end
 ---@param output table
 ---@return string
 local output_to_string = function (output)
-  return table.concat(output, "")
+  local lines = vim.split(table.concat(output, ""), "\n")
+  for _,line in ipairs(lines) do
+    if string.match(line, "^%s*$") then
+      table.remove(lines)
+    else
+      lines[1] = string.gsub(line, "^%s*(.-)$", "%1")
+      break
+    end
+  end
+  return table.concat(lines, "\n")
 end
 
 ---@type FacileLLM.LLM.PromptConversion

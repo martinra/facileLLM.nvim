@@ -390,9 +390,163 @@ FacileLLMMsgPruned: DiffDelete
 ## Example usage
 
 FacileLLM intentionally does not include prebuilt complex workflows. This is
-the bussiness of more integrated solutions like LunarVIM once they include an
-LLM interface. The plan is to include in this place a list of possible usage to
-illustrate the possibilities.
+the business of more integrated solutions like LunarVIM once they include an
+LLM interface.
+
+This section includes examples of how the FacileLLM can be used to support some
+workflows. Their descriptions will include prompts, and as such display
+techniques of prompt engineering. They are the result of best-effort but little
+profound knowledge on the topic. Two disclaimers are thus due: First, do not
+overrate the suggested prompts and view them as not more than an inspiration.
+Second, be aware that the use of fine-tuned models specific to the intended
+purposes seems superior to prompt engineering. However a combination of both
+might indeed work best.
+
+### Basic interaction: Creating new prompts
+
+What could be more natural than creating LLM prompts by ... prompting an LLM?
+Include the following conversation into your configuration:
+
+```lua
+["Prompt Engineer"] = {
+  {
+    role = "Instruction",
+    lines = {
+         "You are a prompt engineer for ChatGPT working on creating the most "
+      .. "efficient and precise prompts. You have ample experience in the field "
+      .. "and know all tricks and tweaks."
+    },
+  },
+},
+```
+
+We start by creating a new session with default model and configurable
+background: `<leader>aib` in normal mode. Select the "Prompt Engineer"
+conversation. The cursor should be placed in a window showing the input buffer
+of the new FacileLLM session.
+
+In the input buffer write:
+
+```
+Suggest ChatGPT instructions that trigger it to generate new Spanish vocabulary at level C1.
+```
+
+Submit the text by `<CR>` in normal mode (or `<C-o><CR>` in insert mode).
+
+A possible generated answer is:
+
+```
+Sure! Here are some ChatGPT instructions that can trigger it to generate new Spanish vocabulary at level C1:
+
+1. "Please provide me with a list of advanced Spanish vocabulary words related to technology and innovation."
+2. "Generate a set of complex Spanish idioms and their meanings."
+3. "Can you give examples of sophisticated Spanish adjectives to describe emotions and feelings?"
+4. "I want to expand my Spanish vocabulary at a C1 level. Could you suggest some advanced words related to finance and economics?"
+5. "Create a list of advanced Spanish verbs used in academic writing and their corresponding noun forms."
+6. "Can you generate a collection of advanced Spanish vocabulary related to art, literature, and culture?"
+7. "I'm preparing for an advanced Spanish exam. Please provide me with a variety of complex vocabulary words in different categories - science, politics, environment, etc."
+8. "I'm looking to enhance my Spanish vocabulary for business purposes. Can you suggest some advanced words and phrases commonly used in professional settings?"
+
+Remember to specify the desired level (C1) and the specific topic or context to generate more precise and relevant Spanish vocabulary.
+```
+
+If the response is too far from what you have hoped you can regenerate the response by `<C-r>`.
+
+To further refine the prompts, write in the input buffer:
+
+```
+Include instructions to generate a CSV file for import into Anki.
+```
+
+Again submit via `<CR>` in normal mode and continue. When finished copy the
+last LLM response to your working buffer from the register `l`, that is in
+normal mode invoke for instance `"lp`. Then delete the session by one of the
+following two actions: `<leader>aid` to select a session for deletion. Or with
+the cursor in the output or input buffer of that facileLLM session use `<C-s>d`
+in normal mode.
+
+### Context and pruning/purging: Creating new prompts II
+
+While attempting to be exhaustive, the list of prompts created in the first
+attempt was wide. It is more efficient to narrow down quickly to the required
+topic. Specificity in the user prompt is one aspect, but context and example
+instructions can have even stronger impact. While the details depend on the
+model implementation, they should normally mapped to the system prompt.
+
+Initiate a new session with the "Prompt Engineer" conversation. In the session
+input buffer write:
+
+```
+We design a system prompt to make ChatGPT act as a Spanish teacher.
+```
+
+Submit this in normal mode with `<C-k>` to provide it as context. Only now we
+submit input (use `<CR>` in normal mode after writing in the input buffer).
+
+```
+Suggest system prompts to help generating new vocabulary at level C1. Provide three options and only show the suggested system prompt.
+```
+
+The generate answer could look like:
+
+```
+Option 1:
+System Prompt: "You are a Spanish teacher helping a student at level C1 expand their vocabulary. Start the conversation by discussing a topic related to travel and ask the student to share some specific vocabulary they would like to learn."
+
+Option 2:
+System Prompt: "As a Spanish teacher, you want to assist a student at level C1 in acquiring new vocabulary. Begin the conversation by asking the student to describe their favorite book or movie in Spanish and encourage them to identify any unfamiliar words or phrases they encountered."
+
+Option 3:
+System Prompt: "Imagine you are a Spanish teacher guiding a student at level C1 in their vocabulary development. Initiate the conversation by discussing the benefits of learning new words and ask the student to express their interest in a particular field or topic they would like to expand their vocabulary in."
+```
+
+Now this is much more helpful than what we obtained in the first attempt. We
+will make an erroneous attempt at refining the third option, then revert that
+part of the conversation and make a second attempt.
+
+```
+Continuing with Option 3, add instructions that vocabulary list have to always include CSV list for import into Anki.
+```
+
+We first want to remove the instruction to discuss the benefits of learning new
+words, and only then want to add the Anki version. The best move here seems to
+revert the conversation. Change into the output window and put at any position
+in the last LLM response, then purge this message by `<C-p>` in normal mode.
+The message will disappear. Move the cursor on the last input message and by
+`p` prune it, which will mark it red (in default theming). In this way you can
+later copy it back into the input buffer. You could also "deprune" it using
+`<S-p>`.
+
+We now provide the input
+
+```
+Continuing with Option 3, remove the instruction to discuss the benefits of learning new words.
+```
+
+In an example run, this yields
+
+```
+Option 3:
+System Prompt: "Imagine you are a Spanish teacher guiding a student at level C1 in their vocabulary development. Initiate the conversation by asking the student to express their interest in a particular field or topic they would like to expand their vocabulary in."
+```
+
+Now change to the output buffer and yank the message that you have pruned and insert into the input buffer (or type from scratch):
+
+```
+Add instructions that vocabulary list have to always include CSV list for import into Anki.
+```
+
+The answer is quite satisfying:
+
+```
+Option 3:
+System Prompt: "Imagine you are a Spanish teacher guiding a student at level C1 in their vocabulary development. Initiate the conversation by asking the student to express their interest in a particular field or topic they would like to expand their vocabulary in. Once they provide the topic, make sure to create a vocabulary list that includes a CSV file for easy import into Anki, a flashcard application."
+```
+
+One might feel tempted to instruct to remove the headline and quotes, but since
+you are using an efficient text editor, just quickly make that change yourself
+after pasting from register `l` into a work buffer.
+
 
 ## Global commands
 

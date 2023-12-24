@@ -103,234 +103,6 @@ opts = {
 },
 ```
 
-## Global commands
-
-### `show`
-
-Show the most recently used session, presenting
-both its conversation and input winow. If none is availabe create a new
-session.
-
-Bound by default to `<leader>aiw`.
-
-### `select_default_model`
-
-If several models are configured, this command lets you select the default one
-that is used to create sessions without selecting a model explictly.
-
-Bound by default to `<leader>aiM`.
-
-### `create_from_model_selection`
-
-Create a new session by selecting a model to instantiate it.
-
-Bound by default to `<leader>ain`.
-
-### `create_from_conversation_selection`
-
-Create a new session using the default model but allowing for the selection of
-an initial conversation.
-
-Bound by default to `<leader>aib`.
-
-### `create_from_model_conversation_selection`
-
-Create a new session by selecting a model and and initial conversation.
-
-Bound by default to `<leader>aiN`.
-
-### `delete_from_selection`
-
-Delete a session after selecting it.
-
-Bound by default to `<leader>aid`.
-
-### `focus_from_selection`
-
-Focus a session after selecting it. When using unique sessions, this closes
-other sessions currently presented.
-
-Bound by default to `<leader>aif`.
-
-### `rename_from_selection`
-
-Rename a session after selecting it.
-
-Bound by default to `<leader>air`.
-
-### `set_model_from_selection`
-
-Set the model of a selected session.
-
-Bound by default to `<leader>aim`.
-
-### `add_visual_as_input_and_query`
-
-In visual mode, add the selected text as input for the current session and
-then query the model for a response.
-
-Bound by default to `<leader>ai<Enter>`.
-
-### `add_visual_as_instruction`
-
-In visual mode, add the selected text as an instruction to the current session.
-
-Bound by default to `<leader>aii`.
-
-### `add_visual_as_context`
-
-In visual mode, add the selected text as context to the current session.
-
-Bound by default to `<leader>aik`.
-
-### `add_visual_as_example`
-
-In visual mode, add the selected text as example to the current session.
-
-Bound by default to `<leader>aie`.
-
-### `add_visual_as_input_query_and_append`
-
-In visual mode, add the selected text as input for the current session, then
-query the model for a response, and once this response is completed insert it
-after the selection.
-
-Bound by default to `<leader>aip`.
-
-### `add_visual_as_input_query_and_prepend`
-
-Same as `add_visual_as_input_query_and_append`, but insert the response before
-the selection.
-
-Bound by default to `<leader>aiP`.
-
-### `add_visual_as_input_query_and_substitute`
-
-Same as `add_visual_as_input_query_and_append`, but delete the selection and
-substitute the response once completely received.
-
-Bound by default to `<leader>ais`.
-
-### `add_line_as_input_and_query`
-
-In normal mode, add the current line as input for the current session and
-then query the model for a response.
-
-Bound by default to `<leader>ai<Enter>`.
-
-### `add_line_as_input_query_and_append`
-
-In normal mode, add the current line as input for the current session, then
-query the model for a response, and once this response is completed insert it
-after the current line.
-
-Bound by default to `<leader>aip`.
-
-### `add_line_as_input_query_and_prepend`
-
-Same as `add_line_as_input_query_and_append`, but insert the response before
-the current lint.
-
-Bound by default to `<leader>aiP`.
-
-### `add_line_as_input_query_and_substitute`
-
-Same as `add_line_as_input_query_and_append`, but delete the current line and
-substitute the response once completely received.
-
-Bound by default to `<leader>ais`.
-
-## Local commands
-
-Local commands are the ones awailable in the conversation and/or input buffer
-of a session.
-
-### `delete_interaction`
-
-Delete the user input and the LLM responses of a session, but not the
-instructions, the context, and the examples.
-
-Bound by default to `<C-d>i`.
-
-### `delete_conversation`
-
-Delete the whole conversation of a session.
-
-Bound by default to `<C-d>c`.
-
-### `delete_session`
-
-Delete a session.
-
-Bound by default to `<C-s>d`.
-
-### `fork_session`
-
-Fork a session, replicating its current model configuration and conversation.
-
-Bound by default to `<C-s>f`.
-
-### `rename_session`
-
-Rename a session.
-
-Bound by default to `<C-s>r`.
-
-### `input_confirm`
-
-Include the provided input into the session conversation and query the LLM for
-a response.
-
-Bound by default to `<Enter>`. Only available in the input buffer. Consider
-using `<C-o><Enter>` when in insert mode.
-
-### `input_instruction`
-
-Include the provided input as an instruction into the session conversation.
-
-Bound by default to `<C-i>`. Only available in the input buffer. Consider
-using `<C-o><C-i>` when in insert mode.
-
-
-### `input_context`
-
-Include the provided input as context into the session conversation.
-
-Bound by default to `<C-k>`. Only available in the input buffer. Consider
-using `<C-o><C-k>` when in insert mode.
-
-### `input_example`
-
-Include the provided input as an example into the session conversation.
-
-Bound by default to `<C-e>`. Only available in the input buffer. Consider
-using `<C-o><C-e>` when in insert mode.
-
-### `requery`
-
-Purge the last LLM response and re-query it.
-
-Bound by default to `<C-r>`.
-
-### `prune_message`
-
-Prune the message under the cursor. Pruned messages are usually not provided to
-the LLM when querying it.
-
-Bound by default to `p`. Only availabe in the conversation buffer.
-
-### `deprune_message`
-
-De-prune the message under the cursor. 
-
-Bound by default to `P`. Only availabe in the conversation buffer.
-
-### `purge_message`
-
-Purge the message under the cursor. Purged messages cannot be recovered.
-
-Bound by default to `<C-p>`. Only availabe in the conversation buffer.
-
 ## Setup
 
 The function `setup` (or alternatively the `opts` structure when using Lazy) is
@@ -621,3 +393,232 @@ FacileLLM intentionally does not include prebuilt complex workflows. This is
 the bussiness of more integrated solutions like LunarVIM once they include an
 LLM interface. The plan is to include in this place a list of possible usage to
 illustrate the possibilities.
+
+## Global commands
+
+### `show`
+
+Show the most recently used session, presenting
+both its conversation and input winow. If none is availabe create a new
+session.
+
+Bound by default to `<leader>aiw`.
+
+### `select_default_model`
+
+If several models are configured, this command lets you select the default one
+that is used to create sessions without selecting a model explictly.
+
+Bound by default to `<leader>aiM`.
+
+### `create_from_model_selection`
+
+Create a new session by selecting a model to instantiate it.
+
+Bound by default to `<leader>ain`.
+
+### `create_from_conversation_selection`
+
+Create a new session using the default model but allowing for the selection of
+an initial conversation.
+
+Bound by default to `<leader>aib`.
+
+### `create_from_model_conversation_selection`
+
+Create a new session by selecting a model and and initial conversation.
+
+Bound by default to `<leader>aiN`.
+
+### `delete_from_selection`
+
+Delete a session after selecting it.
+
+Bound by default to `<leader>aid`.
+
+### `focus_from_selection`
+
+Focus a session after selecting it. When using unique sessions, this closes
+other sessions currently presented.
+
+Bound by default to `<leader>aif`.
+
+### `rename_from_selection`
+
+Rename a session after selecting it.
+
+Bound by default to `<leader>air`.
+
+### `set_model_from_selection`
+
+Set the model of a selected session.
+
+Bound by default to `<leader>aim`.
+
+### `add_visual_as_input_and_query`
+
+In visual mode, add the selected text as input for the current session and
+then query the model for a response.
+
+Bound by default to `<leader>ai<Enter>`.
+
+### `add_visual_as_instruction`
+
+In visual mode, add the selected text as an instruction to the current session.
+
+Bound by default to `<leader>aii`.
+
+### `add_visual_as_context`
+
+In visual mode, add the selected text as context to the current session.
+
+Bound by default to `<leader>aik`.
+
+### `add_visual_as_example`
+
+In visual mode, add the selected text as example to the current session.
+
+Bound by default to `<leader>aie`.
+
+### `add_visual_as_input_query_and_append`
+
+In visual mode, add the selected text as input for the current session, then
+query the model for a response, and once this response is completed insert it
+after the selection.
+
+Bound by default to `<leader>aip`.
+
+### `add_visual_as_input_query_and_prepend`
+
+Same as `add_visual_as_input_query_and_append`, but insert the response before
+the selection.
+
+Bound by default to `<leader>aiP`.
+
+### `add_visual_as_input_query_and_substitute`
+
+Same as `add_visual_as_input_query_and_append`, but delete the selection and
+substitute the response once completely received.
+
+Bound by default to `<leader>ais`.
+
+### `add_line_as_input_and_query`
+
+In normal mode, add the current line as input for the current session and
+then query the model for a response.
+
+Bound by default to `<leader>ai<Enter>`.
+
+### `add_line_as_input_query_and_append`
+
+In normal mode, add the current line as input for the current session, then
+query the model for a response, and once this response is completed insert it
+after the current line.
+
+Bound by default to `<leader>aip`.
+
+### `add_line_as_input_query_and_prepend`
+
+Same as `add_line_as_input_query_and_append`, but insert the response before
+the current lint.
+
+Bound by default to `<leader>aiP`.
+
+### `add_line_as_input_query_and_substitute`
+
+Same as `add_line_as_input_query_and_append`, but delete the current line and
+substitute the response once completely received.
+
+Bound by default to `<leader>ais`.
+
+## Local commands
+
+Local commands are the ones awailable in the conversation and/or input buffer
+of a session.
+
+### `delete_interaction`
+
+Delete the user input and the LLM responses of a session, but not the
+instructions, the context, and the examples.
+
+Bound by default to `<C-d>i`.
+
+### `delete_conversation`
+
+Delete the whole conversation of a session.
+
+Bound by default to `<C-d>c`.
+
+### `delete_session`
+
+Delete a session.
+
+Bound by default to `<C-s>d`.
+
+### `fork_session`
+
+Fork a session, replicating its current model configuration and conversation.
+
+Bound by default to `<C-s>f`.
+
+### `rename_session`
+
+Rename a session.
+
+Bound by default to `<C-s>r`.
+
+### `input_confirm`
+
+Include the provided input into the session conversation and query the LLM for
+a response.
+
+Bound by default to `<Enter>`. Only available in the input buffer. Consider
+using `<C-o><Enter>` when in insert mode.
+
+### `input_instruction`
+
+Include the provided input as an instruction into the session conversation.
+
+Bound by default to `<C-i>`. Only available in the input buffer. Consider
+using `<C-o><C-i>` when in insert mode.
+
+
+### `input_context`
+
+Include the provided input as context into the session conversation.
+
+Bound by default to `<C-k>`. Only available in the input buffer. Consider
+using `<C-o><C-k>` when in insert mode.
+
+### `input_example`
+
+Include the provided input as an example into the session conversation.
+
+Bound by default to `<C-e>`. Only available in the input buffer. Consider
+using `<C-o><C-e>` when in insert mode.
+
+### `requery`
+
+Purge the last LLM response and re-query it.
+
+Bound by default to `<C-r>`.
+
+### `prune_message`
+
+Prune the message under the cursor. Pruned messages are usually not provided to
+the LLM when querying it.
+
+Bound by default to `p`. Only availabe in the conversation buffer.
+
+### `deprune_message`
+
+De-prune the message under the cursor. 
+
+Bound by default to `P`. Only availabe in the conversation buffer.
+
+### `purge_message`
+
+Purge the message under the cursor. Purged messages cannot be recovered.
+
+Bound by default to `<C-p>`. Only availabe in the conversation buffer.
+

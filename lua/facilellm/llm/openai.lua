@@ -36,26 +36,6 @@ local convert_role_to_openai = function (role)
   end
 end
 
----@param role FacileLLM.OpenAI.MsgRole
----@return FacileLLM.MsgRole
-local convert_role_from_openai = function (role)
-  if role == "assistant" then
-    return "LLM"
-  end
-  vim.schedule(vim.notify,
-    "Warning in OpenAI API:\n" .. "Unexpected role " .. role .. ".\n",
-    vim.log.levels.WARN
-  )
-
-  if role == "user" then
-    return "Input"
-  elseif role == "system" then
-    return "Instruction"
-  else
-    error("unknown role " .. role)
-  end
-end
-
 ---@param msg FacileLLM.Message
 ---@return FacileLLM.OpenAI.Message
 local convert_msg_to_openai = function (msg)
@@ -77,6 +57,26 @@ local convert_msg_to_openai = function (msg)
       '"""'
   end
   return msg_openai
+end
+
+---@param role FacileLLM.OpenAI.MsgRole
+---@return FacileLLM.MsgRole
+local convert_role_from_openai = function (role)
+  if role == "assistant" then
+    return "LLM"
+  end
+  vim.schedule(vim.notify,
+    "Warning in OpenAI API:\n" .. "Unexpected role " .. role .. ".\n",
+    vim.log.levels.WARN
+  )
+
+  if role == "user" then
+    return "Input"
+  elseif role == "system" then
+    return "Instruction"
+  else
+    error("unknown role " .. role)
+  end
 end
 
 ---@param stdout_record FacileLLM.OpenAI.StdOutRecord

@@ -135,7 +135,7 @@ configuration of a model is
   opts           = {
     url = "https://api.openai.com/v1/chat/completions",
     get_api_key = function ()
-      require("facilellm.llm.util").get_api_key_from_pass("OpenAI/facilellm_token")
+      return require("facilellm.llm.util").get_api_key_from_pass("OpenAI/facilellm_token")
     end,
     openai_model = "gpt-3.5-turbo",
     params = {
@@ -182,7 +182,7 @@ are as follows:
 opts = {
   url = "https://api.openai.com/v1/chat/completions",
   get_api_key = function ()
-    require("facilellm.llm.util").get_api_key_from_pass("OpenAI/facilellm_token")
+    return require("facilellm.llm.util").get_api_key_from_pass("OpenAI/facilellm_token")
   end,
   openai_model = "gpt-3.5-turbo",
   params = {
@@ -213,7 +213,7 @@ that are availabeto change are
 ```lua
 opts = {
   get_api_key = function ()
-    require("facilellm.llm.util").get_api_key_from_pass("ReplicateAI/facilellm_token")
+    return require("facilellm.llm.util").get_api_key_from_pass("ReplicateAI/facilellm_token")
   end,
   params = {
     temperature = 0.6,

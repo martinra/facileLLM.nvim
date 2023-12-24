@@ -6,18 +6,43 @@ local config = require("facilellm.config")
 ---@field params table
 ---@field response_to function(conv: Conversation, add_msg: function, on_cmpl: function, opt:table): function?
 
----@class FacileLLM.LLMImplementation
+---@class FacileLLM.LLM.PromptConversion
+---@field conversation_to_input function(FacileLLM.Conversation): string
+---@field output_to_conversation function(string): FacileLLM.Conversation
+
+---@class FacileLLM.LLM.Implementation
 ---@field create function(opts: table): FacileLLM.LLM
 ---@field preview function?(opts: table): string
 
----@alias FacileLLM.LLMImplementationName ("OpenAI API"| "The Void Mock LLM")
+---@alias FacileLLM.LLM.ImplementationName ("OpenAI API"| "The Void Mock LLM"| "Replicate MistralAI")
 
 
----@param name FacileLLM.LLMImplementationName
----@return FacileLLM.LLMImplementation
+---@param name FacileLLM.LLM.ImplementationName
+---@return FacileLLM.LLM.Implementation
 local dispatch = function (name)
   if name == "OpenAI API" then
     return require("facilellm.llm.openai")
+  elseif name == "Replicate MistralAI" then
+    local patch_opts = function (opts)
+      opts.name = "Replicate Mixtral 8x7B Instruct v0.1"
+      opts.url = "https://api.replicate.com/v1/models/mistralai/mixtral-8x7b-instruct-v0.1/predictions"
+      opts.replicate_model_name = "Mixtral 8x7B Instruct v0.1"
+      opts.replicate_version = nil
+      opts.prompt_conversion = require("facilellm.llm.mistral_prompt")
+      return opts
+    end
+    local replicate = require("facilellm.llm.replicate")
+    return {
+      create = function (opts)
+        return replicate.create(patch_opts(opts))
+      end,
+      preview = function (opts)
+        return replicate.preview(patch_opts(opts))
+      end,
+    }
+
+
+    
   elseif name == "The Void Mock LLM" then
     return require("facilellm.llm.void")
   else
@@ -25,7 +50,7 @@ local dispatch = function (name)
   end
 end
 
----@param implementation FacileLLM.LLMImplementation | FacileLLM.LLMImplementationName
+---@param implementation FacileLLM.LLM.Implementation | FacileLLM.LLM.ImplementationName
 ---@param opts table
 ---@return FacileLLM.LLM
 local create = function (implementation, opts)
@@ -35,7 +60,7 @@ local create = function (implementation, opts)
   return implementation.create(opts)
 end
 
----@param implementation FacileLLM.LLMImplementation | FacileLLM.LLMImplementationName
+---@param implementation FacileLLM.LLM.Implementation | FacileLLM.LLM.ImplementationName
 ---@param opts table
 ---@return string?
 local preview = function (implementation, opts)

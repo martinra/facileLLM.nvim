@@ -146,7 +146,6 @@ end
 local response_to = function (conversation, add_message, on_complete, opts)
   if not opts.api_key then
     opts.api_key = opts.get_api_key()
-    print(vim.inspect(opts.api_key))
     if opts.api_key == nil then
       vim.notify("Error on acquiring API key for " .. opts.name, vim.log.levels.ERROR)
       return

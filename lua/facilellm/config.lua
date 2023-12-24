@@ -9,7 +9,7 @@
 
 ---@class FacileLLM.Config.LLM
 ---@field name string?
----@field implementation FacileLLM.LLMImplementationName | FacileLLM.LLMImplementation
+---@field implementation FacileLLM.LLM.ImplementationName | FacileLLM.LLM.Implementation
 ---@field opts table Options that are forwarded to the implementation.
 ---@field conversation FacileLLM.ConversationName | FacileLLM.Conversation
 ---@field registers table<string, FacileLLM.Config.Register>

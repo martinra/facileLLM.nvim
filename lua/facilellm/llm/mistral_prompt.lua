@@ -63,9 +63,9 @@ local conversation_to_input = function (conversation, params)
   end
 
   return {
-    top_k = params.top_k or 50,
-    top_p = params.top_p or 0.9,
     temperature = params.temperature or 0.6,
+    top_p = params.top_p or 0.9,
+    top_k = params.top_k or 50,
 
     presence_penalty = params.presence_penalty or 0,
     frequency_penalty = params.frequency_penalty or 0,

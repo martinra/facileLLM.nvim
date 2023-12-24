@@ -2,6 +2,7 @@
 -- Description at https://replicate.com/docs/reference/http
 
 local job = require("plenary.job")
+local llm_util = require("facilellm.llm.util")
 
 
 local schedule_prediction = {}
@@ -301,6 +302,8 @@ local preview = function (opts)
   else
     preview = preview .. "via Replicate API at " .. opts.url .. "\n"
   end
+
+  preview = preview .. llm_util.preview_params(opts.params)
 
   return preview
 end

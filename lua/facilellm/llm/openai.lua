@@ -1,6 +1,7 @@
 -- OpenAI API, not restrict to their product.
 
 local job = require("plenary.job")
+local llm_util = require("facilellm.llm.util")
 local message = require("facilellm.session.message")
 local util = require("facilellm.util")
 
@@ -284,9 +285,7 @@ local preview = function (opts)
     preview = preview .. "OpenAI API at " .. opts.url .. "\n"
   end
 
-  if opts.params.temperature then
-    preview = preview .. "Temperature: " .. opts.params.temperature .. "\n"
-  end
+  preview = preview .. llm_util.preview_params(opts.params)
 
   return preview
 end

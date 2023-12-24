@@ -219,7 +219,9 @@ local response_to = function (conversation, add_message, on_complete, opts)
       else
         errmsg = stderr_text
       end
-      vim.notify("Error on OpenAI API:\n" .. errmsg, vim.log.levels.ERROR)
+      vim.schedule(function ()
+        vim.notify("Error on OpenAI API:\n" .. errmsg, vim.log.levels.ERROR)
+      end)
     end)
 
   curl_job:start()

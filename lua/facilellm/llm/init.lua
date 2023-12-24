@@ -14,7 +14,7 @@ local config = require("facilellm.config")
 ---@field create function(opts: table): FacileLLM.LLM
 ---@field preview function?(opts: table): string
 
----@alias FacileLLM.LLM.ImplementationName ("OpenAI API"| "The Void Mock LLM"| "Replicate MistralAI")
+---@alias FacileLLM.LLM.ImplementationName ("OpenAI API"| "Replicate MistralAI"| "The Void Mock LLM")
 
 
 ---@param name FacileLLM.LLM.ImplementationName

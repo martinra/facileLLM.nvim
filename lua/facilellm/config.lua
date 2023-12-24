@@ -352,6 +352,10 @@ end
 ---@param conv table
 ---@return nil
 local validate_conversation = function (conv)
+  if conv.role or conv.lines or conv.status then
+    error("invalid conversation: role, line, or status on top level")
+  end
+
   for _,msg in ipairs(conv) do
     vim.validate({
       message = {msg,        "t", false},
@@ -363,6 +367,9 @@ local validate_conversation = function (conv)
       vim.validate({
         line = {line, "s", false}
       })
+      if string.find(line, "\n") then
+        error("invalid message line: contains newline")
+      end
     end
     if msg.status then
       if msg.status ~= "pruned" and msg.status ~= "purged" then

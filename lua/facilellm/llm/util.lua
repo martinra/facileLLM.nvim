@@ -28,7 +28,19 @@ local preview_params = function (params)
   return preview
 end
 
+---@param password_path string
+---@return string?
+local get_api_key_from_pass = function (password_path)
+  local key = vim.fn.system("pass show " .. password_path)
+  if string.sub(key, 1, 54) == "gpg: public key decryption failed: Operation cancelled" then
+    return nil
+  end
+  key = string.gsub(key, "\n", "")
+  return key
+end
+
 
 return {
   preview_params = preview_params,
+  get_api_key_from_pass = get_api_key_from_pass,
 }

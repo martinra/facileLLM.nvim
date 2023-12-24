@@ -8,12 +8,13 @@ local schedule_prediction = {}
 
 ---@param url string
 ---@param api_key string
+---@param cancelled {[1]: boolean}
 ---@param add_message function
 ---@param on_complete function
 ---@param prompt_conversion FacileLLM.LLM.PromptConversion
----@param cancelled {[1]: boolean}
+---@param nmb_received_chars integer?
 ---@return nil
-schedule_prediction.get = function (url, api_key, add_message, on_complete, prompt_conversion, cancelled)
+schedule_prediction.get = function (url, api_key, cancelled, add_message, on_complete, prompt_conversion, nmb_received_chars)
   ---@diagnostic disable-next-line missing-fields
   local curl_job = job:new({
     command = "curl",
@@ -65,11 +66,6 @@ schedule_prediction.get = function (url, api_key, add_message, on_complete, prom
       end)
       on_complete()
       return
-    elseif json.status == "starting" or json.status == "processing" then
-      vim.schedule(function ()
-        schedule_prediction.get(url, api_key, add_message, on_complete, prompt_conversion, cancelled)
-      end, 300)
-      return
    elseif json.status == "cancelled" then
       if cancelled[1] then
         return
@@ -77,14 +73,21 @@ schedule_prediction.get = function (url, api_key, add_message, on_complete, prom
       vim.schedule(function ()
         vim.notify("Replicate API response indicates unexpected cancellation:\n" .. vim.inspect(json),
                   vim.log.levels.ERROR)
-     end)
+      end)
       on_complete()
       return
-    elseif json.status ~= "succeeded" then
+
+    elseif json.status == "starting" then
+      vim.schedule(function ()
+        schedule_prediction.get(url, api_key, cancelled,
+          add_message, on_complete, prompt_conversion)
+      end, 300)
+      return
+    elseif json.status ~= "processing" and json.status ~= "succeeded" then
       vim.schedule(function ()
         vim.notify("Replicate API response indicates unexpected status:\n" .. vim.inspect(json),
                    vim.log.levels.ERROR)
-     end)
+      end)
       on_complete()
       return
     end
@@ -98,13 +101,18 @@ schedule_prediction.get = function (url, api_key, add_message, on_complete, prom
       return
     end
 
-    -- TODO: get message difference while processing
-    -- TODO: remove initial newlines
-    local conv = prompt_conversion.output_to_conversation(json.output)
-    for _,msg in ipairs(conv) do
-      add_message(msg.role, msg.lines)
+    local output = prompt_conversion.output_to_string(json.output)
+    nmb_received_chars = nmb_received_chars or 0
+    add_message(string.sub(output, nmb_received_chars+1))
+
+    if json.status == "succeeded" then
+      on_complete()
+    else
+      vim.schedule(function ()
+        schedule_prediction.get(url, api_key, cancelled,
+          add_message, on_complete, prompt_conversion, string.len(output))
+      end, 200)
     end
-    on_complete()
   end)
 
   curl_job:after_failure(function ()
@@ -205,8 +213,10 @@ local response_to = function (conversation, add_message, on_complete, opts)
     if cancelled[1] then
       schedule_prediction.cancel(prediction_url_cancel, opts.api_key)
     else
+      add_message("")
       vim.schedule(function ()
-        schedule_prediction.get(json.urls.get, opts.api_key, add_message, on_complete, opts.prompt_conversion, cancelled)
+        schedule_prediction.get(json.urls.get, opts.api_key, cancelled,
+          add_message, on_complete, opts.prompt_conversion)
       end, 30)
     end
   end)

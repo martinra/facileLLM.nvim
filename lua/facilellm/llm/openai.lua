@@ -41,13 +41,15 @@ end
 local convert_role_from_openai = function (role)
   if role == "assistant" then
     return "LLM"
-  elseif role == "user" then
+  end
+  vim.schedule(vim.notify,
+    "Warning in OpenAI API:\n" .. "Unexpected role " .. role .. ".\n",
+    vim.log.levels.WARN
+  )
+
+  if role == "user" then
     return "Input"
   elseif role == "system" then
-    vim.schedule(vim.notify,
-        "Warning in OpenAI API:\n" .. "Abmiguous role \"system\".\n",
-        vim.log.levels.WARN
-      )
     return "Instruction"
   else
     error("unknown role " .. role)
@@ -160,6 +162,7 @@ local response_to = function (conversation, add_message, on_complete, opts)
 
   local cancelled = { false }
 
+  local receiving_llm = false
   local on_stdout = function (_, data)
     if cancelled[1] then
       return
@@ -173,7 +176,12 @@ local response_to = function (conversation, add_message, on_complete, opts)
       end)
       if ok and delta.content then
         local role = delta.role and convert_role_from_openai(delta.role)
-        add_message(role, delta.content)
+        if role == "LLM" or role == nil and receiving_llm then
+          receiving_llm = true
+          add_message(delta.content)
+        else
+          receiving_llm = false
+        end
       end
     end
   end

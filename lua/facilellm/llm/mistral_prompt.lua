@@ -76,19 +76,14 @@ local conversation_to_input = function (conversation, params)
   }
 end
 
----@param output string[]
----@return FacileLLM.Conversation
-local output_to_conversation = function (output)
-  return {
-    {
-      role = "LLM",
-      lines = vim.split(table.concat(output, ""), "\n"),
-    }
-  }
+---@param output table
+---@return string
+local output_to_string = function (output)
+  return table.concat(output, "")
 end
 
 ---@type FacileLLM.LLM.PromptConversion
 return {
   conversation_to_input = conversation_to_input,
-  output_to_conversation = output_to_conversation,
+  output_to_string = output_to_string,
 }

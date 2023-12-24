@@ -336,11 +336,10 @@ local query_model = function (sessionid, render_conversation, on_complete)
 
   -- The model may use asynchronous calls, so we wrap this function.
   local add_message_and_render = vim.schedule_wrap(
-    ---@param role FacileLLM.MsgRole
     ---@param content string | string[]
     ---@return nil
-    function (role, content)
-      add_message(sessionid, role, content)
+    function (content)
+      add_message(sessionid, "LLM", content)
       render_conversation(sessionid)
     end)
 

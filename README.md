@@ -18,6 +18,12 @@ workflow of NeoVim. Some of the key points during design were:
 
 * Pruning can help to make the best our of models of limited context length.
 
+* Implementation of the OpenAI API and in particular ChatGPT in its various versions.
+
+* Implementation of the Replicate API. Ready access to Mixtral 8x7B Instruct,
+  and the possibility to connect to any open LLM model by only providing prompt
+  encoding.
+
 ## Alternatives
 
 I am aware of two LLM interfaces for NeoVim:
@@ -46,7 +52,7 @@ the following entry in your call to `require("lazy").setup`:
 },
 ```
 
-Can also remove telescope dependency, in which case some of the preview features during model, conversation, and session selection are not available:
+You can remove the telescope dependency, in which case some of the preview features during model, conversation, and session selection are not available:
 
 ```lua
 {
@@ -59,7 +65,7 @@ Can also remove telescope dependency, in which case some of the preview features
 ```
 
 To integrate facileLLM into [Edgy](https://github.com/folke/edgy.nvim) include,
-for instance, the follwoing in the call to `require("edgy").setup`:
+for instance, the following in the call to `require("edgy").setup`:
 
 ```lua
 options = {
@@ -85,8 +91,8 @@ right = {
 ```
 
 When using facileLLM in combination with Edgy, you probably want to use unique
-sessions (see the configuration section. When using Lazy, you can achieve this
-by including the following options:
+sessions (see the configuration section for and explanation). When using Lazy,
+you can achieve this by including the following options:
 
 ```lua
 opts = {
@@ -212,7 +218,7 @@ then query the model for a response.
 
 Bound by default to `<leader>ai<Enter>`.
 
-### `add_input_as_input_query_and_append`
+### `add_line_as_input_query_and_append`
 
 In normal mode, add the current line as input for the current session, then
 query the model for a response, and once this response is completed insert it
@@ -220,16 +226,16 @@ after the current line.
 
 Bound by default to `<leader>aip`.
 
-### `add_input_as_input_query_and_prepend`
+### `add_line_as_input_query_and_prepend`
 
-Same as `add_input_as_input_query_and_append`, but insert the response before
+Same as `add_line_as_input_query_and_append`, but insert the response before
 the current lint.
 
 Bound by default to `<leader>aiP`.
 
-### `add_input_as_input_query_and_substitute`
+### `add_line_as_input_query_and_substitute`
 
-Same as `add_input_as_input_query_and_append`, but delete the current line and
+Same as `add_line_as_input_query_and_append`, but delete the current line and
 substitute the response once completely received.
 
 Bound by default to `<leader>ais`.
@@ -357,9 +363,7 @@ configuration of a model is
   opts           = {
     url = "https://api.openai.com/v1/chat/completions",
     get_api_key = function ()
-      local key = vim.fn.system("pass show OpenAI/facilellm_token")
-      key = string.gsub(key, "\n", "")
-      return key
+      require("facilellm.llm.util").get_api_key_from_pass("OpenAI/facilellm_token")
     end,
     openai_model = "gpt-3.5-turbo",
     params = {
@@ -377,10 +381,15 @@ configuration of a model is
 
 The implementation must be a string identifying one of the available model
 implementations, or a structure with a `create` and a `preview` function.
-Details on this are currently only available in the source code.
+Details on the latter are currently only available in the source code. The
+ accepted strings are `OpenAI API` and `Replicate MistralAI`.
 
 The field `opts` is forwarded to both the `create` and the `preview` functions
-and depends on the model implementation.
+and depends on the model implementation. In the example configuration, the API
+key is retrieved through the Linux password manager `pass`. In general,
+`get_api_key` is a function that returns the API key as a string. This includes
+the (strongly dicouraged) possibility to hardcode it in the configuration as a
+return value.
 
 The field `conversation` can be an intial conversation or the name of a
 conversation that is made available through the `conversations` or
@@ -401,9 +410,7 @@ are as follows:
 opts = {
   url = "https://api.openai.com/v1/chat/completions",
   get_api_key = function ()
-    local key = vim.fn.system("pass show OpenAI/facilellm_token")
-    key = string.gsub(key, "\n", "")
-    return key
+    require("facilellm.llm.util").get_api_key_from_pass("OpenAI/facilellm_token")
   end,
   openai_model = "gpt-3.5-turbo",
   params = {
@@ -426,6 +433,33 @@ calling the API. Changes to fields of `params` after initializing a session
 take effect on future API calls. This allows for exmaple to adjust the
 temperature of a model without having to setup many of them.
 
+### Replicate MistralAI configuration
+
+This model is an instance of a MistralAI model run via Replicate. The options
+that are availabeto change are 
+
+```lua
+opts = {
+  get_api_key = function ()
+    require("facilellm.llm.util").get_api_key_from_pass("ReplicateAI/facilellm_token")
+  end,
+  params = {
+    temperature = 0.6,
+    top_p = 0.9,
+    top_k = 50,
+    presence_penalty = 0,
+    frequency_penalty = 0,
+    max_new_tokens = 1024,
+  },
+},
+```
+
+Note that the implementation is a combination of a Replicate specific API
+implementation combined with prompt encoding specific to Mixtral 8x7B Instruct
+v.0.1. In particular the Replicate API can be used to provide implementations
+for other models by merely replacing the prompt encoder. Details on this are
+currently only available in the source code.
+
 ### Conversation configuration
 
 Conversations can be given in two ways. To explicitly configure a list of them
@@ -433,7 +467,7 @@ use the field `conversations`. For example, the default configuration includes:
 
 ```lua
 conversations = {
-  ["Empty"] = {},
+  ["Blank"] = {},
   ["Concise answers"] = {
     {
       role = "Instruction",
@@ -543,6 +577,10 @@ keymaps = {
   add_visual_as_input_query_and_append     = "<leader>aip",
   add_visual_as_input_query_and_prepend    = "<leader>aiP",
   add_visual_as_input_query_and_substitute = "<leader>ais",
+  add_line_as_input_and_query              = "<leader>ai<Enter>",
+  add_line_as_input_query_and_append       = "<leader>aip",
+  add_line_as_input_query_and_prepend      = "<leader>aiP",
+  add_line_as_input_query_and_substitute   = "<leader>ais",
 },
 ```
 

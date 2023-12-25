@@ -1,10 +1,6 @@
 # Next Steps
 
 - user story with repeated pruning/purging to keep promt empty
-  - Spanish teacher, prepare Anki vocabulary
-    - OK created and verified
-    - explain including conversation
-    - highlight what is important about examples
   - vocabulary extraction
     - first scan, then mark, then extract via AI
   - proofread EN document
@@ -16,6 +12,8 @@
   - generate ideas, extensive
   - find error in code
   - generate code
+
+- config: don't open new windows except when asked explicitly
 
 - pruning in visual: prune messages touched by highlight
 

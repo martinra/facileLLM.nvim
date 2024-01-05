@@ -182,7 +182,6 @@ local response_to = function (conversation, add_message, on_complete, opts)
 
   curl_job:after(function ()
     local stdout_texts = curl_job:result()
-    print(vim.inspect(stdout_texts))
     local flag, json = pcall(vim.json.decode, table.concat(stdout_texts, ""))
     if not flag then
       vim.schedule(function ()

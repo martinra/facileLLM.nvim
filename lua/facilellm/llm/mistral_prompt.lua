@@ -82,7 +82,7 @@ local output_to_string = function (output)
   local lines = vim.split(table.concat(output, ""), "\n")
   for _,line in ipairs(lines) do
     if string.match(line, "^%s*$") then
-      table.remove(lines)
+      table.remove(lines, 1)
     else
       lines[1] = string.gsub(line, "^%s*(.-)$", "%1")
       break

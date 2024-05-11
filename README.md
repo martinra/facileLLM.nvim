@@ -20,9 +20,9 @@ workflow of NeoVim. Some of the key points during design were:
 
 * Implementation of the OpenAI API and in particular ChatGPT in its various versions.
 
-* Implementation of the Replicate API. Ready access to Mixtral 8x7B Instruct,
-  and the possibility to connect to any open LLM model by only providing prompt
-  encoding.
+* Implementation of the Replicate API. Ready access to LLama3 70B Instruct,
+  Mixtral 8x7B Instruct, and the possibility to connect to any open LLM model
+  by only providing prompt encoding.
 
 ## Alternatives
 
@@ -204,16 +204,45 @@ The field `params` specifies parameters that are provided to the model when
 calling the API. Changes to fields of `params` after initializing a session
 take effect on future API calls. This allows for exmaple to adjust the
 temperature of a model without having to setup many of them.
+### Llama3 via Replicate configuration
 
-### Replicate MistralAI configuration
+This model is an instance of a Meta model run via Replicate.
 
-This model is an instance of a MistralAI model run via Replicate. The options
-that are availabeto change are 
+```lua
+implementation = "Llama3 Instruct via Replicate",
+```
+
+The options that are availabe to change are 
 
 ```lua
 opts = {
   get_api_key = function ()
-    return require("facilellm.llm.util").get_api_key_from_pass("ReplicateAI/facilellm_token")
+    return require("facilellm.llm.util").get_api_key_from_pass("Replicate/facilellm_token")
+  end,
+  params = {
+    temperature = 0.6,
+    top_p = 0.9,
+    top_k = 50,
+    presence_penalty = 0,
+    max_new_tokens = 1024,
+  },
+},
+```
+
+### MistralAI via Replicate configuration
+
+This model is an instance of a MistralAI model run via Replicate.
+
+```lua
+implementation = "Mixtral 8x7B Instruct v0.1 via Replicate",
+```
+
+The options that are availabe to change are 
+
+```lua
+opts = {
+  get_api_key = function ()
+    return require("facilellm.llm.util").get_api_key_from_pass("Replicate/facilellm_token")
   end,
   params = {
     temperature = 0.6,
@@ -226,9 +255,11 @@ opts = {
 },
 ```
 
-Note that the implementation is a combination of a Replicate specific API
-implementation combined with prompt encoding specific to Mixtral 8x7B Instruct
-v.0.1. In particular the Replicate API can be used to provide implementations
+### Replicate API
+
+The implementations of Llama3 and Mixtral are a combination of a Replicate
+specific API implementation combined with prompt encoding specific to the
+model. In particular the Replicate API can be used to provide implementations
 for other models by merely replacing the prompt encoder. Details on this are
 currently only available in the source code.
 

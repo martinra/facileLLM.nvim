@@ -46,7 +46,7 @@ schedule_prediction.stream = function (url, cancelled, stream_curl_job, add_mess
           add_message(string.sub(line, 7))
         elseif last_event_error then
           vim.schedule(function ()
-            vim.notify("Error on ReplicateAI API:\n" .. string.sub(line, 7), vim.log.levels.ERROR)
+            vim.notify("Error on Replicate API:\n" .. string.sub(line, 7), vim.log.levels.ERROR)
           end)
         end
         previous_was_data = true
@@ -76,7 +76,7 @@ schedule_prediction.stream = function (url, cancelled, stream_curl_job, add_mess
       end
       local stderr_text = curl_job:stderr_result()
       vim.schedule(function ()
-        vim.notify("Error on ReplicateAI API:\n" .. vim.inspect(stderr_text), vim.log.levels.ERROR)
+        vim.notify("Error on Replicate API:\n" .. vim.inspect(stderr_text), vim.log.levels.ERROR)
       end)
     end)
 

@@ -14,7 +14,7 @@ local config = require("facilellm.config")
 ---@field create function(opts: table): FacileLLM.LLM
 ---@field preview function?(opts: table): string
 
----@alias FacileLLM.LLM.ImplementationName ("OpenAI API"| "Replicate MistralAI"| "The Void Mock LLM")
+---@alias FacileLLM.LLM.ImplementationName ("OpenAI API"| "Llama3 Instruct via Replicate" | "Mixtral 8x7B Instruct v0.1 via Replicate" | "The Void Mock LLM")
 
 
 ---@param name FacileLLM.LLM.ImplementationName
@@ -23,13 +23,13 @@ local dispatch = function (implementation)
   if implementation == "OpenAI API" then
     return require("facilellm.llm.openai")
 
-  elseif implementation == "Mixtral Instruct via ReplicateAI" then
+  elseif implementation == "Llama3 Instruct via Replicate" then
     local patch_opts = function (opts)
-      opts.name = "Mixtral 8x7B Instruct v0.1 via ReplicateAI"
-      opts.url = "https://api.replicate.com/v1/models/mistralai/mixtral-8x7b-instruct-v0.1/predictions"
-      opts.replicate_model_name = "Mixtral 8x7B Instruct v0.1"
+      opts.name = "Llama3 70b Instruct via Replicate"
+      opts.url = "https://api.replicate.com/v1/models/meta/meta-llama-3-70b-instruct/predictions"
+      opts.replicate_model_name = "Llama3 70b Instruct"
       opts.replicate_version = nil
-      opts.prompt_conversion = require("facilellm.llm.mixtral_prompt")
+      opts.prompt_conversion = require("facilellm.llm.llama3_prompt")
       return opts
     end
     local replicate = require("facilellm.llm.replicate")
@@ -42,13 +42,13 @@ local dispatch = function (implementation)
       end,
     }
 
-  elseif implementation == "Llama3 Instruct via ReplicateAI" then
+  elseif implementation == "Mixtral 8x7B Instruct v0.1 via Replicate" then
     local patch_opts = function (opts)
-      opts.name = "Llama3 70b Instruct via ReplicateAI"
-      opts.url = "https://api.replicate.com/v1/models/meta/meta-llama-3-70b-instruct/predictions"
-      opts.replicate_model_name = "Llama3 70b Instruct"
+      opts.name = "Mixtral 8x7B Instruct v0.1 via Replicate"
+      opts.url = "https://api.replicate.com/v1/models/mistralai/mixtral-8x7b-instruct-v0.1/predictions"
+      opts.replicate_model_name = "Mixtral 8x7B Instruct v0.1"
       opts.replicate_version = nil
-      opts.prompt_conversion = require("facilellm.llm.llama3_prompt")
+      opts.prompt_conversion = require("facilellm.llm.mixtral_prompt")
       return opts
     end
     local replicate = require("facilellm.llm.replicate")

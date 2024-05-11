@@ -29,7 +29,7 @@ local dispatch = function (implementation)
       opts.url = "https://api.replicate.com/v1/models/mistralai/mixtral-8x7b-instruct-v0.1/predictions"
       opts.replicate_model_name = "Mixtral 8x7B Instruct v0.1"
       opts.replicate_version = nil
-      opts.prompt_conversion = require("facilellm.llm.mistral_prompt")
+      opts.prompt_conversion = require("facilellm.llm.mixtral_prompt")
       return opts
     end
     local replicate = require("facilellm.llm.replicate")

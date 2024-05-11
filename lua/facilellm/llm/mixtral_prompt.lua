@@ -5,24 +5,36 @@ local message = require("facilellm.session.message")
 
 ---@param msg FacileLLM.Message
 ---@return string
-local convert_msg_to_mistral = function (msg)
+local convert_msg_to_mixtral = function (msg)
   local content = table.concat(msg.lines, "\n")
 
-  if msg.role == "Context" then
-    return
-    "The conversation will be based on the following context:\n" ..
-    '"""\n' ..
-    content .. "\n" ..
-    '"""'
-  elseif msg.role == "Example" then
-    return
-    "This is an example of how you should respond:\n" ..
-    '"""\n' ..
-    content .. "\n" ..
-    '"""'
+  local prompt = ""
+
+  if msg.role == "LLM" then
+    prompt = prompt .. " [/INST] "
   end
 
-  return content
+  if msg.role == "Instruction" then
+    prompt = prompt .. "During the conversation follow this instruction:\n\"\"\""
+  elseif msg.role == "Context" then
+    prompt = prompt .. "The conversation will be based on the following context:\n\"\"\""
+  elseif msg.role == "Example" then
+    prompt = prompt .. "This is an example of how you should respond:\n\"\"\""
+  end
+
+  prompt = prompt .. content
+  if msg.role == "Instruction" or
+     msg.role == "Context" or
+     msg.role == "Example" then
+    prompt = prompt .. "\"\"\"\n"
+  end
+
+  if msg.role == "LLM" then
+    prompt = prompt .. "</s> "
+    prompt = prompt .. "[INST] "
+  end
+
+  return prompt
 end
 
 ---@param conversation FacileLLM.Conversation
@@ -31,36 +43,13 @@ end
 local conversation_to_input = function (conversation, params)
   params = params or {}
 
-  local prompt = "<s>"
-  local inst = nil
+  local prompt = "<s> [INST] "
   for _,msg in ipairs(conversation) do
     if not message.isempty(msg) and not message.ispruned(msg) then
-      if inst then
-        if msg.role == "LLM" then
-          prompt = prompt .. " [/INST]"
-          inst = false
-        else
-          prompt = prompt .. "\n\n"
-        end
-      elseif not inst then
-        if msg.role == "LLM" then
-          prompt = prompt .. "\n\n"
-        else
-          if inst ~= nil then
-            prompt = prompt .. "</s>"
-          end
-          prompt = prompt .. " [INST]"
-          inst = true
-        end
-      end
-      prompt = prompt .. " " .. convert_msg_to_mistral(msg)
+      prompt = prompt .. convert_msg_to_mixtral(msg)
     end
   end
-  if inst then
-    prompt = prompt .. " [/INST] "
-  else
-    prompt = prompt .. "</s>"
-  end
+  prompt = prompt .. " [/INST] "
 
   return {
     temperature = params.temperature or 0.6,
@@ -79,6 +68,8 @@ end
 ---@param output table
 ---@return string
 local output_to_string = function (output)
+  error("should not be called")
+
   local lines = vim.split(table.concat(output, ""), "\n")
   for _,line in ipairs(lines) do
     if string.match(line, "^%s*$") then

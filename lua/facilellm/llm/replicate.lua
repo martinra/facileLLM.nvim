@@ -8,6 +8,87 @@ local llm_util = require("facilellm.llm.util")
 local schedule_prediction = {}
 
 ---@param url string
+---@param cancelled {[1]: boolean}
+---@param stream_curl_job {}
+---@param add_message function
+---@param on_complete function
+---@return nil
+schedule_prediction.stream = function (url, cancelled, stream_curl_job, add_message, on_complete)
+  local last_event_output = false
+  local last_event_error = false
+  local previous_was_data = false
+  local on_stdout = function (_, str)
+    if cancelled[1] then
+      return
+    end
+
+    local lines = vim.split(str, "\n")
+    for _,line in ipairs(lines) do
+      if string.sub(line, 1,7) == "event: " then
+        if string.sub(line, 8) == "output" then
+          last_event_output = true
+          last_event_error = false
+        else
+          last_event_output = false
+          if string.sub(line, 8) == "error" then
+            last_event_error = true
+          elseif string.sub(line, 8) == "done" then
+            last_event_error = false
+            stream_curl_job[1]:_shutdown()
+          end
+        end
+        previous_was_data = false
+      elseif string.sub(line, 1,6) == "data: " then
+        if last_event_output then
+          if previous_was_data then
+            add_message("\n")
+          end
+          add_message(string.sub(line, 7))
+        elseif last_event_error then
+          vim.schedule(function ()
+            vim.notify("Error on ReplicateAI API:\n" .. string.sub(line, 7), vim.log.levels.ERROR)
+          end)
+        end
+        previous_was_data = true
+      end
+    end
+  end
+
+  ---@diagnostic disable-next-line missing-fields
+  local curl_job = job:new({
+      command = "curl",
+      args = {
+        "--silent", "--show-error", "--no-buffer",
+        url,
+        "-H", "Accept: text/event-stream",
+        "-H", "Cache-Control: no-store"
+      },
+      on_stdout = on_stdout
+    })
+  stream_curl_job[1] = curl_job
+
+  curl_job:after(function ()
+    on_complete()
+  end)
+  curl_job:after_failure(function (j, code, signal)
+      if code == nil then
+        return
+      end
+      local stderr_text = curl_job:stderr_result()
+      vim.schedule(function ()
+        vim.notify("Error on ReplicateAI API:\n" .. vim.inspect(stderr_text), vim.log.levels.ERROR)
+      end)
+    end)
+
+  curl_job:start()
+
+  return function ()
+    curl_job:_shutdown()
+    cancelled[1] = true
+  end
+end
+
+---@param url string
 ---@param api_key string
 ---@param cancelled {[1]: boolean}
 ---@param add_message function
@@ -161,10 +242,12 @@ local response_to = function (conversation, add_message, on_complete, opts)
 
   local prediction_url_cancel
   local cancelled = { false }
+  local stream_curl_job = {}
 
   local data = {
     version = opts.replicate_version,
     input = opts.prompt_conversion.conversation_to_input(conversation, opts.params),
+    stream = opts.stream,
   }
 
   ---@diagnostic disable-next-line missing-fields
@@ -174,7 +257,7 @@ local response_to = function (conversation, add_message, on_complete, opts)
       "--silent", "--show-error", "--no-buffer",
       opts.url,
       "-H", "Content-Type: application/json",
-      "-H", "Authorization: Token " .. opts.api_key,
+      "-H", "Authorization: Bearer " .. opts.api_key,
       "-d", vim.json.encode(data),
     },
     enabled_recording = true,
@@ -200,9 +283,10 @@ local response_to = function (conversation, add_message, on_complete, opts)
       return
     end
 
-    if not json.urls or not json.urls.get or not json.urls.cancel then
+    if not json.urls or not json.urls.cancel or
+       not (opts.stream and json.urls.stream or not opts.stream and json.urls.get) then
       vim.schedule(function ()
-        vim.notify("Replicate API response does not provide url:\n" .. vim.inspect(json),
+        vim.notify("Replicate API response does not provide required urls:\n" .. vim.inspect(json),
                    vim.log.levels.ERROR)
       end)
       on_complete()
@@ -212,6 +296,12 @@ local response_to = function (conversation, add_message, on_complete, opts)
 
     if cancelled[1] then
       schedule_prediction.cancel(prediction_url_cancel, opts.api_key)
+    elseif opts.stream then
+      add_message("")
+      vim.schedule(function ()
+        schedule_prediction.stream(json.urls.stream, cancelled, stream_curl_job,
+          add_message, on_complete)
+      end, 30)
     else
       add_message("")
       vim.schedule(function ()
@@ -233,6 +323,9 @@ local response_to = function (conversation, add_message, on_complete, opts)
 
   return function ()
     schedule_prediction.cancel(prediction_url_cancel, opts.api_key)
+    if opts.stream and stream_curl_job[1] then
+      stream_curl_job[1]:_shutdown()
+    end
     cancelled[1] = true
   end
 end
@@ -242,6 +335,7 @@ local default_opts = function ()
   return {
     name = "Replicate Unspecified Model",
     url = "https://api.replicate.com/v1/predictions",
+    stream = true,
     get_api_key = function ()
       return vim.ui.input("API key for api.replicate.com: ")
     end,

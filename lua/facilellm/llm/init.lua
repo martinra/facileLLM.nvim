@@ -19,12 +19,13 @@ local config = require("facilellm.config")
 
 ---@param name FacileLLM.LLM.ImplementationName
 ---@return FacileLLM.LLM.Implementation
-local dispatch = function (name)
-  if name == "OpenAI API" then
+local dispatch = function (implementation)
+  if implementation == "OpenAI API" then
     return require("facilellm.llm.openai")
-  elseif name == "Replicate MistralAI" then
+
+  elseif implementation == "Mixtral Instruct via ReplicateAI" then
     local patch_opts = function (opts)
-      opts.name = "Replicate Mixtral 8x7B Instruct v0.1"
+      opts.name = "Mixtral 8x7B Instruct v0.1 via ReplicateAI"
       opts.url = "https://api.replicate.com/v1/models/mistralai/mixtral-8x7b-instruct-v0.1/predictions"
       opts.replicate_model_name = "Mixtral 8x7B Instruct v0.1"
       opts.replicate_version = nil
@@ -41,10 +42,28 @@ local dispatch = function (name)
       end,
     }
 
+  elseif implementation == "Llama3 Instruct via ReplicateAI" then
+    local patch_opts = function (opts)
+      opts.name = "Llama3 70b Instruct via ReplicateAI"
+      opts.url = "https://api.replicate.com/v1/models/meta/meta-llama-3-70b-instruct/predictions"
+      opts.replicate_model_name = "Llama3 70b Instruct"
+      opts.replicate_version = nil
+      opts.prompt_conversion = require("facilellm.llm.llama3_prompt")
+      return opts
+    end
+    local replicate = require("facilellm.llm.replicate")
+    return {
+      create = function (opts)
+        return replicate.create(patch_opts(opts))
+      end,
+      preview = function (opts)
+        return replicate.preview(patch_opts(opts))
+      end,
+    }
 
-    
   elseif name == "The Void Mock LLM" then
     return require("facilellm.llm.void")
+
   else
     error("Unknown LLM implementation " .. vim.inspect(name))
   end

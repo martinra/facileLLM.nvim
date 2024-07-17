@@ -14,8 +14,9 @@ local schedule_prediction = {}
 ---@param on_complete function
 ---@return nil
 schedule_prediction.stream = function (url, cancelled, stream_curl_job, add_message, on_complete)
-  local last_event_output = false
-  local last_event_error = false
+  local first_message_added = false
+  local last_event_was_output = false
+  local last_event_was_error = false
   local previous_was_data = false
   local on_stdout = function (_, str)
     if cancelled[1] then
@@ -26,25 +27,27 @@ schedule_prediction.stream = function (url, cancelled, stream_curl_job, add_mess
     for _,line in ipairs(lines) do
       if string.sub(line, 1,7) == "event: " then
         if string.sub(line, 8) == "output" then
-          last_event_output = true
-          last_event_error = false
+          last_event_was_output = true
+          last_event_was_error = false
         else
-          last_event_output = false
+          last_event_was_output = false
           if string.sub(line, 8) == "error" then
-            last_event_error = true
+            last_event_was_error = true
           elseif string.sub(line, 8) == "done" then
-            last_event_error = false
+            last_event_was_error = false
             stream_curl_job[1]:_shutdown()
           end
         end
         previous_was_data = false
       elseif string.sub(line, 1,6) == "data: " then
-        if last_event_output then
-          if previous_was_data then
+        if last_event_was_output then
+          if previous_was_data and first_message_added then
+            -- We only add newlines after text was received to avoid a
+            -- situtation where the LLM response starts with blank lines.
             add_message("\n")
           end
           add_message(string.sub(line, 7))
-        elseif last_event_error then
+        elseif last_event_was_error then
           vim.schedule(function ()
             vim.notify("Error on Replicate API:\n" .. string.sub(line, 7), vim.log.levels.ERROR)
           end)

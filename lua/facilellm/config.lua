@@ -349,6 +349,16 @@ local default_opts = function ()
   }
 end
 
+---@param impl table
+---@return nil
+local validate_implementation = function (impl)
+  vim.validate({
+    implementation = {impl,         "t", false},
+    create         = {impl.create,  "f", false},
+    preview        = {impl.preview, "f", true},
+  })
+end
+
 ---@param conv table
 ---@return nil
 local validate_conversation = function (conv)
@@ -407,12 +417,15 @@ local validate_model_config = function (model)
   })
   vim.validate({
     name           = {model.name,           "s",        true},
-    implementation = {model.implementation, {"s", "f"}, false},
+    implementation = {model.implementation, {"s", "t"}, false},
     opts           = {model.opts,           "t",        true},
     conversation   = {model.conversation,   {"s", "t"}, true},
     registers      = {model.registers,      "t",        true},
     autostart      = {model.autostart,      "b",        true},
   })
+  if model.implementation and type(model.implementation) == "table" then
+    validate_implementation(model.implementation)
+  end
   if model.conversation and type(model.conversation) == "table" then
     validate_conversation(model.conversation)
   end

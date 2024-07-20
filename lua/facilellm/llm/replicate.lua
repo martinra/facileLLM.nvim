@@ -46,7 +46,11 @@ schedule_prediction.stream = function (url, cancelled, stream_curl_job, add_mess
             -- situtation where the LLM response starts with blank lines.
             add_message("\n")
           end
-          add_message(string.sub(line, 7))
+          local msg = string.sub(line, 7)
+          if msg ~= "" then
+            add_message(msg)
+            first_message_added = true
+          end
         elseif last_event_was_error then
           vim.schedule(function ()
             vim.notify("Error on Replicate API:\n" .. string.sub(line, 7), vim.log.levels.ERROR)

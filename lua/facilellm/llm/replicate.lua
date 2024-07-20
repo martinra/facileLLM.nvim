@@ -345,9 +345,9 @@ local default_opts = function ()
     params = {},
 
     ---@type string?
-    replicate_model_name = nil,
-    ---@type string?
     replicate_version = nil,
+    ---@type string?
+    replicate_model_name = nil,
     ---@type FacileLLM.LLM.PromptConversion?
     prompt_conversion = nil,
   }

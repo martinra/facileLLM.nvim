@@ -27,8 +27,8 @@ local dispatch = function (implementation)
     local patch_opts = function (opts)
       opts.name = "Llama3 70b Instruct via Replicate"
       opts.url = "https://api.replicate.com/v1/models/meta/meta-llama-3-70b-instruct/predictions"
-      opts.replicate_model_name = "Llama3 70b Instruct"
       opts.replicate_version = nil
+      opts.replicate_model_name = "Llama3 70b Instruct"
       opts.prompt_conversion = require("facilellm.llm.llama3_prompt")
       return opts
     end
@@ -46,8 +46,8 @@ local dispatch = function (implementation)
     local patch_opts = function (opts)
       opts.name = "Mixtral 8x7B Instruct v0.1 via Replicate"
       opts.url = "https://api.replicate.com/v1/models/mistralai/mixtral-8x7b-instruct-v0.1/predictions"
-      opts.replicate_model_name = "Mixtral 8x7B Instruct v0.1"
       opts.replicate_version = nil
+      opts.replicate_model_name = "Mixtral 8x7B Instruct v0.1"
       opts.prompt_conversion = require("facilellm.llm.mixtral_prompt")
       return opts
     end

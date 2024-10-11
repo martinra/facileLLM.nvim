@@ -204,21 +204,26 @@ The field `params` specifies parameters that are provided to the model when
 calling the API. Changes to fields of `params` after initializing a session
 take effect on future API calls. This allows for exmaple to adjust the
 temperature of a model without having to setup many of them.
+
 ### Llama3 via Replicate configuration
 
 This model is an instance of a Meta model run via Replicate.
 
 ```lua
-implementation = "Llama3 Instruct via Replicate",
+implementation = require("facilellm.llm.replicate"),
 ```
 
 The options that are availabe to change are 
 
 ```lua
 opts = {
+  url = "https://api.replicate.com/v1/models/meta/meta-llama-3-8b-instruct/predictions",
   get_api_key = function ()
     return require("facilellm.llm.util").get_api_key_from_pass("Replicate/facilellm_token")
   end,
+  replicate_version = nil,
+  replicate_model_name = "Llama3 8b Instruct",
+  prompt_conversion = require("facilellm.llm.llama3_prompt"),
   params = {
     temperature = 0.6,
     top_p = 0.9,
@@ -234,16 +239,20 @@ opts = {
 This model is an instance of a MistralAI model run via Replicate.
 
 ```lua
-implementation = "Mixtral 8x7B Instruct v0.1 via Replicate",
+implementation = require("facilellm.llm.replicate"),
 ```
 
 The options that are availabe to change are 
 
 ```lua
 opts = {
+  url = "https://api.replicate.com/v1/models/mistralai/mixtral-8x7b-instruct-v0.1/predictions",
   get_api_key = function ()
     return require("facilellm.llm.util").get_api_key_from_pass("Replicate/facilellm_token")
   end,
+  replicate_version = nil,
+  replicate_model_name = "Mixtral 8x7B Instruct v0.1",
+  prompt_conversion = require("facilellm.llm.mixtral_prompt"),
   params = {
     temperature = 0.6,
     top_p = 0.9,

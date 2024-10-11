@@ -14,78 +14,17 @@ local config = require("facilellm.config")
 ---@field create function(opts: table): FacileLLM.LLM
 ---@field preview function?(opts: table): string
 
----@alias FacileLLM.LLM.ImplementationName ("OpenAI API"| "Llama3 Instruct via Replicate" | "Mixtral 8x7B Instruct v0.1 via Replicate" | "The Void Mock LLM")
-
-
----@param name FacileLLM.LLM.ImplementationName
----@return FacileLLM.LLM.Implementation
-local dispatch = function (implementation)
-  if implementation == "OpenAI API" then
-    return require("facilellm.llm.openai")
-
-  elseif implementation == "Llama3 Instruct via Replicate" then
-    local patch_opts = function (opts)
-      opts.name = "Llama3 70b Instruct via Replicate"
-      opts.url = "https://api.replicate.com/v1/models/meta/meta-llama-3-70b-instruct/predictions"
-      opts.replicate_version = nil
-      opts.replicate_model_name = "Llama3 70b Instruct"
-      opts.prompt_conversion = require("facilellm.llm.llama3_prompt")
-      return opts
-    end
-    local replicate = require("facilellm.llm.replicate")
-    return {
-      create = function (opts)
-        return replicate.create(patch_opts(opts))
-      end,
-      preview = function (opts)
-        return replicate.preview(patch_opts(opts))
-      end,
-    }
-
-  elseif implementation == "Mixtral 8x7B Instruct v0.1 via Replicate" then
-    local patch_opts = function (opts)
-      opts.name = "Mixtral 8x7B Instruct v0.1 via Replicate"
-      opts.url = "https://api.replicate.com/v1/models/mistralai/mixtral-8x7b-instruct-v0.1/predictions"
-      opts.replicate_version = nil
-      opts.replicate_model_name = "Mixtral 8x7B Instruct v0.1"
-      opts.prompt_conversion = require("facilellm.llm.mixtral_prompt")
-      return opts
-    end
-    local replicate = require("facilellm.llm.replicate")
-    return {
-      create = function (opts)
-        return replicate.create(patch_opts(opts))
-      end,
-      preview = function (opts)
-        return replicate.preview(patch_opts(opts))
-      end,
-    }
-
-  elseif name == "The Void Mock LLM" then
-    return require("facilellm.llm.void")
-
-  else
-    error("Unknown LLM implementation " .. vim.inspect(name))
-  end
-end
-
----@param implementation FacileLLM.LLM.Implementation | FacileLLM.LLM.ImplementationName
+---@param implementation FacileLLM.LLM.Implementation
 ---@param opts table
 ---@return FacileLLM.LLM
 local create = function (implementation, opts)
-  if type(implementation) == "string" then
-    implementation = dispatch(implementation)
-  end
   return implementation.create(opts)
 end
 
----@param implementation FacileLLM.LLM.Implementation | FacileLLM.LLM.ImplementationName
+---@param implementation FacileLLM.LLM.Implementation
 ---@param opts table
 ---@return string?
 local preview = function (implementation, opts)
-  if type(implementation) == "string" then
-    implementation = dispatch(implementation)
-  end
   if implementation.preview then
     return implementation.preview(opts)
   else

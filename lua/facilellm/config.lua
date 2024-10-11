@@ -9,7 +9,7 @@
 
 ---@class FacileLLM.Config.LLM
 ---@field name string?
----@field implementation FacileLLM.LLM.ImplementationName | FacileLLM.LLM.Implementation
+---@field implementation FacileLLM.LLM.Implementation
 ---@field opts table Options that are forwarded to the implementation.
 ---@field conversation FacileLLM.ConversationName | FacileLLM.Conversation
 ---@field registers table<string, FacileLLM.Config.Register>
@@ -229,21 +229,21 @@ local default_opts = function ()
     models = {
       {
         name = "OpenAI GPT 3.5-Turbo",
-        implementation = "OpenAI API",
+        implementation = require("facilellm.llm.openai"),
         opts = {
           openai_model = "gpt-3.5-turbo",
         },
       },
       {
         name = "OpenAI GPT 4",
-        implementation = "OpenAI API",
+        implementation = require("facilellm.llm.openai"),
         opts = {
           openai_model = "gpt-4",
         },
       },
       {
         name = "OpenAI GPT 4 32K",
-        implementation = "OpenAI API",
+        implementation = require("facilellm.llm.openai"),
         opts = {
           openai_model = "gpt-4-32k",
         },

@@ -186,7 +186,7 @@ schedule_prediction.get = function (url, api_key, cancelled, add_message, on_com
       return
 
     elseif json.status == "starting" then
-      vim.schedule(function ()
+      vim.defer_fn(function ()
         schedule_prediction.get(url, api_key, cancelled,
           add_message, on_complete, prompt_conversion)
       end, 300)
@@ -226,7 +226,7 @@ schedule_prediction.get = function (url, api_key, cancelled, add_message, on_com
     if json.status == "succeeded" then
       on_complete()
     else
-      vim.schedule(function ()
+      vim.defer_fn(function ()
         schedule_prediction.get(url, api_key, cancelled,
           add_message, on_complete, prompt_conversion, string.len(output))
       end, 200)
@@ -334,13 +334,13 @@ local response_to = function (conversation, add_message, on_complete, opts)
       schedule_prediction.cancel(prediction_url_cancel, opts.api_key)
     elseif opts.stream then
       add_message("")
-      vim.schedule(function ()
+      vim.defer_fn(function ()
         schedule_prediction.stream(json.urls.stream, cancelled, stream_curl_job,
           add_message, on_complete)
       end, 30)
     else
       add_message("")
-      vim.schedule(function ()
+      vim.defer_fn(function ()
         schedule_prediction.get(json.urls.get, opts.api_key, cancelled,
           add_message, on_complete, opts.prompt_conversion)
       end, 30)
@@ -373,7 +373,10 @@ local default_opts = function ()
     url = "https://api.replicate.com/v1/predictions",
     stream = true,
     get_api_key = function ()
-      return vim.ui.input("API key for api.replicate.com: ")
+      return vim.ui.input(
+          { prompt = "API key for api.replicate.com: " },
+          function () end
+      )
     end,
     params = {},
 

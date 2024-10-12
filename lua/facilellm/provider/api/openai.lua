@@ -86,10 +86,11 @@ local convert_role_from_openai = function (role)
   if role == "assistant" then
     return "LLM"
   end
-  vim.schedule(vim.notify,
-    "Warning in OpenAI API:\n" .. "Unexpected role " .. role .. ".\n",
-    vim.log.levels.WARN
-  )
+  vim.schedule(function ()
+    vim.notify(
+        "Warning in OpenAI API:\n" .. "Unexpected role " .. role .. ".\n",
+        vim.log.levels.WARN)
+    end)
 
   if role == "user" then
     return "Input"
@@ -108,10 +109,12 @@ local append_to_stdout_record = function (stdout_record, data)
 
   -- NOTE: We here assume that stdout does not break along the data prefixes.
   elseif string.sub(data, 1,6) ~= "data: " then
-    vim.schedule(vim.notify,
+    vim.schedule(function ()
+      vim.notify(
         "Error in OpenAI API:\n" .. "Received string not prefixed by data.\n" .. data,
         vim.log.levels.ERROR
       )
+    end)
 
   else
     if data ~= "data: [DONE]" then
@@ -260,7 +263,10 @@ local default_opts = function ()
     name = "OpenAI GPT",
     url = "https://api.openai.com/v1/chat/completions",
     get_api_key = function ()
-      return vim.ui.input("API key for api.openai.com: ")
+      return vim.ui.input(
+          { prompt = "API key for api.openai.com: " },
+          function () end
+         )
     end,
     openai_model = "gpt-3.5-turbo",
     params = {},

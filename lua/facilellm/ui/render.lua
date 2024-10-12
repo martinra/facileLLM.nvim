@@ -239,9 +239,9 @@ local clear_conversation = function (bufnr, render_state)
     end_highlight_receiving(bufnr, render_state)
   end
 
-  vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
+  vim.api.nvim_set_option_value("modifiable", true, { buf = bufnr})
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {})
-  vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
+  vim.api.nvim_set_option_value("modifiable", false, { buf = bufnr})
 end
 
 ---@param bufnr BufNr
@@ -255,7 +255,7 @@ local render_conversation = function (bufnr, conv, render_state)
 
   local workaround_fold = false
 
-  vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
+  vim.api.nvim_set_option_value("modifiable", true, { buf = bufnr})
 
   for mx = render_state.pos.msg, #conv do
     local msg = conv[mx]
@@ -329,7 +329,7 @@ local render_conversation = function (bufnr, conv, render_state)
     end
   end
 
-  vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
+  vim.api.nvim_set_option_value("modifiable", false, { buf = bufnr })
 
   -- HACK: We recompute all folds. Without this on 0.9.4 when creating from
   -- selection, they are seemingly never applied. This might not be neccessary
@@ -404,9 +404,9 @@ local purge_message = function (bufnr, mx, msg, render_state)
   end
 
   local row, _, row_end, _ = get_message_range(mx, msg, render_state)
-  vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
+  vim.api.nvim_set_option_value("modifiable", true, { buf = bufnr })
   vim.api.nvim_buf_set_lines(bufnr, row, row_end+1, false, {})
-  vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
+  vim.api.nvim_set_option_value("modifiable", false, { buf = bufnr })
 
   local offset_reduction
   if render_state.pos.msg == mx then

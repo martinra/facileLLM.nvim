@@ -142,12 +142,12 @@ local create_buffer = function (sessionid, name)
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_name(bufnr, name)
 
-  vim.api.nvim_buf_set_option(bufnr, "buftype",    "nofile")
-  vim.api.nvim_buf_set_option(bufnr, "filetype",   "facilellm-input")
-  vim.api.nvim_buf_set_option(bufnr, "swapfile",   false)
-  vim.api.nvim_buf_set_option(bufnr, "buflisted",  false)
-  vim.api.nvim_buf_set_option(bufnr, "bufhidden",  "hide")
-  vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
+  vim.api.nvim_set_option_value("buftype",    "nofile",          { buf = bufnr })
+  vim.api.nvim_set_option_value("filetype",   "facilellm-input", { buf = bufnr })
+  vim.api.nvim_set_option_value("swapfile",   false,             { buf = bufnr })
+  vim.api.nvim_set_option_value("buflisted",  false,             { buf = bufnr })
+  vim.api.nvim_set_option_value("bufhidden",  "hide",            { buf = bufnr })
+  vim.api.nvim_set_option_value("modifiable", true,              { buf = bufnr })
 
   ui_common.buf_set_session(bufnr, sessionid)
 

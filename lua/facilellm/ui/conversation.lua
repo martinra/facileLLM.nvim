@@ -10,12 +10,12 @@ local create_buffer = function (sessionid, name)
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_name(bufnr, name)
 
-  vim.api.nvim_buf_set_option(bufnr, "buftype",    "nofile")
-  vim.api.nvim_buf_set_option(bufnr, "filetype",   "facilellm-conversation")
-  vim.api.nvim_buf_set_option(bufnr, "swapfile",   false)
-  vim.api.nvim_buf_set_option(bufnr, "buflisted",  false)
-  vim.api.nvim_buf_set_option(bufnr, "bufhidden",  "hide")
-  vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
+  vim.api.nvim_set_option_value("buftype",    "nofile",                  { buf = bufnr })
+  vim.api.nvim_set_option_value("filetype",   "facilellm-conversation",  { buf = bufnr })
+  vim.api.nvim_set_option_value("swapfile",   false,                     { buf = bufnr })
+  vim.api.nvim_set_option_value("buflisted",  false,                     { buf = bufnr })
+  vim.api.nvim_set_option_value("bufhidden",  "hide",                    { buf = bufnr })
+  vim.api.nvim_set_option_value("modifiable", false,                     { buf = bufnr })
 
   ui_common.buf_set_session(bufnr, sessionid)
   ui_common.buf_set_is_conversation(bufnr)
@@ -29,7 +29,7 @@ local fold_messages = function (winid)
   if not config.opts.interface.fold_instruction
     and not config.opts.interface.fold_context
     and not config.opts.interface.fold_example then
-    vim.api.nvim_win_set_option(winid, "foldenable", false)
+    vim.api.nvim_set_option_value("foldenable", false, { win = winid })
     return
   end
 
@@ -72,9 +72,9 @@ local fold_messages = function (winid)
   foldexpr = foldexpr .. allroleexpr
   foldexpr = foldexpr .. "?'<1':'='"
 
-  vim.api.nvim_win_set_option(winid, "foldenable", true)
-  vim.api.nvim_win_set_option(winid, "foldmethod", "expr")
-  vim.api.nvim_win_set_option(winid, "foldexpr", foldexpr)
+  vim.api.nvim_set_option_value("foldenable", true,   { win = winid })
+  vim.api.nvim_set_option_value("foldmethod", "expr", { win = winid })
+  vim.api.nvim_set_option_value("foldexpr", foldexpr, { win = winid })
 end
 
 ---@param bufnr BufNr

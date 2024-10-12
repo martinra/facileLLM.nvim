@@ -1,6 +1,6 @@
 local config = require("facilellm.config")
 local conversation = require("facilellm.session.conversation")
-local llm = require("facilellm.llm")
+local provider = require("facilellm.provider")
 local message = require("facilellm.session.message")
 local util = require("facilellm.util")
 
@@ -9,11 +9,11 @@ local util = require("facilellm.util")
 
 ---@class FacileLLM.Session
 ---@field name string
----@field model FacileLLM.LLM
+---@field provider FacileLLM.Provider
 ---@field conversation FacileLLM.Conversation
 ---@field conversation_locked boolean
 ---@field cancel_query function?
----@field config FacileLLM.Config.LLM
+---@field config FacileLLM.Config.Provider
 
 
 ---@type table<FacileLLM.SessionId,FacileLLM.Session> Table of sessions by their id
@@ -91,27 +91,27 @@ local fork_name_variant = function (orig_name)
   end
 end
 
-local get_model_config = function (sessionid)
+local get_provider_config = function (sessionid)
   return sessions[sessionid].config
 end
 
----@param model_config FacileLLM.Config.LLM
+---@param provider_config FacileLLM.Config.Provider
 ---@return FacileLLM.SessionId
-local create = function (model_config)
+local create = function (provider_config)
   local sessionid = new_sessionid()
 
-  local model = llm.create(model_config.implementation, model_config.opts)
-  local name = model_config.name or model.name
+  local provider_instance = provider.create(provider_config.implementation, provider_config.opts)
+  local name = provider_config.name or provider_instance.name
   name = unique_name_variant(name)
 
   ---@type FacileLLM.Session
   local sess = {
     name = name,
-    model = model,
-    conversation = conversation.create(model_config.conversation),
+    provider = provider_instance,
+    conversation = conversation.create(provider_config.conversation),
     conversation_locked = false,
     cancel_query = nil,
-    config = util.deep_copy_values(model_config),
+    config = util.deep_copy_values(provider_config),
   }
   sessions[sessionid] = sess
 
@@ -172,17 +172,17 @@ local set_name = function (sessionid, name)
 end
 
 ---@param sessionid FacileLLM.SessionId
----@return FacileLLM.LLM
-local get_model = function (sessionid)
-  return sessions[sessionid].model
+---@return FacileLLM.Provider
+local get_provider = function (sessionid)
+  return sessions[sessionid].provider
 end
 
 ---@param sessionid FacileLLM.SessionId
----@param model_config FacileLLM.Config.LLM
-local set_model = function (sessionid, model_config)
+---@param provider_config FacileLLM.Config.Provider
+local set_provider = function (sessionid, provider_config)
   local sess = sessions[sessionid]
-  sess.model = llm.create(model_config.implementation, model_config.opts)
-  sess.config = vim.tbl_deep_extend("force", {}, model_config)
+  sess.provider = provider.create(provider_config.implementation, provider_config.opts)
+  sess.config = vim.tbl_deep_extend("force", {}, provider_config)
 end
 
 ---@param sessionid FacileLLM.SessionId
@@ -323,18 +323,18 @@ end
 ---@param render_conversation function(FacileLLM.SessionId): nil
 ---@param on_complete function(FacileLLM.SessionId): nil
 ---@return nil
-local query_model = function (sessionid, render_conversation, on_complete)
+local query_provider = function (sessionid, render_conversation, on_complete)
   if is_conversation_locked(sessionid) and config.opts.feedback.conversation_lock.warn_on_query then
-    vim.notify("querying model despite lock", vim.log.levels.WARN)
+    vim.notify("querying provider despite lock", vim.log.levels.WARN)
     return
   end
 
   if sessions[sessionid].cancel_query ~= nil then
-    vim.notify("querying model despite ongoing query", vim.log.levels.WARN)
+    vim.notify("querying provider despite ongoing query", vim.log.levels.WARN)
     return
   end
 
-  -- The model may use asynchronous calls, so we wrap this function.
+  -- The provider may use asynchronous calls, so we wrap this function.
   local add_message_and_render = vim.schedule_wrap(
     ---@param content string | string[]
     ---@return nil
@@ -343,7 +343,7 @@ local query_model = function (sessionid, render_conversation, on_complete)
       render_conversation(sessionid)
     end)
 
-  -- The model may use asynchronous calls, so we wrap this function.
+  -- The provider may use asynchronous calls, so we wrap this function.
   ---@return nil
   local on_complete__loc = vim.schedule_wrap(
     function ()
@@ -354,8 +354,8 @@ local query_model = function (sessionid, render_conversation, on_complete)
     end)
 
   lock_conversation(sessionid)
-  local model = get_model(sessionid)
-  sessions[sessionid].cancel_query = model.response_to(
+  local provider_instance = get_provider(sessionid)
+  sessions[sessionid].cancel_query = provider_instance.response_to(
     get_conversation(sessionid),
     add_message_and_render, on_complete__loc
   )
@@ -371,9 +371,9 @@ return {
   get_name               = get_name,
   set_name               = set_name,
   fork_name_variant      = fork_name_variant,
-  get_model              = get_model,
-  set_model              = set_model,
-  get_model_config       = get_model_config,
+  get_provider           = get_provider,
+  set_provider           = set_provider,
+  get_provider_config    = get_provider_config,
   get_conversation       = get_conversation,
   get_last_message_with_index = get_last_message_with_index,
   get_last_llm_message   = get_last_llm_message,
@@ -382,5 +382,5 @@ return {
   lock_conversation      = lock_conversation,
   unlock_conversation    = unlock_conversation,
   clear_conversation     = clear_conversation,
-  query_model            = query_model,
+  query_provider         = query_provider,
 }

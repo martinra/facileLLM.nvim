@@ -65,7 +65,7 @@ local conversation_to_input = function (conversation, params)
   }
 end
 
----@type FacileLLM.LLM.PromptConversion
+---@type FacileLLM.Provider.PromptConversion
 return {
   conversation_to_input = conversation_to_input,
 }

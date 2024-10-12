@@ -2,7 +2,26 @@
 -- Description at https://replicate.com/docs/reference/http
 
 local job = require("plenary.job")
-local llm_util = require("facilellm.llm.util")
+local provider_util = require("facilellm.provider.util")
+
+local log = require("structlog")
+log.configure({
+  facilellm_replicate = {
+    pipelines = {
+      {
+        level = log.level.INFO,
+        processors = {
+          log.processors.Timestamper("%H:%M:%S"),
+        },
+        formatter = log.formatters.Format(
+          "%s [%s] %s: %-30s",
+          { "timestamp", "level", "logger_name", "msg" }
+        ),
+        sink = log.sinks.File("./facilellm_replicate.log"),
+      },
+    },
+  },
+})
 
 
 local schedule_prediction = {}
@@ -77,7 +96,7 @@ schedule_prediction.stream = function (url, cancelled, stream_curl_job, add_mess
   curl_job:after(function ()
     on_complete()
   end)
-  curl_job:after_failure(function (j, code, signal)
+  curl_job:after_failure(function (_, code, _)
       if code == nil then
         return
       end
@@ -100,7 +119,7 @@ end
 ---@param cancelled {[1]: boolean}
 ---@param add_message function
 ---@param on_complete function
----@param prompt_conversion FacileLLM.LLM.PromptConversion
+---@param prompt_conversion FacileLLM.Provider.PromptConversion
 ---@param nmb_received_chars integer?
 ---@return nil
 schedule_prediction.get = function (url, api_key, cancelled, add_message, on_complete, prompt_conversion, nmb_received_chars)
@@ -362,13 +381,13 @@ local default_opts = function ()
     replicate_version = nil,
     ---@type string?
     replicate_model_name = nil,
-    ---@type FacileLLM.LLM.PromptConversion?
+    ---@type FacileLLM.Provider.PromptConversion?
     prompt_conversion = nil,
   }
 end
 
 ---@param opts table
----@return FacileLLM.LLM
+---@return FacileLLM.Provider
 local create = function (opts)
   opts = opts or {}
   opts = vim.tbl_deep_extend("force", default_opts(), opts)
@@ -379,15 +398,15 @@ local create = function (opts)
 
   -- We expose name and model parameters to the caller for later
   -- modification.
-  ---@type FacileLLM.LLM
-  local llm = {
+  ---@type FacileLLM.Provider
+  local provider = {
     name = opts.name,
     params = opts.params,
     response_to = function (conversation, add_message, on_complete)
       return response_to(conversation, add_message, on_complete, opts)
     end,
   }
-  return llm
+  return provider
 end
 
 ---@param opts table
@@ -413,7 +432,7 @@ local preview = function (opts)
     preview = preview .. "via Replicate API at " .. opts.url .. "\n"
   end
 
-  preview = preview .. llm_util.preview_params(opts.params)
+  preview = preview .. provider_util.preview_params(opts.params)
 
   return preview
 end

@@ -1,5 +1,7 @@
 # Next Steps
 
+- better config of general models
+
 - user story with repeated pruning/purging to keep promt empty
   - vocabulary extraction
     - first scan, then mark, then extract via AI

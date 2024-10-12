@@ -162,6 +162,7 @@ local create_window = function (bufnr, conv_winid)
     vim.api.nvim_set_current_win(conv_winid)
   end
 
+  -- FIXME: set height from current window if conv_height not given
   local conv_height = vim.api.nvim_win_get_height(conv_winid)
   local input_height = math.ceil(config.opts.interface.input_relative_height*conv_height)
 

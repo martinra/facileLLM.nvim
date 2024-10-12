@@ -1,6 +1,6 @@
 local config = require("facilellm.config")
 local conversation = require("facilellm.session.conversation")
-local llm = require("facilellm.llm")
+local provider = require("facilellm.provider")
 local session = require("facilellm.session")
 local ui_common = require("facilellm.ui.common")
 local ui_render = require("facilellm.ui.render")
@@ -128,13 +128,13 @@ local select_session = function (session_names, callback, prompt, opts)
   end
 end
 
----@param models FacileLLM.Config.LLM[]
----@param callback function(FacileLLM.Config.LLM): nil
+---@param providers FacileLLM.Config.Provider[]
+---@param callback function(FacileLLM.Config.Provider): nil
 ---@param prompt string?
 ---@param opts table? options passed through to telescope
 ---@return nil
-local select_model = function (models, callback, prompt, opts)
-  prompt = prompt or "Select an LLM model"
+local select_provider = function (providers, callback, prompt, opts)
+  prompt = prompt or "Select an LLM provider"
   if config.opts.interface.telescope and available_telescope then
     local autocmdid = vim.api.nvim_create_autocmd("User", {
       pattern = "TelescopePreviewerLoaded",
@@ -147,12 +147,12 @@ local select_model = function (models, callback, prompt, opts)
     pickers.new(opts, {
       prompt_title = prompt,
       finder = finders.new_table {
-        results = models,
-        entry_maker = function(model)
+        results = providers,
+        entry_maker = function(provider_config)
           return {
-            value   = model,
-            display = model.name,
-            ordinal = model.name,
+            value   = provider_config,
+            display = provider_config.name,
+            ordinal = provider_config.name,
           }
         end
       },
@@ -165,16 +165,16 @@ local select_model = function (models, callback, prompt, opts)
             return
           end
 
-          ---@type FacileLLM.Config.LLM
-          local model_config = entry.value
+          ---@type FacileLLM.Config.Provider
+          local provider_config = entry.value
 
-          local preview = llm.preview(model_config.implementation, model_config.opts)
+          local preview = provider.preview(provider_config.implementation, provider_config.opts)
           preview = preview or "Model preview not available.\n"
           local lines = vim.split(preview, "\n", {keepempty = true})
           table.insert(lines, 1, "")
           table.insert(lines, 1, "# Model")
 
-          local conv = conversation.create(model_config.conversation)
+          local conv = conversation.create(provider_config.conversation)
           if conv ~= {} then
             table.insert(lines, "# Initial Conversation")
             table.insert(lines, "")
@@ -191,24 +191,24 @@ local select_model = function (models, callback, prompt, opts)
           actions.close(prompt_bufnr)
           vim.api.nvim_del_autocmd(autocmdid)
 
-          ---@type FacileLLM.Config.LLM
-          local model_config = actions_state.get_selected_entry().value
-          callback(model_config)
+          ---@type FacileLLM.Config.Provider
+          local provider_config = actions_state.get_selected_entry().value
+          callback(provider_config)
         end)
         return true
       end,
     }):find()
   else
-    vim.ui.select( models,
+    vim.ui.select( providers,
       {
         prompt = prompt,
-        format_item = function (model)
-          return model.name
+        format_item = function (provider_config)
+          return provider_config.name
         end,
       },
-      function (model)
-        if model ~= nil then
-          callback(model)
+      function (provider_config)
+        if provider_config ~= nil then
+          callback(provider_config)
         end
       end)
   end
@@ -298,6 +298,6 @@ return {
   touch_window = touch_window,
   get_most_recent = get_most_recent,
   select_session = select_session,
-  select_model = select_model,
+  select_provider = select_provider,
   select_conversation = select_conversation,
 }

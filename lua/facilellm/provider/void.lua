@@ -126,20 +126,20 @@ local default_opts = function ()
 end
 
 ---@param opts table
----@return FacileLLM.LLM
+---@return FacileLLM.Provider
 local create = function (opts)
   opts = opts or {}
   opts = vim.tbl_deep_extend("force", default_opts(), opts)
 
-  ---@type FacileLLM.LLM
-  local llm = {
+  ---@type FacileLLM.Provider
+  local provider = {
     name = opts.name,
     params = opts.params,
     response_to = function(conv, add_message, on_complete)
       return response_to(conv, add_message, on_complete, opts)
     end,
   }
-  return llm
+  return provider
 end
 
 

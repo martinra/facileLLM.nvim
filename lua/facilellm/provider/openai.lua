@@ -1,9 +1,29 @@
--- OpenAI API, not restrict to their product.
+-- OpenAI API, not restricted to their product.
 
 local job = require("plenary.job")
-local llm_util = require("facilellm.llm.util")
+local provider_util = require("facilellm.provider.util")
 local message = require("facilellm.session.message")
 local util = require("facilellm.util")
+
+
+local log = require("structlog")
+log.configure({
+  facilellm_openai = {
+    pipelines = {
+      {
+        level = log.level.INFO,
+        processors = {
+          log.processors.Timestamper("%H:%M:%S"),
+        },
+        formatter = log.formatters.Format(
+          "%s [%s] %s: %-30s",
+          { "timestamp", "level", "logger_name", "msg" }
+        ),
+        sink = log.sinks.File("./facilellm_openai.log"),
+      },
+    },
+  },
+})
 
 
 ---@alias FacileLLM.OpenAI.MsgRole ("system"| "assistant"| "user")
@@ -190,6 +210,7 @@ local response_to = function (conversation, add_message, on_complete, opts)
   local data = util.deep_copy_values(opts.params)
   data.stream = true
   data.model = opts.openai_model
+  -- TODO: this should be refactored as conversation_to_messages
   data.messages = {}
   for _,msg in ipairs(conversation) do
     if not message.isempty(msg) and not message.ispruned(msg) then
@@ -247,7 +268,7 @@ local default_opts = function ()
 end
 
 ---@param opts table
----@return FacileLLM.LLM
+---@return FacileLLM.Provider
 local create = function (opts)
   opts = opts or {}
   opts = vim.tbl_deep_extend("force", default_opts(), opts)
@@ -255,15 +276,15 @@ local create = function (opts)
   -- We expose name and model parameters to the caller for later
   -- modification.
 
-  ---@type FacileLLM.LLM
-  local llm = {
+  ---@type FacileLLM.Provider
+  local provider = {
     name = opts.name,
     params = opts.params,
     response_to = function (conversation, add_message, on_complete)
       return response_to(conversation, add_message, on_complete, opts)
     end,
   }
-  return llm
+  return provider
 end
 
 ---@param opts table
@@ -285,7 +306,7 @@ local preview = function (opts)
     preview = preview .. "OpenAI API at " .. opts.url .. "\n"
   end
 
-  preview = preview .. llm_util.preview_params(opts.params)
+  preview = preview .. provider_util.preview_params(opts.params)
 
   return preview
 end

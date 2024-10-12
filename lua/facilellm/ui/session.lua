@@ -478,8 +478,8 @@ local on_complete_query = function (sessionid, response_callback)
 
   local msg = session.get_last_llm_message(sessionid)
   if msg then
-    local model_config = session.get_model_config(sessionid)
-    for name,reg in pairs(model_config.registers) do
+    local provider_config = session.get_provider_config(sessionid)
+    for name,reg in pairs(provider_config.registers) do
       local text = message.postprocess(msg, reg)
       if string.len(text) ~= 0 then
         vim.fn.setreg(name, text, "l")
@@ -499,7 +499,7 @@ local query = function (sessionid, response_callback)
   local conv = session.get_conversation(sessionid)
   local render_state = get_render_state(sessionid)
   ui_render.start_highlight_receiving(conv, render_state)
-  session.query_model(sessionid, render_conversation,
+  session.query_provider(sessionid, render_conversation,
     function (sessionid__loc)
       on_complete_query(sessionid__loc, response_callback)
     end)
@@ -632,10 +632,10 @@ local set_buf_autocmds = function (sessionid)
   end
 end
 
----@param model_config FacileLLM.Config.LLM
+---@param provider_config FacileLLM.Config.Provider
 ---@return FacileLLM.SessionId
-local create = function (model_config)
-  local sessionid = session.create(model_config)
+local create = function (provider_config)
+  local sessionid = session.create(provider_config)
   local name = session.get_name(sessionid)
 
   local sess = {
@@ -661,13 +661,13 @@ end
 ---@param sessionid FacileLLM.SessionId
 ---@return FacileLLM.SessionId
 local fork = function (sessionid)
-  local model_config = {
+  local provider_config = {
     name = session.fork_name_variant(session.get_name(sessionid)),
     conversation = util.deep_copy_values(session.get_conversation(sessionid))
   }
-  model_config =
-    vim.tbl_deep_extend("keep", model_config, session.get_model_config(sessionid))
-  return create(model_config)
+  provider_config =
+    vim.tbl_deep_extend("keep", provider_config, session.get_provider_config(sessionid))
+  return create(provider_config)
 end
 
 

@@ -18,7 +18,8 @@ workflow of NeoVim. Some of the key points during design were:
 
 * Pruning can help to make the best our of models of limited context length.
 
-* Implementation of the OpenAI API and in particular ChatGPT in its various versions.
+* Implementation of the OpenAI API and in particular OpenRouterAI and ChatGPT
+  in its various versions.
 
 * Implementation of the Replicate API. Ready access to LLama3 70B Instruct,
   Mixtral 8x7B Instruct, and the possibility to connect to any open LLM model
@@ -27,8 +28,9 @@ workflow of NeoVim. Some of the key points during design were:
 ## Alternatives
 
 I am aware of two LLM interfaces for NeoVim:
-[NeoAI](https://github.com/Bryley/neoai.nvim/) and
-[ChatGPT.nvim](https://github.com/jackMort/ChatGPT.nvim).
+[NeoAI](https://github.com/Bryley/neoai.nvim/),
+[ChatGPT.nvim](https://github.com/jackMort/ChatGPT.nvim), and
+- [Avante.nvim](https://github.com/yetone/avante.nvim).
 
 ## License
 
@@ -52,7 +54,7 @@ the following entry in your call to `require("lazy").setup`:
 },
 ```
 
-You can remove the telescope dependency, in which case some of the preview features during model, conversation, and session selection are not available:
+You can remove the telescope dependency, in which case some of the preview features during provider, conversation, and session selection are not available:
 
 ```lua
 {
@@ -110,8 +112,8 @@ subdivided into tables:
 
 ```lua
 opts = {
-  default_model = "Model Name",
-  models = {},
+  default_provider = "Provider Name",
+  providers = {},
   conversations = {},
   conversations_csv = nil,
   naming = {},
@@ -120,13 +122,13 @@ opts = {
 },
 ```
 
-The default model must be given. It can be an index to the model list, or
-preferably one of the names of a model included in this list. 
+The default provider must be given. It can be an index to the provider list, or
+preferably one of the names of a provider included in this list. 
 
-### Model configuration
+### Provider configuration
 
-The model is a list of model configuratons. A complete and functional example
-configuration of a model is
+The field `providers` is a list of provider configuratons. A complete and
+functional example configuration of a provider is
 
 ```lua
 {
@@ -135,7 +137,7 @@ configuration of a model is
   opts           = {
     url = "https://api.openai.com/v1/chat/completions",
     get_api_key = function ()
-      return require("facilellm.llm.util").get_api_key_from_pass("OpenAI/facilellm_token")
+      return require("facilellm.provider.util").get_api_key_from_pass("OpenAI/facilellm_token")
     end,
     openai_model = "gpt-3.5-turbo",
     params = {
@@ -151,13 +153,13 @@ configuration of a model is
 }
 ```
 
-The implementation must be a string identifying one of the available model
+The implementation must be a string identifying one of the available API
 implementations, or a structure with a `create` and a `preview` function.
 Details on the latter are currently only available in the source code. The
  accepted strings are `OpenAI API` and `Replicate MistralAI`.
 
 The field `opts` is forwarded to both the `create` and the `preview` functions
-and depends on the model implementation. In the example configuration, the API
+and depends on the API implementation. In the example configuration, the API
 key is retrieved through the Linux password manager `pass`. In general,
 `get_api_key` is a function that returns the API key as a string. This includes
 the (strongly dicouraged) possibility to hardcode it in the configuration as a
@@ -174,7 +176,7 @@ A session is started automatically if the field `autostart` is set to true.
 
 ### OpenAI API configuration
 
-The `opts` field in the model configuration is specific to the model
+The `opts` field in the provider configuration is specific to the API
 implementation. For the OpenAI API that is provided in facileLLM, the fields
 are as follows:
 
@@ -182,7 +184,7 @@ are as follows:
 opts = {
   url = "https://api.openai.com/v1/chat/completions",
   get_api_key = function ()
-    return require("facilellm.llm.util").get_api_key_from_pass("OpenAI/facilellm_token")
+    return require("facilellm.provider.util").get_api_key_from_pass("OpenAI/facilellm_token")
   end,
   openai_model = "gpt-3.5-turbo",
   params = {
@@ -207,10 +209,10 @@ temperature of a model without having to setup many of them.
 
 ### Llama3 via Replicate configuration
 
-This model is an instance of a Meta model run via Replicate.
+The next provideris an instance of a Meta model run via the Replicate API.
 
 ```lua
-implementation = require("facilellm.llm.replicate"),
+implementation = require("facilellm.provider.replicate"),
 ```
 
 The options that are availabe to change are 
@@ -219,11 +221,11 @@ The options that are availabe to change are
 opts = {
   url = "https://api.replicate.com/v1/models/meta/meta-llama-3-8b-instruct/predictions",
   get_api_key = function ()
-    return require("facilellm.llm.util").get_api_key_from_pass("Replicate/facilellm_token")
+    return require("facilellm.provider.util").get_api_key_from_pass("Replicate/facilellm_token")
   end,
   replicate_version = nil,
   replicate_model_name = "Llama3 8b Instruct",
-  prompt_conversion = require("facilellm.llm.llama3_prompt"),
+  prompt_conversion = require("facilellm.provider.llama3_prompt"),
   params = {
     temperature = 0.6,
     top_p = 0.9,
@@ -236,10 +238,10 @@ opts = {
 
 ### MistralAI via Replicate configuration
 
-This model is an instance of a MistralAI model run via Replicate.
+This provider is an instance of a MistralAI model run via the Replicate API.
 
 ```lua
-implementation = require("facilellm.llm.replicate"),
+implementation = require("facilellm.provider.replicate"),
 ```
 
 The options that are availabe to change are 
@@ -248,11 +250,11 @@ The options that are availabe to change are
 opts = {
   url = "https://api.replicate.com/v1/models/mistralai/mixtral-8x7b-instruct-v0.1/predictions",
   get_api_key = function ()
-    return require("facilellm.llm.util").get_api_key_from_pass("Replicate/facilellm_token")
+    return require("facilellm.provider.util").get_api_key_from_pass("Replicate/facilellm_token")
   end,
   replicate_version = nil,
   replicate_model_name = "Mixtral 8x7B Instruct v0.1",
-  prompt_conversion = require("facilellm.llm.mixtral_prompt"),
+  prompt_conversion = require("facilellm.provider.mixtral_prompt"),
   params = {
     temperature = 0.6,
     top_p = 0.9,
@@ -373,14 +375,14 @@ keymaps = {
   purge_message       = "<C-p>",
 
   show                                     = "<leader>aiw",
-  select_default_model                     = "<leader>aiM",
-  create_from_model_selection              = "<leader>ain",
+  select_default_provider                  = "<leader>aiP",
+  create_from_provider_selection           = "<leader>ain",
   create_from_conversation_selection       = "<leader>aib",
-  create_from_model_conversation_selection = "<leader>aiN",
+  create_from_provider_conversation_selection = "<leader>aiN",
   delete_from_selection                    = "<leader>aid",
   focus_from_selection                     = "<leader>aif",
   rename_from_selection                    = "<leader>air",
-  set_model_from_selection                 = "<leader>aim",
+  set_provider_from_selection              = "<leader>aip",
 
   add_visual_as_input_and_query            = "<leader>ai<Enter>",
   add_visual_as_instruction                = "<leader>aii",

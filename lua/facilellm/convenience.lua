@@ -1,5 +1,5 @@
 local config = require("facilellm.config")
-local llm = require("facilellm.llm")
+local provider = require("facilellm.provider")
 local session = require("facilellm.session")
 local ui_select = require("facilellm.ui.select_session")
 local ui_session = require("facilellm.ui.session")
@@ -7,31 +7,31 @@ local util = require("facilellm.util")
 
 
 ---@return nil
-local select_default_model = function ()
-  ui_select.select_model(config.opts.models,
-    function (model_config)
-      llm.set_default_model_config(model_config.name)
+local select_default_provider = function ()
+  ui_select.select_provider(config.opts.providers,
+    function (provider_config)
+      provider.set_default_provider_config(provider_config.name)
     end,
-    "Select default model"
+    "Select default provider"
   )
 end
 
----@param model_config? FacileLLM.Config.LLM
+---@param provider_config? FacileLLM.Config.Provider
 ---@return FacileLLM.SessionId
-local create_from_model = function (model_config)
-  model_config = model_config or llm.get_default_model_config()
-  return ui_session.create(model_config)
+local create_from_provider = function (provider_config)
+  provider_config = provider_config or provider.get_default_provider_config()
+  return ui_session.create(provider_config)
 end
 
 ---@params opts table? options passed through to telescope
 ---@return nil
-local create_from_model_selection = function (opts)
-  ui_select.select_model(config.opts.models,
-    function (model_config)
-      local sessionid = ui_session.create(model_config)
+local create_from_provider_selection = function (opts)
+  ui_select.select_provider(config.opts.providers,
+    function (provider_config)
+      local sessionid = ui_session.create(provider_config)
       ui_session.set_current_win_conversation_input(sessionid)
     end,
-    "Select model to create new session from",
+    "Select provider to create new session from",
     opts
   )
 end
@@ -41,10 +41,10 @@ end
 local create_from_conversation_selection = function (opts)
   ui_select.select_conversation(config.opts.conversations,
     function (conversation)
-      local model_config = llm.get_default_model_config()
-      model_config = util.deep_copy_values(model_config)
-      model_config.conversation = util.deep_copy_values(conversation)
-      local sessionid = ui_session.create(model_config)
+      local provider_config = provider.get_default_provider_config()
+      provider_config = util.deep_copy_values(provider_config)
+      provider_config.conversation = util.deep_copy_values(conversation)
+      local sessionid = ui_session.create(provider_config)
       ui_session.set_current_win_conversation_input(sessionid)
     end,
     "Select initial conversation of new session",
@@ -54,20 +54,20 @@ end
 
 ---@params opts table? options passed through to telescope
 ---@return nil
-local create_from_model_conversation_selection = function (opts)
-  ui_select.select_model(config.opts.models,
-    function (model_config)
+local create_from_provider_conversation_selection = function (opts)
+  ui_select.select_provider(config.opts.providers,
+    function (provider_config)
       ui_select.select_conversation(config.opts.conversations,
         function (conversation)
-          model_config = util.deep_copy_values(model_config)
-          model_config.conversation = util.deep_copy_values(conversation)
-          local sessionid = ui_session.create(model_config)
+          provider_config = util.deep_copy_values(provider_config)
+          provider_config.conversation = util.deep_copy_values(conversation)
+          local sessionid = ui_session.create(provider_config)
           ui_session.set_current_win_conversation_input(sessionid)
         end,
         "Select initial conversation of new session"
       )
     end,
-    "Select model to create new session from",
+    "Select provider to create new session from",
     opts
   )
 end
@@ -98,19 +98,19 @@ end
 
 ---@params opts table? options passed through to telescope
 ---@return nil
-local set_model_from_selection = function (opts)
+local set_provider_from_selection = function (opts)
   ui_select.select_session(session.get_session_names(),
     function (sessionid)
       local name = session.get_name(sessionid)
-      ui_select.select_model(config.opts.models,
-        function (model_config)
-          session.set_model(sessionid, model_config)
+      ui_select.select_provider(config.opts.providers,
+        function (provider_config)
+          session.set_provider(sessionid, provider_config)
         end,
-        "Select model for session " .. name,
+        "Select provider for session " .. name,
         opts
       )
     end,
-    "Select session to change model of",
+    "Select session to change provider of",
     opts
   )
 end
@@ -120,7 +120,7 @@ end
 local show = function (sessionid)
   sessionid = sessionid or ui_select.get_most_recent()
   sessionid = sessionid or session.get_some_session()
-  sessionid = sessionid or create_from_model()
+  sessionid = sessionid or create_from_provider()
 
   ui_session.set_current_win_conversation_input(sessionid)
 end
@@ -312,14 +312,14 @@ end
 
 
 return {
-  select_default_model = select_default_model,
-  create_from_model = create_from_model,
-  create_from_model_selection = create_from_model_selection,
+  select_default_provider = select_default_provider,
+  create_from_provider = create_from_provider,
+  create_from_provider_selection = create_from_provider_selection,
   create_from_conversation_selection = create_from_conversation_selection,
-  create_from_model_conversation_selection = create_from_model_conversation_selection,
+  create_from_provider_conversation_selection = create_from_provider_conversation_selection,
   delete_from_selection = delete_from_selection,
   rename_from_selection = rename_from_selection,
-  set_model_from_selection = set_model_from_selection,
+  set_provider_from_selection = set_provider_from_selection,
   show = show,
   focus = focus,
   focus_from_selection = focus_from_selection,

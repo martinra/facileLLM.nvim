@@ -1,15 +1,15 @@
 ---@class FacileLLM.Config
----@field default_model string | integer
----@field models FacileLLM.Config.LLM[]
+---@field default_provider string | integer
+---@field providers FacileLLM.Config.Provider[]
 ---@field conversations table<FacileLLM.ConversationName, FacileLLM.Conversation>
 ---@field conversations_csv string?
 ---@field naming FacileLLM.Config.Naming
 ---@field interface FacileLLM.Config.Interface
 ---@field feedback FacileLLM.Config.Feedback
 
----@class FacileLLM.Config.LLM
+---@class FacileLLM.Config.Provider
 ---@field name string?
----@field implementation FacileLLM.LLM.Implementation
+---@field implementation FacileLLM.Provider.Implementation
 ---@field opts table Options that are forwarded to the implementation.
 ---@field conversation FacileLLM.ConversationName | FacileLLM.Conversation
 ---@field registers table<string, FacileLLM.Config.Register>
@@ -57,14 +57,14 @@
 ---@field deprune_message string
 ---@field purge_message string
 ---@field show string
----@field select_default_model string
----@field create_from_model_selection string
+---@field select_default_provider string
+---@field create_from_provider_selection string
 ---@field create_from_conversation_selection string
----@field create_from_model_conversation_selection string
+---@field create_from_provider_conversation_selection string
 ---@field delete_from_selection string
 ---@field focus_from_selection string
 ---@field rename_from_selection string
----@field set_model_from_selection string
+---@field set_provider_from_selection string
 ---@field add_visual_as_input_and_query string
 ---@field add_visual_as_instruction string
 ---@field add_visual_as_context string
@@ -114,21 +114,21 @@ local set_global_keymaps = function ()
     vim.keymap.set("n", config.opts.interface.keymaps.show,
       facilellm.show, {})
   end
-  if config.opts.interface.keymaps.select_default_model ~= "" then
-    vim.keymap.set("n", config.opts.interface.keymaps.select_default_model,
-      facilellm.select_default_model, {})
+  if config.opts.interface.keymaps.select_default_provider ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.select_default_provider,
+      facilellm.select_default_provider, {})
   end
-  if config.opts.interface.keymaps.create_from_model_selection ~= "" then
-    vim.keymap.set("n", config.opts.interface.keymaps.create_from_model_selection,
-      facilellm.create_from_model_selection, {})
+  if config.opts.interface.keymaps.create_from_provider_selection ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.create_from_provider_selection,
+      facilellm.create_from_provider_selection, {})
   end
   if config.opts.interface.keymaps.create_from_conversation_selection ~= "" then
     vim.keymap.set("n", config.opts.interface.keymaps.create_from_conversation_selection,
       facilellm.create_from_conversation_selection, {})
   end
-  if config.opts.interface.keymaps.create_from_model_conversation_selection ~= "" then
-    vim.keymap.set("n", config.opts.interface.keymaps.create_from_model_conversation_selection,
-      facilellm.create_from_model_conversation_selection, {})
+  if config.opts.interface.keymaps.create_from_provider_conversation_selection ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.create_from_provider_conversation_selection,
+      facilellm.create_from_provider_conversation_selection, {})
   end
   if config.opts.interface.keymaps.delete_from_selection ~= "" then
     vim.keymap.set("n", config.opts.interface.keymaps.delete_from_selection,
@@ -142,9 +142,9 @@ local set_global_keymaps = function ()
     vim.keymap.set("n", config.opts.interface.keymaps.rename_from_selection,
       facilellm.rename_from_selection, {})
   end
-  if config.opts.interface.keymaps.set_model_from_selection ~= "" then
-    vim.keymap.set("n", config.opts.interface.keymaps.set_model_from_selection,
-      facilellm.set_model_from_selection, {})
+  if config.opts.interface.keymaps.set_provider_from_selection ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.set_provider_from_selection,
+      facilellm.set_provider_from_selection, {})
   end
 
   if config.opts.interface.keymaps.add_visual_as_input_and_query ~= "" then
@@ -196,19 +196,19 @@ local set_global_keymaps = function ()
   end
 end
 
----@param models FacileLLM.Config.LLM[]
+---@param providers FacileLLM.Config.Provider[]
 ---@return nil
-local autostart_sessions = function (models)
+local autostart_sessions = function (providers)
   local ui_session = require("facilellm.ui.session")
-  for _,model in ipairs(models) do
-    if model.autostart then
-      ui_session.create(model)
+  for _,provider in ipairs(providers) do
+    if provider.autostart then
+      ui_session.create(provider)
     end
   end
 end
 
----@return FacileLLM.Config.LLM
-local default_model_config = function ()
+---@return FacileLLM.Config.Provider
+local default_provider_config = function ()
   return {
     name           = nil,
     implementation = "undefined",
@@ -225,25 +225,25 @@ end
 ---@return FacileLLM.Config
 local default_opts = function ()
   return {
-    default_model = "OpenAI GPT 3.5-Turbo",
-    models = {
+    default_provider = "OpenAI GPT 3.5-Turbo",
+    providers = {
       {
         name = "OpenAI GPT 3.5-Turbo",
-        implementation = require("facilellm.llm.openai"),
+        implementation = require("facilellm.provider.openai"),
         opts = {
           openai_model = "gpt-3.5-turbo",
         },
       },
       {
         name = "OpenAI GPT 4",
-        implementation = require("facilellm.llm.openai"),
+        implementation = require("facilellm.provider.openai"),
         opts = {
           openai_model = "gpt-4",
         },
       },
       {
         name = "OpenAI GPT 4 32K",
-        implementation = require("facilellm.llm.openai"),
+        implementation = require("facilellm.provider.openai"),
         opts = {
           openai_model = "gpt-4-32k",
         },
@@ -309,15 +309,15 @@ local default_opts = function ()
         deprune_message     = "P",
         purge_message       = "<C-p>",
 
-        show                                     = "<leader>aiw",
-        select_default_model                     = "<leader>aiM",
-        create_from_model_selection              = "<leader>ain",
-        create_from_conversation_selection       = "<leader>aib",
-        create_from_model_conversation_selection = "<leader>aiN",
-        delete_from_selection                    = "<leader>aid",
-        focus_from_selection                     = "<leader>aif",
-        rename_from_selection                    = "<leader>air",
-        set_model_from_selection                 = "<leader>aim",
+        show                                        = "<leader>aiw",
+        select_default_provider                     = "<leader>aiP",
+        create_from_provider_selection              = "<leader>ain",
+        create_from_conversation_selection          = "<leader>aib",
+        create_from_provider_conversation_selection = "<leader>aiN",
+        delete_from_selection                       = "<leader>aid",
+        focus_from_selection                        = "<leader>aif",
+        rename_from_selection                       = "<leader>air",
+        set_provider_from_selection                 = "<leader>aip",
 
         add_visual_as_input_and_query            = "<leader>ai<Enter>",
         add_visual_as_instruction                = "<leader>aii",
@@ -409,28 +409,28 @@ local validate_registers = function (registers)
   end
 end
 
----@param model table
+---@param provider table
 ---@return nil
-local validate_model_config = function (model)
+local validate_provider_config = function (provider)
   vim.validate({
-    model                = {model, "t", false}
+    provider       = {provider, "t", false}
   })
   vim.validate({
-    name           = {model.name,           "s",        true},
-    implementation = {model.implementation, {"s", "t"}, false},
-    opts           = {model.opts,           "t",        true},
-    conversation   = {model.conversation,   {"s", "t"}, true},
-    registers      = {model.registers,      "t",        true},
-    autostart      = {model.autostart,      "b",        true},
+    name           = {provider.name,           "s",        true},
+    implementation = {provider.implementation, {"s", "t"}, false},
+    opts           = {provider.opts,           "t",        true},
+    conversation   = {provider.conversation,   {"s", "t"}, true},
+    registers      = {provider.registers,      "t",        true},
+    autostart      = {provider.autostart,      "b",        true},
   })
-  if model.implementation and type(model.implementation) == "table" then
-    validate_implementation(model.implementation)
+  if provider.implementation and type(provider.implementation) == "table" then
+    validate_implementation(provider.implementation)
   end
-  if model.conversation and type(model.conversation) == "table" then
-    validate_conversation(model.conversation)
+  if provider.conversation and type(provider.conversation) == "table" then
+    validate_conversation(provider.conversation)
   end
-  if model.registers then
-    validate_registers(model.registers)
+  if provider.registers then
+    validate_registers(provider.registers)
   end
 end
 
@@ -493,14 +493,15 @@ local validate_interface = function (interface)
       purge_message        = {keymaps.purge_message,       "s", true},
 
       show                        = {keymaps.show,                        "s", true},
-      select_default_model        = {keymaps.select_default_model,        "s", true},
-      create_from_model_selection = {keymaps.create_from_model_selection, "s", true},
-      create_from_model_conversation_selection =
-        {keymaps.create_from_model_conversation_selection, "s", true},
+      select_default_provider     = {keymaps.select_default_provider,     "s", true},
+      create_from_provider_selection =
+        {keymaps.create_from_provider_selection, "s", true},
+      create_from_provider_conversation_selection =
+        {keymaps.create_from_provider_conversation_selection, "s", true},
       delete_from_selection       = {keymaps.delete_from_selection,       "s", true},
       focus_from_selection        = {keymaps.focus_from_selection,        "s", true},
       rename_from_selection       = {keymaps.rename_from_selection,       "s", true},
-      set_model_from_selection    = {keymaps.set_model_from_selection,    "s", true},
+      set_provider_from_selection = {keymaps.set_provider_from_selection, "s", true},
 
       add_visual_as_input_and_query             =
         {keymaps.add_visual_as_input_and_query,            "s", true},
@@ -559,8 +560,8 @@ local validate_facilellm_config = function (opts)
     opts = {opts, "t"},
   })
   vim.validate({
-    -- default_model validated when validating models
-    models            = {opts.models,            "t", true},
+    -- default_provider validated when validating providers
+    providers         = {opts.providers,            "t", true},
     conversations     = {opts.conversations,     "t", true},
     conversations_csv = {opts.conversations_csv, "s", true},
     naming            = {opts.naming,            "t", true},
@@ -568,29 +569,29 @@ local validate_facilellm_config = function (opts)
     feedback          = {opts.feedback,          "t", true},
   })
 
-  if opts.models then
+  if opts.providers then
     vim.validate({
-      default_model = {opts.default_model, {"s", "n"}, false},
+      default_provider = {opts.default_provider, {"s", "n"}, false},
     })
 
-    local default_model_available = false
-    if type(opts.default_model) == "number" then
-      default_model_available = opts.models[opts.default_model] == nil
+    local default_provider_available = false
+    if type(opts.default_provider) == "number" then
+      default_provider_available = opts.providers[opts.default_provider] == nil
     end
 
-    for _,model in ipairs(opts.models) do
-      validate_model_config(model)
-      if not default_model_available and model.name then
-        default_model_available = model.name == opts.default_model
+    for _,provider in ipairs(opts.providers) do
+      validate_provider_config(provider)
+      if not default_provider_available and provider.name then
+        default_provider_available = provider.name == opts.default_provider
       end
     end
 
-    if not default_model_available then
-      error("default model not defined")
+    if not default_provider_available then
+      error("default provider not defined")
     end
 
-  elseif opts.default_model then
-    error("default model but no model defined")
+  elseif opts.default_provider then
+    error("default provider but no provider defined")
   end
 
   if opts.conversations then
@@ -616,8 +617,8 @@ end
 ---@return FacileLLM.Config
 local extend_facilellm_config = function (opts)
   opts = vim.tbl_deep_extend("force", default_opts(), opts)
-  for mx,model in ipairs(opts.models) do
-    opts.models[mx] = vim.tbl_deep_extend("force", default_model_config(), model)
+  for px,provider in ipairs(opts.providers) do
+    opts.providers[px] = vim.tbl_deep_extend("force", default_provider_config(), provider)
   end
   if opts.conversations_csv then
     for name, conv in pairs(util.csv_to_conversations(opts.conversations_csv)) do
@@ -641,7 +642,7 @@ M.setup = function (opts)
 
   set_highlights()
   set_global_keymaps()
-  autostart_sessions(M.opts.models)
+  autostart_sessions(M.opts.providers)
 end
 
 

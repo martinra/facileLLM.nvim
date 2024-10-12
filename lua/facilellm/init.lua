@@ -5,14 +5,14 @@ local convenience = require("facilellm.convenience")
 return {
   setup = config.setup,
 
-  select_default_model                     = convenience.select_default_model,
-  create_from_model                        = convenience.create_from_model,
-  create_from_model_selection              = convenience.create_from_model_selection,
-  create_from_conversation_selection       = convenience.create_from_conversation_selection,
-  create_from_model_conversation_selection = convenience.create_from_model_conversation_selection,
-  delete_from_selection                    = convenience.delete_from_selection,
-  rename_from_selection                    = convenience.rename_from_selection,
-  set_model_from_selection                 = convenience.set_model_from_selection,
+  select_default_provider                     = convenience.select_default_provider,
+  create_from_provider                        = convenience.create_from_provider,
+  create_from_provider_selection              = convenience.create_from_provider_selection,
+  create_from_conversation_selection          = convenience.create_from_conversation_selection,
+  create_from_provider_conversation_selection = convenience.create_from_provider_conversation_selection,
+  delete_from_selection                       = convenience.delete_from_selection,
+  rename_from_selection                       = convenience.rename_from_selection,
+  set_provider_from_selection                 = convenience.set_provider_from_selection,
 
   show                 = convenience.show,
   focus                = convenience.focus,

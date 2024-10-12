@@ -2,7 +2,7 @@
 ---@return string
 local preview_params = function (params)
   local preview = ""
-  
+
   if params.temperature then
     preview = preview .. "Temperature: " .. params.temperature .. "\n"
   end

@@ -158,13 +158,15 @@ end
 ---@param conv_winid WinId?
 ---@return WinId
 local create_window = function (bufnr, conv_winid)
+  local input_height
   if conv_winid then
     vim.api.nvim_set_current_win(conv_winid)
+    local conv_height = vim.api.nvim_win_get_height(conv_winid)
+    input_height = math.ceil(config.opts.interface.input_relative_height*conv_height)
+  else
+    local cur_height = vim.api.nvim_win_get_height(0)
+    input_height = math.ceil(config.opts.interface.input_relative_height*cur_height)
   end
-
-  -- FIXME: set height from current window if conv_height not given
-  local conv_height = vim.api.nvim_win_get_height(conv_winid)
-  local input_height = math.ceil(config.opts.interface.input_relative_height*conv_height)
 
   vim.cmd("noau rightbelow split")
   local input_winid = vim.api.nvim_get_current_win()

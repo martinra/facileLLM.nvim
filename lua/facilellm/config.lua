@@ -229,21 +229,21 @@ local default_opts = function ()
     providers = {
       {
         name = "OpenAI GPT 3.5-Turbo",
-        implementation = require("facilellm.provider.openai"),
+        implementation = require("facilellm.provider.api.openai"),
         opts = {
           openai_model = "gpt-3.5-turbo",
         },
       },
       {
         name = "OpenAI GPT 4",
-        implementation = require("facilellm.provider.openai"),
+        implementation = require("facilellm.provider.api.openai"),
         opts = {
           openai_model = "gpt-4",
         },
       },
       {
         name = "OpenAI GPT 4 32K",
-        implementation = require("facilellm.provider.openai"),
+        implementation = require("facilellm.provider.api.openai"),
         opts = {
           openai_model = "gpt-4-32k",
         },

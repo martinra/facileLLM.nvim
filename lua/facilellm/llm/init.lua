@@ -8,7 +8,6 @@ local config = require("facilellm.config")
 
 ---@class FacileLLM.LLM.PromptConversion
 ---@field conversation_to_input function(FacileLLM.Conversation): string
----@field output_to_string function(table): string
 
 ---@class FacileLLM.LLM.Implementation
 ---@field create function(opts: table): FacileLLM.LLM

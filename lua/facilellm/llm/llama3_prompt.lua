@@ -62,14 +62,8 @@ local conversation_to_input = function (conversation, params)
   }
 end
 
-local output_to_string = function (output)
-  error("not implemented")
-  return output
-end
-
 
 ---@type FacileLLM.LLM.PromptConversion
 return {
   conversation_to_input = conversation_to_input,
-  output_to_string = output_to_string,
 }

@@ -65,25 +65,7 @@ local conversation_to_input = function (conversation, params)
   }
 end
 
----@param output table
----@return string
-local output_to_string = function (output)
-  error("should not be called")
-
-  local lines = vim.split(table.concat(output, ""), "\n")
-  for _,line in ipairs(lines) do
-    if string.match(line, "^%s*$") then
-      table.remove(lines, 1)
-    else
-      lines[1] = string.gsub(line, "^%s*(.-)$", "%1")
-      break
-    end
-  end
-  return table.concat(lines, "\n")
-end
-
 ---@type FacileLLM.LLM.PromptConversion
 return {
   conversation_to_input = conversation_to_input,
-  output_to_string = output_to_string,
 }

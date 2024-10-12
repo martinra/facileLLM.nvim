@@ -190,7 +190,17 @@ schedule_prediction.get = function (url, api_key, cancelled, add_message, on_com
       return
     end
 
-    local output = prompt_conversion.output_to_string(json.output)
+    local lines = vim.split(table.concat(json.output, ""), "\n")
+    for _,line in ipairs(lines) do
+      if string.match(line, "^%s*$") then
+        table.remove(lines, 1)
+      else
+        lines[1] = string.gsub(line, "^%s*(.-)$", "%1")
+        break
+      end
+    end
+    local output = table.concat(lines, "\n")
+
     nmb_received_chars = nmb_received_chars or 0
     add_message(string.sub(output, nmb_received_chars+1))
 
@@ -364,7 +374,7 @@ local create = function (opts)
   opts = vim.tbl_deep_extend("force", default_opts(), opts)
 
   if not opts.prompt_conversion then
-    error("Replicate API rerquires model conversion")
+    error("Replicate API requires model conversion")
   end
 
   -- We expose name and model parameters to the caller for later

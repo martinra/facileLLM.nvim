@@ -108,18 +108,8 @@ local append_to_stdout_record = function (stdout_record, data)
     return
 
   -- NOTE: We here assume that stdout does not break along the data prefixes.
-  elseif string.sub(data, 1,6) ~= "data: " then
-    vim.schedule(function ()
-      vim.notify(
-        "Error in OpenAI API:\n" .. "Received string not prefixed by data.\n" .. data,
-        vim.log.levels.ERROR
-      )
-    end)
-
-  else
-    if data ~= "data: [DONE]" then
-      table.insert(stdout_record.lines, string.sub(data,7))
-    end
+  elseif string.sub(data, 1,6) == "data: " and data ~= "data: [DONE]" then
+    table.insert(stdout_record.lines, string.sub(data,7))
   end
 end
 

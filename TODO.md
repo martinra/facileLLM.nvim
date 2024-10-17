@@ -2,6 +2,10 @@
 
 - better config of general models
 
+- facilellm hot and cold presets; try them; associate with conversation?
+- prompt templates
+- function to fill several registers
+
 - user story with repeated pruning/purging to keep promt empty
   - vocabulary extraction
     - first scan, then mark, then extract via AI

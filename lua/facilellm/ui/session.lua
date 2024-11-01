@@ -541,7 +541,7 @@ end
 ---@return nil
 local requery = function (sessionid)
   local mx, msg = session.get_last_message_with_index(sessionid)
-  if not msg or msg.role ~= "LLM" then
+  if not msg or msg.role ~= "LLM" and msg.role ~= "Input" then
     return
   end
   ---@cast mx FacileLLM.MsgIndex
@@ -550,8 +550,10 @@ local requery = function (sessionid)
   local render_state = get_render_state(sessionid)
 
   ui_select.touch(sessionid)
-  message.purge(msg)
-  ui_render.purge_message(bufnr, mx, msg, render_state)
+  if msg.role == "LLM" then
+    message.purge(msg)
+    ui_render.purge_message(bufnr, mx, msg, render_state)
+  end
   query(sessionid)
 end
 

@@ -704,6 +704,7 @@ return {
   render_conversation                = render_conversation,
   add_message                        = add_message,
   append_conversation                = append_conversation,
+  query                              = query,
   add_input_message_and_query        = add_input_message_and_query,
   add_input_message_query_and_insert = add_input_message_query_and_insert,
   requery                            = requery,

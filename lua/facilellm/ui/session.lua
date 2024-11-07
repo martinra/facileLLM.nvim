@@ -493,7 +493,7 @@ local on_complete_query = function (sessionid, response_callback)
     local provider_config = session.get_provider_config(sessionid)
     for name,reg in pairs(provider_config.registers) do
       local text = message.postprocess(msg, reg)
-      if string.len(text) ~= 0 then
+      if text and string.len(text) ~= 0 then
         vim.fn.setreg(name, text, "l")
       end
     end

@@ -215,6 +215,13 @@ local add_message = function (sessionid, role, content)
 end
 
 ---@param sessionid FacileLLM.SessionId
+---@param conv FacileLLM.Conversation
+---@return nil
+local append_conversation = function (sessionid, conv)
+  conversation.append(get_conversation(sessionid), conv)
+end
+
+---@param sessionid FacileLLM.SessionId
 ---@return boolean
 local is_conversation_locked = function (sessionid)
   return sessions[sessionid].conversation_locked
@@ -378,6 +385,7 @@ return {
   get_last_message_with_index = get_last_message_with_index,
   get_last_llm_message   = get_last_llm_message,
   add_message            = add_message,
+  append_conversation    = append_conversation,
   is_conversation_locked = is_conversation_locked,
   lock_conversation      = lock_conversation,
   unlock_conversation    = unlock_conversation,

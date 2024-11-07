@@ -468,6 +468,18 @@ local add_message = function (sessionid, role, lines)
 end
 
 ---@param sessionid FacileLLM.SessionId
+---@param conversation FacileLLM.Conversation
+---@return nil
+local append_conversation = function (sessionid, conversation)
+  ui_select.touch(sessionid)
+  session.append_conversation(sessionid, conversation)
+  vim.schedule(
+    function ()
+      render_conversation(sessionid)
+    end)
+end
+
+---@param sessionid FacileLLM.SessionId
 ---@param response_callback function?(): nil
 ---@return nil
 local on_complete_query = function (sessionid, response_callback)
@@ -690,6 +702,7 @@ return {
   clear_conversation                 = clear_conversation,
   render_conversation                = render_conversation,
   add_message                        = add_message,
+  append_conversation                = append_conversation,
   add_input_message_and_query        = add_input_message_and_query,
   add_input_message_query_and_insert = add_input_message_query_and_insert,
   requery                            = requery,

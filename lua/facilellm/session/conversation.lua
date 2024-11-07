@@ -42,6 +42,15 @@ local add_message = function (conversation, role, content)
 end
 
 ---@param conv FacileLLM.Conversation
+---@param conv_append FacileLLM.Conversation
+---@return nil
+local append = function (conv, conv_append)
+  for _,msg in ipairs(conv_append) do
+    add_message(conv, msg.role, msg.lines)
+  end
+end
+
+---@param conv FacileLLM.Conversation
 ---@return FacileLLM.MsgIndex?
 ---@return FacileLLM.Message?
 local get_last_message_with_index = function (conv)
@@ -66,6 +75,7 @@ end
 return {
   create = create,
   add_message = add_message,
+  append = append,
   get_last_message_with_index = get_last_message_with_index,
   get_last_llm_message = get_last_llm_message,
 }

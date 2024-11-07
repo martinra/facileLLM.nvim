@@ -508,6 +508,8 @@ end
 ---@param response_callback function?(): nil
 ---@return nil
 local query = function (sessionid, response_callback)
+  ui_select.touch(sessionid)
+
   local conv = session.get_conversation(sessionid)
   local render_state = get_render_state(sessionid)
   ui_render.start_highlight_receiving(conv, render_state)
@@ -526,7 +528,6 @@ end
 ---@param response_callback function?(): nil
 ---@return nil
 local add_input_message_and_query = function (sessionid, lines, response_callback)
-  ui_select.touch(sessionid)
   session.add_message(sessionid, "Input", lines)
   query(sessionid, response_callback)
 end

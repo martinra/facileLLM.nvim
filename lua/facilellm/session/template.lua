@@ -75,7 +75,6 @@ local template_filetype_and_context = function (winid, tags, context_size)
   for _,line in ipairs(before) do
     table.insert(lines, line)
   end
-  table.insert(lines, "```")
   return {
     {
       role = "Input",

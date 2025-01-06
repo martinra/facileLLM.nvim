@@ -491,10 +491,29 @@ local on_complete_query = function (sessionid, response_callback)
   local msg = session.get_last_llm_message(sessionid)
   if msg then
     local provider_config = session.get_provider_config(sessionid)
-    for name,reg in pairs(provider_config.registers) do
-      local text = message.postprocess(msg, reg)
-      if text and string.len(text) ~= 0 then
-        vim.fn.setreg(name, text, "l")
+    for _,reg in ipairs(provider_config.registers) do
+      print("register ", vim.inspect(reg))
+      local ppresult
+      if reg.postprocess then
+         ppresult = reg.postprocess(msg.lines)
+      else
+         ppresult = table.concat(msg.lines, "\n")
+      end
+      print("postprocess result ", vim.inspect(ppresult))
+      if type(ppresult) == "string" then
+        if string.len(ppresult) ~= 0 then
+          local regname = string.sub(reg.names, 1,1)
+          print("register set ", regname, vim.inspect(ppresult))
+          vim.fn.setreg(regname, ppresult, "l")
+        end
+      elseif type(ppresult) == "table" then
+        for tx,text in ipairs(ppresult) do
+          if string.len(text) ~= 0 then
+            local regname = string.sub(reg.names, tx,tx)
+            print("register set ", regname, vim.inspect(text))
+            vim.fn.setreg(regname, text, "l")
+          end
+        end
       end
     end
 

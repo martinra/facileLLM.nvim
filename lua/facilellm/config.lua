@@ -12,7 +12,7 @@
 ---@field implementation FacileLLM.Provider.Implementation
 ---@field opts table Options that are forwarded to the implementation.
 ---@field conversation FacileLLM.ConversationName | FacileLLM.Conversation
----@field registers table<string, FacileLLM.Config.Register>
+---@field registers FacileLLM.Config.Register[]
 ---@field autostart boolean
 
 ---@class FacileLLM.Config.Naming
@@ -92,7 +92,8 @@
 ---@field warn_on_clear boolean
 
 ---@class FacileLLM.Config.Register
----@field postprocess ("preserve"| "code"| function)
+---@field names string
+---@field postprocess function?(FacileLLM.Message): (nil | string | string[])
 
 
 local util = require("facilellm.util")
@@ -215,8 +216,9 @@ local default_provider_config = function ()
     opts           = {},
     conversation   = {},
     registers      = {
-      ["l"] = { postprocess = "preserve" },
-      ["c"] = { postprocess = "code" },
+      {
+        names = "l",
+      },
     },
     autostart      = false,
   }
@@ -392,19 +394,13 @@ end
 ---@param registers table
 ---@return nil
 local validate_registers = function (registers)
-  for a,reg in pairs(registers) do
+  for rx,reg in ipairs(registers) do
     vim.validate({
-      register_name                        = {a,               "s",        false},
-      ["register " .. a]                   = {reg,             "t",        false},
-      ["register " .. a .. " postprocess"] = {reg.postprocess, {"s", "f"}, false},
+      register_names       = {reg.names,       "s", false},
+      register_postprocess = {reg.postprocess, "f", true},
     })
-    if not string.match(a, "^[%d%l:\\.\\%#=\\*\\+_/]$") then
-      error("invalid register name " .. a)
-    end
-    if type(reg.postprocess) == "string" then
-      if reg.postprocess ~= "preserve" and reg.postprocess ~= "code" then
-        error("invalid postprocessing for register " .. a " : " .. reg.postprocess)
-      end
+    if not string.match(reg.names, "^[%d%l:\\.\\%#=\\*\\+_/]+$") then
+      error("invalid register names " .. reg.names)
     end
   end
 end

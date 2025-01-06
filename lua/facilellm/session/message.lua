@@ -94,25 +94,6 @@ local purge = function (msg)
   msg.status = "purged"
 end
 
----@param msg FacileLLM.Message
----@param reg FacileLLM.Config.Register
----@return string
-local postprocess = function (msg, reg)
-  if reg.postprocess == "preserve" then
-    return table.concat(msg.lines, "\n")
-
-  elseif reg.postprocess == "code" then
-    local text = table.concat(msg.lines, "\n")
-    local code_blocks = {}
-    for s in string.gmatch(text, "```%w*\n(.*)\n```") do
-      table.insert(code_blocks, s)
-    end
-    return table.concat(code_blocks, "\n\n\n")
-
-  else
-    return reg.postprocess(msg.lines)
-  end
-end
 
 
 return {
@@ -125,5 +106,4 @@ return {
   prune        = prune,
   deprune      = deprune,
   purge        = purge,
-  postprocess  = postprocess,
 }

@@ -80,6 +80,18 @@ local convert_msg_to_openai = function (msg)
   return msg_openai
 end
 
+---@param conversation FacileLLM.Conversation
+---@return FacileLLM.API.OpenAI.Message[]
+local convert_conv_to_openai = function (conversation)
+  local openai_messages = {}
+  for _,msg in ipairs(conversation) do
+    if not message.isempty(msg) and not message.ispruned(msg) then
+      table.insert(openai_messages, convert_msg_to_openai(msg))
+    end
+  end
+  return openai_messages
+end
+
 ---@param role FacileLLM.API.OpenAI.MsgRole
 ---@return FacileLLM.MsgRole
 local convert_role_from_openai = function (role)
@@ -203,13 +215,7 @@ local response_to = function (conversation, add_message, on_complete, opts)
   local data = util.deep_copy_values(opts.params)
   data.stream = true
   data.model = opts.openai_model
-  -- TODO: this should be refactored as conversation_to_messages
-  data.messages = {}
-  for _,msg in ipairs(conversation) do
-    if not message.isempty(msg) and not message.ispruned(msg) then
-      table.insert(data.messages, convert_msg_to_openai(msg))
-    end
-  end
+  data.messages = convert_conv_to_openai(conversation)
 
   ---@diagnostic disable-next-line missing-fields
   local curl_job = job:new({

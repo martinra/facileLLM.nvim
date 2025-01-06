@@ -323,7 +323,7 @@ local render_conversation = function (bufnr, conv, render_state)
         set_highlight_pruned(bufnr, mx, msg, render_state)
       end
 
-      if msg.role == "Instruction" or msg.role == "Context" then
+      if msg.role == "Instruction" or msg.role == "Context" or msg.role == "Example" then
         workaround_fold = true
       end
     end
@@ -331,9 +331,6 @@ local render_conversation = function (bufnr, conv, render_state)
 
   vim.api.nvim_set_option_value("modifiable", false, { buf = bufnr })
 
-  -- HACK: We recompute all folds. Without this on 0.9.4 when creating from
-  -- selection, they are seemingly never applied. This might not be neccessary
-  -- once #18479 of github/neovim is applied (v0.10?).
   if workaround_fold then
     vim.schedule( function ()
       local orig_winid = vim.api.nvim_get_current_win()
@@ -341,8 +338,7 @@ local render_conversation = function (bufnr, conv, render_state)
       for _,winid in pairs(vim.api.nvim_list_wins()) do
         if ui_common.win_get_session(winid) and ui_common.win_is_conversation(winid) then
           vim.api.nvim_set_current_win(winid)
-          vim.api.nvim_feedkeys("zx", "nx", false)
-          vim.api.nvim_feedkeys("zc", "nx", false)
+          vim.api.nvim_feedkeys("zX", "nx", false)
         end
       end
       vim.api.nvim_set_current_win(orig_winid)

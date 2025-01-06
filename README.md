@@ -146,8 +146,25 @@ functional example configuration of a provider is
   },
   conversation   = {},
   registers      = {
-    ["l"] = { postprocess = "preserve" },
-    ["c"] = { postprocess = "code" },
+    {
+      names = "l",
+    },
+    {
+      names = "c",
+      postprocess = function (lines)
+        return string.match(table.concat(lines, "\n"), "```\n(.-\n)```")
+      end,
+    },
+    {
+      names = "vb",
+      postprocess = function (lines)
+        clines = table.concat(lines, "\n")
+        return {
+          string.match(clines, "```\n([^`]-\n)```"),
+          string.match(clines, "```\n[^`]-\n```(.-)"),
+        }
+      end,
+    },
   },
   autostart      = false,
 }
@@ -169,8 +186,10 @@ The field `conversation` can be an intial conversation or the name of a
 conversation that is made available through the `conversations` or
 `conversations_csv` fields during the setup.
 
-The field `registers` is a list of registers together with a postprocessing
-function or a string referring to one of the provided implementations.
+The field `registers` is a list of registers that will be populated together
+with an optional postprocessing function. If several names are given and the
+postprocessing function returns a list of strings, registers are set to the
+corresponding string in given order.
 
 A session is started automatically if the field `autostart` is set to true.
 

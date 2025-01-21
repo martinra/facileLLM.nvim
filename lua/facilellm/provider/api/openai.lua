@@ -57,41 +57,6 @@ local convert_role_to_openai = function (role)
   end
 end
 
----@param msg FacileLLM.Message
----@return FacileLLM.API.OpenAI.Message
-local convert_msg_to_openai = function (msg)
-  local msg_openai = {
-    role = convert_role_to_openai(msg.role),
-    content = table.concat(msg.lines, "\n"),
-  }
-  if msg.role == "Context" then
-    msg_openai.content =
-      "The conversation will be based on the following context:\n" ..
-      '"""\n' ..
-      msg_openai.content .. "\n" ..
-      '"""'
-    elseif msg.role == "Example" then
-    msg_openai.content =
-      "This is an example of how you should respond:\n" ..
-      '"""\n' ..
-      msg_openai.content .. "\n" ..
-      '"""'
-  end
-  return msg_openai
-end
-
----@param conversation FacileLLM.Conversation
----@return FacileLLM.API.OpenAI.Message[]
-local convert_conv_to_openai = function (conversation)
-  local openai_messages = {}
-  for _,msg in ipairs(conversation) do
-    if not message.isempty(msg) and not message.ispruned(msg) then
-      table.insert(openai_messages, convert_msg_to_openai(msg))
-    end
-  end
-  return openai_messages
-end
-
 ---@param role FacileLLM.API.OpenAI.MsgRole
 ---@return FacileLLM.MsgRole
 local convert_role_from_openai = function (role)
@@ -111,6 +76,46 @@ local convert_role_from_openai = function (role)
   else
     error("unknown role " .. role)
   end
+end
+
+---@param msg FacileLLM.Message
+---@param opts table
+---@return FacileLLM.API.OpenAI.Message
+local convert_msg_to_openai = function (msg, opts)
+  local msg_openai = {
+    role = convert_role_to_openai(msg.role),
+    content = table.concat(msg.lines, "\n"),
+  }
+  if msg.role == "Context" then
+    msg_openai.content =
+      "The conversation will be based on the following context:\n" ..
+      '"""\n' ..
+      msg_openai.content .. "\n" ..
+      '"""'
+    elseif msg.role == "Example" then
+    msg_openai.content =
+      "This is an example of how you should respond:\n" ..
+      '"""\n' ..
+      msg_openai.content .. "\n" ..
+      '"""'
+  end
+  if msg.cache then
+    opts.cache_msg(msg_openai)
+  end
+  return msg_openai
+end
+
+---@param conversation FacileLLM.Conversation
+---@param opts table
+---@return FacileLLM.API.OpenAI.Message[]
+local convert_conv_to_openai = function (conversation, opts)
+  local openai_messages = {}
+  for _,msg in ipairs(conversation) do
+    if not message.isempty(msg) and not message.ispruned(msg) then
+      table.insert(openai_messages, convert_msg_to_openai(msg, opts))
+    end
+  end
+  return openai_messages
 end
 
 ---@param stdout_record FacileLLM.API.OpenAI.StdOutRecord
@@ -215,7 +220,7 @@ local response_to = function (conversation, add_message, on_complete, opts)
   local data = util.deep_copy_values(opts.params)
   data.stream = true
   data.model = opts.openai_model
-  data.messages = convert_conv_to_openai(conversation)
+  data.messages = convert_conv_to_openai(conversation, opts)
 
   ---@diagnostic disable-next-line missing-fields
   local curl_job = job:new({
@@ -266,6 +271,7 @@ local default_opts = function ()
     end,
     openai_model = "gpt-3.5-turbo",
     params = {},
+    cache_msg = function (msg) return msg end,
   }
 end
 

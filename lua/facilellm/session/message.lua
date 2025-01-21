@@ -1,6 +1,7 @@
 -- Possible roles in a Message need to be provided/translated
 -- by a model, we do not check them. The default role for
 -- input is "Input".
+---TODO: add FileContext
 ---@alias FacileLLM.MsgRole ("Instruction"| "Context"| "Example"| "Input"| "LLM")
 
 ---@alias FacileLLM.MsgStatus (nil| "pruned"| "purged")
@@ -9,6 +10,7 @@
 ---@field role FacileLLM.MsgRole
 ---@field lines string[]
 ---@field status FacileLLM.MsgStatus
+---@field cache boolean
 
 
 ---@param role FacileLLM.MsgRole
@@ -22,11 +24,18 @@ local create = function (role, content)
     lines = content
   end
 
+  if role == "Instruction" or role == "Context" or role == "Example" then
+    cache = true
+  else
+    cache = false
+  end
+
   ---@type FacileLLM.Message
   local msg = {
     role = role,
     lines = lines,
     status = nil,
+    cache = cache,
   }
   return msg
 end

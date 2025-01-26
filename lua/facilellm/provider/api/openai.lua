@@ -1,8 +1,8 @@
 -- OpenAI API, not restricted to their product.
 
+local generic_oai = require("facilellm.provider.model.generic_oai")
 local job = require("plenary.job")
 local provider_util = require("facilellm.provider.util")
-local message = require("facilellm.session.message")
 local util = require("facilellm.util")
 
 
@@ -26,97 +26,10 @@ log.configure({
 })
 
 
----@alias FacileLLM.API.OpenAI.MsgRole ("system"| "assistant"| "user")
-
----@class FacileLLM.API.OpenAI.Message
----@field role FacileLLM.API.OpenAI.MsgRole
----@field content string
-
----@alias OpenAIConversation FacileLLM.API.OpenAI.Message[]
-
 ---@class FacileLLM.API.OpenAI.StdOutRecord
 ---@field lines string[]
 ---@field json_records table[] Start and end position of a valid json recond in lines
 
-
----@param role FacileLLM.MsgRole
----@return FacileLLM.API.OpenAI.MsgRole
-local convert_role_to_openai = function (role)
-  if role == "Instruction" then
-    return "system"
-  elseif role == "Context" then
-    return "system"
-  elseif role == "Example" then
-    return "system"
-  elseif role == "LLM" then
-    return "assistant"
-  elseif role == "Input" then
-    return "user"
-  else
-    error("unknown role " .. role)
-  end
-end
-
----@param role FacileLLM.API.OpenAI.MsgRole
----@return FacileLLM.MsgRole
-local convert_role_from_openai = function (role)
-  if role == "assistant" then
-    return "LLM"
-  end
-  vim.schedule(function ()
-    vim.notify(
-        "Warning in OpenAI API:\n" .. "Unexpected role " .. role .. ".\n",
-        vim.log.levels.WARN)
-    end)
-
-  if role == "user" then
-    return "Input"
-  elseif role == "system" then
-    return "Instruction"
-  else
-    error("unknown role " .. role)
-  end
-end
-
----@param msg FacileLLM.Message
----@param opts table
----@return FacileLLM.API.OpenAI.Message
-local convert_msg_to_openai = function (msg, opts)
-  local msg_openai = {
-    role = convert_role_to_openai(msg.role),
-    content = table.concat(msg.lines, "\n"),
-  }
-  if msg.role == "Context" then
-    msg_openai.content =
-      "The conversation will be based on the following context:\n" ..
-      '"""\n' ..
-      msg_openai.content .. "\n" ..
-      '"""'
-    elseif msg.role == "Example" then
-    msg_openai.content =
-      "This is an example of how you should respond:\n" ..
-      '"""\n' ..
-      msg_openai.content .. "\n" ..
-      '"""'
-  end
-  if msg.cache then
-    opts.cache_msg(msg_openai)
-  end
-  return msg_openai
-end
-
----@param conversation FacileLLM.Conversation
----@param opts table
----@return FacileLLM.API.OpenAI.Message[]
-local convert_conv_to_openai = function (conversation, opts)
-  local openai_messages = {}
-  for _,msg in ipairs(conversation) do
-    if not message.isempty(msg) and not message.ispruned(msg) then
-      table.insert(openai_messages, convert_msg_to_openai(msg, opts))
-    end
-  end
-  return openai_messages
-end
 
 ---@param stdout_record FacileLLM.API.OpenAI.StdOutRecord
 ---@param data string
@@ -206,8 +119,7 @@ local response_to = function (conversation, add_message, on_complete, opts)
         return json.choices[1].delta
       end)
       if ok and delta.content then
-        local role = delta.role and convert_role_from_openai(delta.role)
-        if role == "LLM" or role == nil and receiving_llm then
+        if delta.role == nil and receiving_llm or delta.role == "assistant" then
           receiving_llm = true
           add_message(delta.content)
         else
@@ -220,7 +132,7 @@ local response_to = function (conversation, add_message, on_complete, opts)
   local data = util.deep_copy_values(opts.params)
   data.stream = true
   data.model = opts.openai_model
-  data.messages = convert_conv_to_openai(conversation, opts)
+  data.messages = opts.prompt_conversion.convert_conv_to_oai(conversation)
 
   ---@diagnostic disable-next-line missing-fields
   local curl_job = job:new({
@@ -270,8 +182,8 @@ local default_opts = function ()
          )
     end,
     openai_model = "gpt-3.5-turbo",
+    prompt_conversion = generic_oai,
     params = {},
-    cache_msg = function (msg) return msg end,
   }
 end
 

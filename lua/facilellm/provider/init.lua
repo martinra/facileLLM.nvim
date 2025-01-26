@@ -9,6 +9,9 @@ local config = require("facilellm.config")
 ---@class FacileLLM.Provider.PromptConversion
 ---@field conversation_to_input function(FacileLLM.Conversation): string
 
+---@class FacileLLM.Provider.OAIConversion
+---@field convert_conv_to_oai function(FacileLLM.Conversation): string
+
 ---@class FacileLLM.Provider.Implementation
 ---@field create function(opts: table): FacileLLM.Provider
 ---@field preview function?(opts: table): string

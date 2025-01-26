@@ -7,7 +7,7 @@ local config = require("facilellm.config")
 ---@field response_to function(conv: Conversation, add_msg: function, on_cmpl: function, opt:table): function?
 
 ---@class FacileLLM.Provider.PromptConversion
----@field conversation_to_input function(FacileLLM.Conversation): string
+---@field convert_conv_to_prompt function(FacileLLM.Conversation): string
 
 ---@class FacileLLM.Provider.OAIConversion
 ---@field convert_conv_to_oai function(FacileLLM.Conversation): string

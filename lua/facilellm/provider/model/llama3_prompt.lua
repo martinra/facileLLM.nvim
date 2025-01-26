@@ -36,7 +36,7 @@ end
 ---@param conversation FacileLLM.Conversation
 ---@param params table?
 ---@return table
-local conversation_to_input = function (conversation, params)
+local convert_conv_to_llama = function (conversation, params)
   params = params or {}
 
   local prompt = "<|begin_of_text|>"
@@ -65,5 +65,6 @@ end
 
 ---@type FacileLLM.Provider.PromptConversion
 return {
-  conversation_to_input = conversation_to_input,
+  convert_msg_to_prompt  = convert_msg_to_llama,
+  convert_conv_to_prompt = convert_conv_to_llama,
 }

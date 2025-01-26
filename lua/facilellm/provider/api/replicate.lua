@@ -282,7 +282,7 @@ local response_to = function (conversation, add_message, on_complete, opts)
 
   local data = {
     version = opts.replicate_version,
-    input = opts.prompt_conversion.conversation_to_input(conversation, opts.params),
+    input = opts.prompt_conversion.convert_conv_to_prompt(conversation, opts.params),
     stream = opts.stream,
   }
 

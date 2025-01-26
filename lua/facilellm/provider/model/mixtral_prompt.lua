@@ -40,7 +40,7 @@ end
 ---@param conversation FacileLLM.Conversation
 ---@param params table?
 ---@return table
-local conversation_to_input = function (conversation, params)
+local convert_conv_to_mixtral = function (conversation, params)
   params = params or {}
 
   local prompt = "<s> [INST] "
@@ -67,5 +67,6 @@ end
 
 ---@type FacileLLM.Provider.PromptConversion
 return {
-  conversation_to_input = conversation_to_input,
+  convert_msg_to_prompt  = convert_msg_to_mixtral,
+  convert_conv_to_prompt = convert_conv_to_mixtral,
 }

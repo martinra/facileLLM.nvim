@@ -251,6 +251,7 @@ schedule_prediction.cancel = function (url, api_key)
   if not url then
     return
   end
+  ---@diagnostic disable-next-line missing-fields
   job:new({
     command = "curl",
     args = {

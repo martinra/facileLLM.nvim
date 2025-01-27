@@ -24,11 +24,7 @@ local create = function (role, content)
     lines = content
   end
 
-  if role == "Instruction" or role == "Context" or role == "Example" then
-    cache = true
-  else
-    cache = false
-  end
+  local cache = role == "Instruction" or role == "Context" or role == "Example"
 
   ---@type FacileLLM.Message
   local msg = {

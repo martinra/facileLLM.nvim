@@ -13,6 +13,8 @@ local util = require("facilellm.util")
 ---@field conv_bufnr BufNr
 ---@field input_bufnr BufNr
 ---@field render_state FacileLLM.RenderState
+---@field conversation_winids WinId[]
+---@field input_winid WinId?
 ---@field follow_conversation_flags table<WinId,boolean>
 ---@field pending_insertion_feedback FacileLLM.SessionUI.PendingInsertionFeedback?
 
@@ -677,9 +679,8 @@ local create = function (provider_config)
     input_bufnr = ui_input.create_buffer(sessionid, input_buffer_name(name)),
     render_state = ui_render.create_state(),
     conversation_winids = {},
-    follow_conversation_flags = {},
     input_winid = nil,
-    input_conv_winid = nil,
+    follow_conversation_flags = {},
   }
   session_uis[sessionid] = sess
 

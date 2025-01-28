@@ -12,7 +12,6 @@ local convert_msg_to_claude = function (msg)
   return msg_oai
 end
 
-
 ---@param conversation FacileLLM.Conversation
 ---@return FacileLLM.API.OpenAI.Message[]
 local convert_conv_to_claude = function (conversation)

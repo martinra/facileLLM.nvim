@@ -1,6 +1,7 @@
 ---@alias BufNr integer
 ---@alias WinId integer
 
+
 ---@param bufnr BufNr
 ---@param sessionid FacileLLM.SessionId
 ---@return nil

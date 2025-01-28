@@ -1,14 +1,3 @@
-local config = require("facilellm.config")
-local message = require("facilellm.session.message")
-local session = require("facilellm.session")
-local ui_common = require("facilellm.ui.common")
-local ui_conversation = require("facilellm.ui.conversation")
-local ui_input = require("facilellm.ui.input")
-local ui_recent = require("facilellm.ui.recent_session")
-local ui_render = require("facilellm.ui.render")
-local util = require("facilellm.util")
-
-
 ---@class FacileLLM.SessionUI
 ---@field conv_bufnr BufNr
 ---@field input_bufnr BufNr
@@ -21,6 +10,17 @@ local util = require("facilellm.util")
 ---@class FacileLLM.SessionUI.PendingInsertionFeedback
 ---@field bufnr BufNr
 ---@field mark integer
+
+
+local config = require("facilellm.config")
+local message = require("facilellm.session.message")
+local session = require("facilellm.session")
+local ui_common = require("facilellm.ui.common")
+local ui_conversation = require("facilellm.ui.conversation")
+local ui_input = require("facilellm.ui.input")
+local ui_recent = require("facilellm.ui.recent_session")
+local ui_render = require("facilellm.ui.render")
+local util = require("facilellm.util")
 
 
 ---@type FacileLLM.SessionUI[]

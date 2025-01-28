@@ -1,5 +1,6 @@
 -- Prompt conversion for MistralAI
 
+
 local message = require("facilellm.session.message")
 
 
@@ -64,6 +65,7 @@ local convert_conv_to_mixtral = function (conversation, params)
     prompt = prompt,
   }
 end
+
 
 ---@type FacileLLM.Provider.PromptConversion
 return {

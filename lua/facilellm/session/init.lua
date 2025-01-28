@@ -1,10 +1,3 @@
-local config = require("facilellm.config")
-local conversation = require("facilellm.session.conversation")
-local provider = require("facilellm.provider")
-local message = require("facilellm.session.message")
-local util = require("facilellm.util")
-
-
 ---@alias FacileLLM.SessionId integer
 
 ---@class FacileLLM.Session
@@ -14,6 +7,13 @@ local util = require("facilellm.util")
 ---@field conversation_locked boolean
 ---@field cancel_query function?
 ---@field config FacileLLM.Config.Provider
+
+
+local config = require("facilellm.config")
+local conversation = require("facilellm.session.conversation")
+local provider = require("facilellm.provider")
+local message = require("facilellm.session.message")
+local util = require("facilellm.util")
 
 
 ---@type table<FacileLLM.SessionId,FacileLLM.Session> Table of sessions by their id

@@ -1,6 +1,3 @@
-local config = require("facilellm.config")
-
-
 ---@class FacileLLM.Provider
 ---@field name string
 ---@field params table
@@ -15,6 +12,10 @@ local config = require("facilellm.config")
 ---@class FacileLLM.Provider.Implementation
 ---@field create function(opts: table): FacileLLM.Provider
 ---@field preview function?(opts: table): string
+
+
+local config = require("facilellm.config")
+
 
 ---@param implementation FacileLLM.Provider.Implementation
 ---@param opts table

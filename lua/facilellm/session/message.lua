@@ -100,7 +100,6 @@ local purge = function (msg)
 end
 
 
-
 return {
   create       = create,
   isempty      = isempty,

@@ -1,11 +1,11 @@
-local config = require("facilellm.config")
-local message = require("facilellm.session.message")
-local util = require("facilellm.util")
-
-
 ---@alias FacileLLM.Conversation FacileLLM.Message[]
 ---@alias FacileLLM.MsgIndex integer
 ---@alias FacileLLM.ConversationName string
+
+
+local config = require("facilellm.config")
+local message = require("facilellm.session.message")
+local util = require("facilellm.util")
 
 
 ---@param initial nil | FacileLLM.ConversationName | FacileLLM.Conversation

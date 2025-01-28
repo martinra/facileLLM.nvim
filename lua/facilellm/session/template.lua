@@ -10,6 +10,7 @@
 ---@field begin_tag string
 ---@field end_tag string
 
+
 ---@param winid WinId
 ---@param context_size integer?
 ---@return string[]
@@ -82,6 +83,7 @@ local template_filetype_and_context = function (winid, tags, context_size)
     },
   }
 end
+
 
 return {
   context_before_cursor = context_before_cursor,

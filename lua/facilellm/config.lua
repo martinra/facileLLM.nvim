@@ -635,7 +635,9 @@ local extend_facilellm_config = function (opts)
 end
 
 
-local M = {}
+local M = {
+  opts = nil,
+}
 
 ---@param opts table?
 ---@return nil

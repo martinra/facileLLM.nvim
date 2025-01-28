@@ -1,7 +1,3 @@
-local config = require("facilellm.config")
-local message = require("facilellm.session.message")
-
-
 ---@class FacileLLM.RenderState
 ---@field pos FacileLLM.RenderState.Position
 ---@field offsets integer[]
@@ -17,6 +13,10 @@ local message = require("facilellm.session.message")
 ---@class FacileLLM.RenderState.HighlightReceiving
 ---@field msg FacileLLM.MsgIndex
 ---@field extmark integer?
+
+
+local config = require("facilellm.config")
+local message = require("facilellm.session.message")
 
 
 ---@param role FacileLLM.MsgRole

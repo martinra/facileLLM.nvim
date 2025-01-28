@@ -1,5 +1,11 @@
 -- OpenAI API, not restricted to their product.
 
+
+---@class FacileLLM.API.OpenAI.StdOutRecord
+---@field lines string[]
+---@field json_records table[] Start and end position of a valid json recond in lines
+
+
 local generic_oai = require("facilellm.provider.model.generic_oai")
 local job = require("plenary.job")
 local provider_util = require("facilellm.provider.util")
@@ -24,11 +30,6 @@ log.configure({
     },
   },
 })
-
-
----@class FacileLLM.API.OpenAI.StdOutRecord
----@field lines string[]
----@field json_records table[] Start and end position of a valid json recond in lines
 
 
 ---@param stdout_record FacileLLM.API.OpenAI.StdOutRecord

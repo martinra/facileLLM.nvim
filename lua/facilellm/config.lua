@@ -394,7 +394,7 @@ end
 ---@param registers table
 ---@return nil
 local validate_registers = function (registers)
-  for rx,reg in ipairs(registers) do
+  for _,reg in ipairs(registers) do
     vim.validate({
       register_names       = {reg.names,       "s", false},
       register_postprocess = {reg.postprocess, "f", true},

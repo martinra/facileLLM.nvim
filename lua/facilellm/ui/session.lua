@@ -561,6 +561,9 @@ end
 ---@param response_callback function?(): nil
 ---@return nil
 local add_input_message_and_query = function (sessionid, lines, response_callback)
+  if session.get_provider_config(sessionid).autoclear then
+    clear_interaction(sessionid)
+  end
   session.add_message(sessionid, "Input", lines)
   query(sessionid, response_callback)
 end

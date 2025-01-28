@@ -14,6 +14,7 @@
 ---@field conversation FacileLLM.ConversationName | FacileLLM.Conversation
 ---@field registers FacileLLM.Config.Register[]
 ---@field autostart boolean
+---@field autoclear boolean
 
 ---@class FacileLLM.Config.Naming
 ---@field role_display FacileLLM.Config.Naming.RoleDisplay
@@ -227,6 +228,7 @@ local default_provider_config = function ()
       },
     },
     autostart      = false,
+    autoclear      = false,
   }
 end
 
@@ -424,6 +426,7 @@ local validate_provider_config = function (provider)
     conversation   = {provider.conversation,   {"s", "t"}, true},
     registers      = {provider.registers,      "t",        true},
     autostart      = {provider.autostart,      "b",        true},
+    autoclear      = {provider.autoclear,      "b",        true},
   })
   if provider.implementation and type(provider.implementation) == "table" then
     validate_implementation(provider.implementation)

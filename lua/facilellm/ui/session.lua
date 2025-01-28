@@ -249,8 +249,8 @@ end
 ---@param context ("delete"| "preserve"| "combine")
 ---@param example ("delete"| "preserve"| "combine")
 ---@return nil
-local clear_conversation = function (sessionid, instruction, context, example)
-  if not session.clear_conversation(sessionid, instruction, context, example) then
+local clear = function (sessionid, instruction, context, example)
+  if not session.clear(sessionid, instruction, context, example) then
     return
   end
   local conv = session.get_conversation(sessionid)
@@ -258,6 +258,18 @@ local clear_conversation = function (sessionid, instruction, context, example)
   local render_state = get_render_state(sessionid)
   ui_render.clear_conversation(conv_bufnr, render_state)
   ui_render.render_conversation(conv_bufnr, conv, render_state)
+end
+
+---@param sessionid FacileLLM.SessionId
+---@return nil
+local clear_conversation = function (sessionid)
+  clear(sessionid, "delete", "delete", "delete")
+end
+
+---@param sessionid FacileLLM.SessionId
+---@return nil
+local clear_interaction = function (sessionid)
+  clear(sessionid, "preserve", "preserve", "preserve")
 end
 
 ---@param sessionid FacileLLM.SessionId
@@ -319,21 +331,21 @@ local set_buf_keymaps = function (sessionid)
   local input_bufnr = get_input_buffer(sessionid)
 
 
-  if config.opts.interface.keymaps.delete_interaction ~= "" then
-    vim.keymap.set("n", config.opts.interface.keymaps.delete_interaction,
-      function () ui_session.clear_conversation(sessionid, "preserve", "preserve", "preserve") end,
+  if config.opts.interface.keymaps.clear_interaction ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.clear_interaction,
+      function () ui_session.clear_interaction(sessionid) end,
       { buffer = conv_bufnr })
-    vim.keymap.set("n", config.opts.interface.keymaps.delete_interaction,
-      function () ui_session.clear_conversation(sessionid, "preserve", "preserve", "preserve") end,
+    vim.keymap.set("n", config.opts.interface.keymaps.clear_interaction,
+      function () ui_session.clear_interaction(sessionid) end,
       { buffer = input_bufnr })
   end
 
-  if config.opts.interface.keymaps.delete_conversation ~= "" then
-    vim.keymap.set("n", config.opts.interface.keymaps.delete_conversation,
-      function () ui_session.clear_conversation(sessionid, "delete", "delete", "delete") end,
+  if config.opts.interface.keymaps.clear_conversation ~= "" then
+    vim.keymap.set("n", config.opts.interface.keymaps.clear_conversation,
+      function () ui_session.clear_conversation(sessionid) end,
       { buffer = conv_bufnr })
-    vim.keymap.set("n", config.opts.interface.keymaps.delete_conversation,
-      function () ui_session.clear_conversation(sessionid, "delete", "delete", "delete") end,
+    vim.keymap.set("n", config.opts.interface.keymaps.clear_conversation,
+      function () ui_session.clear_conversation(sessionid) end,
       { buffer = input_bufnr })
   end
 
@@ -720,7 +732,9 @@ return {
   set_current_win_conversation_input = set_current_win_conversation_input,
   set_current_win_conversation       = set_current_win_conversation,
   set_current_win_input              = set_current_win_input,
+  clear                              = clear,
   clear_conversation                 = clear_conversation,
+  clear_interaction                  = clear_interaction,
   render_conversation                = render_conversation,
   add_message                        = add_message,
   append_conversation                = append_conversation,

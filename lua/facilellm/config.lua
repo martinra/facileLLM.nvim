@@ -43,8 +43,8 @@
 ---@field keymaps FacileLLM.Config.Interface.Keymaps
 
 ---@class FacileLLM.Config.Interface.Keymaps
----@field delete_interaction string
----@field delete_conversation string
+---@field clear_interaction string
+---@field clear_conversation string
 ---@field delete_session string
 ---@field fork_session string
 ---@field rename_session string
@@ -301,8 +301,8 @@ local default_opts = function ()
       fold_context              = true,
       fold_example              = true,
       keymaps = {
-        delete_interaction  = "<C-d>i",
-        delete_conversation = "<C-d>c",
+        clear_interaction   = "<C-d>i",
+        clear_conversation  = "<C-d>c",
         delete_session      = "<C-s>d",
         fork_session        = "<C-s>f",
         rename_session      = "<C-s>r",
@@ -479,8 +479,8 @@ local validate_interface = function (interface)
   if interface.keymaps then
     local keymaps = interface.keymaps
     vim.validate({
-      delete_interaction   = {keymaps.delete_interaction,  "s", true},
-      delete_conversation  = {keymaps.delete_conversation, "s", true},
+      clear_interaction    = {keymaps.clear_interaction,   "s", true},
+      clear_conversation   = {keymaps.clear_conversation,  "s", true},
       delete_session       = {keymaps.delete_session,      "s", true},
       fork_session         = {keymaps.fork_session,        "s", true},
       rename_session       = {keymaps.rename_session,      "s", true},

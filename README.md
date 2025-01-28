@@ -377,8 +377,8 @@ interface = {
 
 ```lua
 keymaps = {
-  delete_interaction  = "<C-d>i",
-  delete_conversation = "<C-d>c",
+  clear_interaction   = "<C-d>i",
+  clear_conversation  = "<C-d>c",
   delete_session      = "<C-s>d",
   fork_session        = "<C-s>f",
   rename_session      = "<C-s>r",
@@ -867,14 +867,14 @@ Bound by default to `<leader>ais`.
 Local commands are the ones awailable in the conversation and/or input buffer
 of a session.
 
-### `delete_interaction`
+### `clear_interaction`
 
 Delete the user input and the LLM responses of a session, but not the
 instructions, the context, and the examples.
 
 Bound by default to `<C-d>i`.
 
-### `delete_conversation`
+### `clear_conversation`
 
 Delete the whole conversation of a session.
 

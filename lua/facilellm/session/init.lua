@@ -244,7 +244,7 @@ end
 ---@param context ("delete"| "preserve"| "combine")
 ---@param example ("delete"| "preserve"| "combine")
 ---@return boolean
-local clear_conversation = function (sessionid, instruction, context, example)
+local clear = function (sessionid, instruction, context, example)
   if is_conversation_locked(sessionid) and config.opts.feedback.conversation_lock.warn_on_clear then
     vim.notify("clearing conversation despite lock", vim.log.levels.WARN)
     return false
@@ -389,6 +389,6 @@ return {
   is_conversation_locked = is_conversation_locked,
   lock_conversation      = lock_conversation,
   unlock_conversation    = unlock_conversation,
-  clear_conversation     = clear_conversation,
+  clear                  = clear,
   query_provider         = query_provider,
 }

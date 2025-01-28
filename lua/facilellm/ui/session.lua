@@ -4,8 +4,8 @@ local session = require("facilellm.session")
 local ui_common = require("facilellm.ui.common")
 local ui_conversation = require("facilellm.ui.conversation")
 local ui_input = require("facilellm.ui.input")
+local ui_recent = require("facilellm.ui.recent_session")
 local ui_render = require("facilellm.ui.render")
-local ui_select = require("facilellm.ui.select_session")
 local util = require("facilellm.util")
 
 
@@ -135,7 +135,7 @@ end
 local set_current_win_conversation_input = function (sessionid)
   -- We need to touch the session before creating any windows in order to avoid
   -- the WinNew autocmd to close them if unique_session is true.
-  ui_select.touch(sessionid)
+  ui_recent.touch(sessionid)
 
   local conv_winid = get_some_conversation_window(sessionid)
   if not conv_winid then
@@ -163,7 +163,7 @@ local set_current_win_conversation = function (sessionid)
 
   -- We need to touch the session before creating any windows in order to avoid
   -- the WinNew autocmd to close them if unique_session is true.
-  ui_select.touch(sessionid)
+  ui_recent.touch(sessionid)
 
   local conv_winid = get_some_conversation_window(sessionid)
   if not conv_winid then
@@ -187,7 +187,7 @@ local set_current_win_input = function (sessionid)
 
   -- We need to touch the session before creating any windows in order to avoid
   -- the WinNew autocmd to close them if unique_session is true.
-  ui_select.touch(sessionid)
+  ui_recent.touch(sessionid)
 
   local input_winid = get_some_input_window(sessionid)
   if not input_winid then
@@ -286,7 +286,7 @@ end
 ---@param sessionid FacileLLM.SessionId
 ---@return nil
 local delete = function (sessionid)
-  ui_select.delete(sessionid)
+  ui_recent.delete(sessionid)
   for _,winid in pairs(vim.api.nvim_list_wins()) do
     if vim.api.nvim_win_is_valid(winid)
       and ui_common.win_get_session(winid) == sessionid then
@@ -461,7 +461,7 @@ end
 ---@param lines string[]
 ---@return nil
 local add_message = function (sessionid, role, lines)
-  ui_select.touch(sessionid)
+  ui_recent.touch(sessionid)
   session.add_message(sessionid, role, lines)
   vim.schedule(
     function ()
@@ -473,7 +473,7 @@ end
 ---@param conversation FacileLLM.Conversation
 ---@return nil
 local append_conversation = function (sessionid, conversation)
-  ui_select.touch(sessionid)
+  ui_recent.touch(sessionid)
   session.append_conversation(sessionid, conversation)
   vim.schedule(
     function ()
@@ -529,7 +529,7 @@ end
 ---@param response_callback function?(): nil
 ---@return nil
 local query = function (sessionid, response_callback)
-  ui_select.touch(sessionid)
+  ui_recent.touch(sessionid)
 
   local conv = session.get_conversation(sessionid)
   local render_state = get_render_state(sessionid)
@@ -583,7 +583,7 @@ local requery = function (sessionid)
   local bufnr = get_conversation_buffer(sessionid)
   local render_state = get_render_state(sessionid)
 
-  ui_select.touch(sessionid)
+  ui_recent.touch(sessionid)
   if msg.role == "LLM" then
     message.purge(msg)
     ui_render.purge_message(bufnr, mx, msg, render_state)
@@ -646,9 +646,9 @@ local set_buf_autocmds = function (sessionid)
     vim.api.nvim_create_autocmd("WinNew", {
       buffer = conv_bufnr,
       callback = function()
-        local most_recent_session = ui_select.get_most_recent()
+        local most_recent_session = ui_recent.get_most_recent()
         if most_recent_session == nil then
-          ui_select.touch(sessionid)
+          ui_recent.touch(sessionid)
         elseif most_recent_session ~= sessionid then
           win_close_all_but_unique(most_recent_session)
         end
@@ -657,9 +657,9 @@ local set_buf_autocmds = function (sessionid)
     vim.api.nvim_create_autocmd("WinNew", {
       buffer = conv_bufnr,
       callback = function()
-        local most_recent_session = ui_select.get_most_recent()
+        local most_recent_session = ui_recent.get_most_recent()
         if most_recent_session == nil then
-          ui_select.touch(sessionid)
+          ui_recent.touch(sessionid)
         elseif most_recent_session ~= sessionid then
           win_close_all_but_unique(most_recent_session)
         end

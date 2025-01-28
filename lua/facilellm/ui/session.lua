@@ -245,6 +245,23 @@ local del_pending_insertion_feedback = function (sessionid)
 end
 
 ---@param sessionid FacileLLM.SessionId
+---@return nil
+local render_conversation = function (sessionid)
+  local conv = session.get_conversation(sessionid)
+  local bufnr = get_conversation_buffer(sessionid)
+  local render_state = get_render_state(sessionid)
+  vim.schedule(
+    function ()
+      ui_render.render_conversation(bufnr, conv, render_state)
+    end)
+  for _,winid in pairs(vim.api.nvim_list_wins()) do
+    if does_follow_conversation(sessionid, winid) then
+      ui_conversation.follow(bufnr, winid)
+    end
+  end
+end
+
+---@param sessionid FacileLLM.SessionId
 ---@param instruction ("delete"| "preserve"| "combine")
 ---@param context ("delete"| "preserve"| "combine")
 ---@param example ("delete"| "preserve"| "combine")
@@ -253,11 +270,10 @@ local clear = function (sessionid, instruction, context, example)
   if not session.clear(sessionid, instruction, context, example) then
     return
   end
-  local conv = session.get_conversation(sessionid)
   local conv_bufnr = get_conversation_buffer(sessionid)
   local render_state = get_render_state(sessionid)
   ui_render.clear_conversation(conv_bufnr, render_state)
-  ui_render.render_conversation(conv_bufnr, conv, render_state)
+  render_conversation(sessionid)
 end
 
 ---@param sessionid FacileLLM.SessionId
@@ -270,20 +286,6 @@ end
 ---@return nil
 local clear_interaction = function (sessionid)
   clear(sessionid, "preserve", "preserve", "preserve")
-end
-
----@param sessionid FacileLLM.SessionId
----@return nil
-local render_conversation = function (sessionid)
-  local conv = session.get_conversation(sessionid)
-  local bufnr = get_conversation_buffer(sessionid)
-  local render_state = get_render_state(sessionid)
-  ui_render.render_conversation(bufnr, conv, render_state)
-  for _,winid in pairs(vim.api.nvim_list_wins()) do
-    if does_follow_conversation(sessionid, winid) then
-      ui_conversation.follow(bufnr, winid)
-    end
-  end
 end
 
 ---@param sessionid FacileLLM.SessionId
@@ -475,10 +477,7 @@ end
 local add_message = function (sessionid, role, lines)
   ui_recent.touch(sessionid)
   session.add_message(sessionid, role, lines)
-  vim.schedule(
-    function ()
-      render_conversation(sessionid)
-    end)
+  render_conversation(sessionid)
 end
 
 ---@param sessionid FacileLLM.SessionId
@@ -702,8 +701,7 @@ local create = function (provider_config)
   set_buf_autocmds(sessionid)
   set_buf_keymaps(sessionid)
 
-  local conv = session.get_conversation(sessionid)
-  ui_render.render_conversation(sess.conv_bufnr, conv, sess.render_state)
+  render_conversation(sessionid)
 
   return sessionid
 end

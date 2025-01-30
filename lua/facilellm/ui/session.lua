@@ -490,7 +490,36 @@ local append_conversation = function (sessionid, conversation)
 end
 
 ---@param sessionid FacileLLM.SessionId
----@param response_callback function?(): nil
+---@param lines string[]
+---@return nil
+local set_registers = function (sessionid, lines)
+  local provider_config = session.get_provider_config(sessionid)
+
+  for _,reg in ipairs(provider_config.registers) do
+    local ppresult
+    if reg.postprocess then
+      ppresult = reg.postprocess(lines)
+    else
+      ppresult = table.concat(lines, "\n")
+    end
+    if type(ppresult) == "string" then
+      if string.len(ppresult) ~= 0 then
+        local regname = string.sub(reg.names, 1,1)
+        vim.fn.setreg(regname, ppresult, "l")
+      end
+    elseif type(ppresult) == "table" then
+      for tx,text in ipairs(ppresult) do
+        if string.len(text) ~= 0 then
+          local regname = string.sub(reg.names, tx,tx)
+          vim.fn.setreg(regname, text, "l")
+        end
+      end
+    end
+  end
+end
+
+---@param sessionid FacileLLM.SessionId
+---@param response_callback function?(string[]): nil
 ---@return nil
 local on_complete_query = function (sessionid, response_callback)
   local bufnr = get_conversation_buffer(sessionid)
@@ -500,33 +529,7 @@ local on_complete_query = function (sessionid, response_callback)
 
   local msg = session.get_last_llm_message(sessionid)
   if msg then
-    local provider_config = session.get_provider_config(sessionid)
-    for _,reg in ipairs(provider_config.registers) do
-      print("register ", vim.inspect(reg))
-      local ppresult
-      if reg.postprocess then
-         ppresult = reg.postprocess(msg.lines)
-      else
-         ppresult = table.concat(msg.lines, "\n")
-      end
-      print("postprocess result ", vim.inspect(ppresult))
-      if type(ppresult) == "string" then
-        if string.len(ppresult) ~= 0 then
-          local regname = string.sub(reg.names, 1,1)
-          print("register set ", regname, vim.inspect(ppresult))
-          vim.fn.setreg(regname, ppresult, "l")
-        end
-      elseif type(ppresult) == "table" then
-        for tx,text in ipairs(ppresult) do
-          if string.len(text) ~= 0 then
-            local regname = string.sub(reg.names, tx,tx)
-            print("register set ", regname, vim.inspect(text))
-            vim.fn.setreg(regname, text, "l")
-          end
-        end
-      end
-    end
-
+    set_registers(sessionid, msg.lines)
     if response_callback then
       response_callback(msg.lines)
     end
@@ -534,7 +537,7 @@ local on_complete_query = function (sessionid, response_callback)
 end
 
 ---@param sessionid FacileLLM.SessionId
----@param response_callback function?(): nil
+---@param response_callback function?(string[]): nil
 ---@return nil
 local query = function (sessionid, response_callback)
   ui_recent.touch(sessionid)
@@ -554,7 +557,7 @@ end
 
 ---@param sessionid FacileLLM.SessionId
 ---@param lines string[]
----@param response_callback function?(): nil
+---@param response_callback function?(string[]): nil
 ---@return nil
 local add_input_message_and_query = function (sessionid, lines, response_callback)
   if session.get_provider_config(sessionid).autoclear then

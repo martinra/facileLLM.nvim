@@ -15,6 +15,9 @@ local delete = function (sessionid)
   if recent_sessionid == sessionid then
     recent_sessionid = nil
   end
+  if recent_completion_sessionid == sessionid then
+    recent_completion_sessionid = nil
+  end
 end
 
 ---@param sessionid FacileLLM.SessionId

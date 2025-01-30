@@ -6,10 +6,6 @@
 ---@field cursor_position_tag string
 ---@field filetype_tag string
 
----@class FacileLLM.Template.RegisterTags
----@field begin_tag string
----@field end_tag string
-
 
 ---@param winid WinId
 ---@param context_size integer?

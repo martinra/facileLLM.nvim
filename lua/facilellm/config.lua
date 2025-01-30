@@ -210,14 +210,10 @@ local autostart_sessions = function (providers)
   local ui_session = require("facilellm.ui.session")
   local ui_recent = require("facilellm.ui.recent_session")
 
-  local touched = false
   for _,provider in ipairs(providers) do
     if provider.autostart then
       local sess = ui_session.create(provider)
-      if not touched then
-        ui_recent.touch(sess)
-        touched = true
-      end
+      ui_recent.touch(sess)
     end
   end
 end

@@ -103,7 +103,7 @@ local util = require("facilellm.util")
 
 ---@return nil
 local set_highlights = function ()
-  vim.api.nvim_set_hl(0, "FacileLLMRole", {link = "markdownH1", default = true})
+  vim.api.nvim_set_hl(0, "FacileLLMRole", {link = "Title", default = true})
   vim.api.nvim_set_hl(0, "FacileLLMMsgReceiving", {link = "DiffAdd", default = true})
   vim.api.nvim_set_hl(0, "FacileLLMMsgPruned", {link = "DiffDelete", default = true})
 end

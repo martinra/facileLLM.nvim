@@ -97,7 +97,6 @@
 ---@field postprocess function?(FacileLLM.Message): (nil | string | string[])
 
 
-local ui_recent = require("facilellm.ui.recent_session")
 local util = require("facilellm.util")
 
 
@@ -203,6 +202,8 @@ end
 ---@return nil
 local autostart_sessions = function (providers)
   local ui_session = require("facilellm.ui.session")
+  local ui_recent = require("facilellm.ui.recent_session")
+
   local touched = false
   for _,provider in ipairs(providers) do
     if provider.autostart then

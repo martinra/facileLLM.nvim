@@ -12,7 +12,6 @@
 local config = require("facilellm.config")
 local conversation = require("facilellm.session.conversation")
 local provider = require("facilellm.provider")
-local message = require("facilellm.session.message")
 local util = require("facilellm.util")
 
 
@@ -240,86 +239,31 @@ local unlock_conversation = function (sessionid)
 end
 
 ---@param sessionid FacileLLM.SessionId
----@param instruction ("delete"| "preserve"| "combine")
----@param context ("delete"| "preserve"| "combine")
----@param example ("delete"| "preserve"| "combine")
 ---@return boolean
-local clear = function (sessionid, instruction, context, example)
+local clear_conversation = function (sessionid)
   if is_conversation_locked(sessionid) and config.opts.feedback.conversation_lock.warn_on_clear then
     vim.notify("clearing conversation despite lock", vim.log.levels.WARN)
     return false
   end
 
-  if instruction == "delete" and context == "delete" and example == "delete" then
-    sessions[sessionid].conversation = {}
-    return true
-  end
+  sessions[sessionid].conversation = {}
 
-  if instruction == "preserve" and context == "preserve" and example == "preserve" then
-    local conv = {}
-    for _,msg in ipairs(sessions[sessionid].conversation) do
-      if msg.role == "Instruction" or msg.role == "Context" or msg.role == "Example" then
-        table.insert(conv, msg)
-      end
-    end
-    sessions[sessionid].conversation = conversation.create(conv)
-    return true
-  end
+  return true
+end
 
-  local instruction_msgs = {}
-  if instruction == "combine" then
-    instruction_msgs[1] = message.create("Context")
-  end
-  local context_msgs = {}
-  if context == "combine" then
-    context_msgs[1] = message.create("Instruction")
-  end
-  local example_msgs = {}
-  if context == "combine" then
-    example_msgs[1] = message.create("Example")
-  end
-
-  for _,msg in ipairs(sessions[sessionid].conversation) do
-    if msg.role == "Instruction" then
-      if instruction == "preserve" then
-        table.insert(context_msgs, msg)
-      elseif instruction == "combine" then
-        message.append_lines(instruction_msgs[1], msg.lines)
-      end
-    elseif msg.role == "Context" then
-      if context == "preserve" then
-        table.insert(context_msgs, msg)
-      elseif context == "combine" then
-        message.append_lines(context_msgs[1], msg.lines)
-      end
-    elseif msg.role == "Example" then
-      if context == "preserve" then
-        table.insert(example_msgs, msg)
-      elseif context == "combine" then
-        message.append_lines(example_msgs[1], msg.lines)
-      end
-    end
-  end
-
-  if instruction == "combine" and message.isempty(instruction_msgs[1]) then
-    instruction_msgs[1] = nil
-  end
-  if context == "combine" and message.isempty(context_msgs[1]) then
-    context_msgs[1] = nil
-  end
-  if example == "combine" and message.isempty(example_msgs[1]) then
-    example_msgs[1] = nil
+---@param sessionid FacileLLM.SessionId
+---@return boolean
+local clear_interaction = function (sessionid)
+  if is_conversation_locked(sessionid) and config.opts.feedback.conversation_lock.warn_on_clear then
+    vim.notify("clearing conversation despite lock", vim.log.levels.WARN)
+    return false
   end
 
   local conv = {}
-  for _,msg in ipairs(instruction_msgs) do
-    table.insert(conv, msg)
-  end
-  for _,msg in ipairs(context_msgs) do
-    table.insert(conv, msg)
-  end
-  for _,msg in ipairs(example_msgs) do
-    table.insert(conv, msg)
+  for _,msg in ipairs(sessions[sessionid].conversation) do
+    if msg.preserve or msg.preserve == nil and (msg.role == "Instruction" or msg.role == "Context" or msg.role == "Example") then
+      table.insert(conv, msg)
+    end
   end
   sessions[sessionid].conversation = conversation.create(conv)
 
@@ -389,6 +333,7 @@ return {
   is_conversation_locked = is_conversation_locked,
   lock_conversation      = lock_conversation,
   unlock_conversation    = unlock_conversation,
-  clear                  = clear,
+  clear_conversation     = clear_conversation,
+  clear_interaction      = clear_interaction,
   query_provider         = query_provider,
 }

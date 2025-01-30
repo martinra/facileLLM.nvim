@@ -10,7 +10,8 @@
 ---@field role FacileLLM.MsgRole
 ---@field lines string[]
 ---@field status FacileLLM.MsgStatus
----@field cache boolean
+---@field preserve boolean?
+---@field cache boolean?
 
 
 ---@param role FacileLLM.MsgRole
@@ -24,6 +25,7 @@ local create = function (role, content)
     lines = content
   end
 
+  local preserve = role == "Instruction" or role == "Context" or role == "Example"
   local cache = role == "Instruction" or role == "Context" or role == "Example"
 
   ---@type FacileLLM.Message
@@ -31,6 +33,7 @@ local create = function (role, content)
     role = role,
     lines = lines,
     status = nil,
+    preserve = preserve,
     cache = cache,
   }
   return msg

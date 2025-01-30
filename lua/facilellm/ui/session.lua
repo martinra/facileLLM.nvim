@@ -262,12 +262,9 @@ local render_conversation = function (sessionid)
 end
 
 ---@param sessionid FacileLLM.SessionId
----@param instruction ("delete"| "preserve"| "combine")
----@param context ("delete"| "preserve"| "combine")
----@param example ("delete"| "preserve"| "combine")
 ---@return nil
-local clear = function (sessionid, instruction, context, example)
-  if not session.clear(sessionid, instruction, context, example) then
+local clear_conversation = function (sessionid)
+  if not session.clear_conversation(sessionid) then
     return
   end
   local conv_bufnr = get_conversation_buffer(sessionid)
@@ -278,14 +275,14 @@ end
 
 ---@param sessionid FacileLLM.SessionId
 ---@return nil
-local clear_conversation = function (sessionid)
-  clear(sessionid, "delete", "delete", "delete")
-end
-
----@param sessionid FacileLLM.SessionId
----@return nil
 local clear_interaction = function (sessionid)
-  clear(sessionid, "preserve", "preserve", "preserve")
+  if not session.clear_interaction(sessionid) then
+    return
+  end
+  local conv_bufnr = get_conversation_buffer(sessionid)
+  local render_state = get_render_state(sessionid)
+  ui_render.clear_conversation(conv_bufnr, render_state)
+  render_conversation(sessionid)
 end
 
 ---@param sessionid FacileLLM.SessionId
@@ -733,7 +730,6 @@ return {
   set_current_win_conversation_input = set_current_win_conversation_input,
   set_current_win_conversation       = set_current_win_conversation,
   set_current_win_input              = set_current_win_input,
-  clear                              = clear,
   clear_conversation                 = clear_conversation,
   clear_interaction                  = clear_interaction,
   render_conversation                = render_conversation,

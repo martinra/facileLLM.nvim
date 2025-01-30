@@ -14,6 +14,12 @@
 ---@field cache boolean?
 
 
+---@param role string
+---@return boolean
+local is_general_instruction_role = function (role)
+  return role == "Instruction" or role == "Context" or role == "Example"
+end
+
 ---@param role FacileLLM.MsgRole
 ---@param content nil | string | string[]
 ---@return FacileLLM.Message
@@ -25,16 +31,13 @@ local create = function (role, content)
     lines = content
   end
 
-  local preserve = role == "Instruction" or role == "Context" or role == "Example"
-  local cache = role == "Instruction" or role == "Context" or role == "Example"
-
   ---@type FacileLLM.Message
   local msg = {
     role = role,
     lines = lines,
     status = nil,
-    preserve = preserve,
-    cache = cache,
+    preserve = is_general_instruction_role(role),
+    cache = is_general_instruction_role(role),
   }
   return msg
 end
@@ -104,6 +107,7 @@ end
 
 
 return {
+  is_general_instruction_role = is_general_instruction_role,
   create       = create,
   isempty      = isempty,
   ispruned     = ispruned,

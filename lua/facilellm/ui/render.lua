@@ -323,7 +323,7 @@ local render_conversation = function (bufnr, conv, render_state)
         set_highlight_pruned(bufnr, mx, msg, render_state)
       end
 
-      if msg.role == "Instruction" or msg.role == "Context" or msg.role == "Example" then
+      if message.is_general_instruction_role(msg.role) then
         workaround_fold = true
       end
     end

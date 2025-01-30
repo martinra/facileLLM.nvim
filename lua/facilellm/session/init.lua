@@ -11,6 +11,7 @@
 
 local config = require("facilellm.config")
 local conversation = require("facilellm.session.conversation")
+local message = require("facilellm.session.message")
 local provider = require("facilellm.provider")
 local util = require("facilellm.util")
 
@@ -261,7 +262,7 @@ local clear_interaction = function (sessionid)
 
   local conv = {}
   for _,msg in ipairs(sessions[sessionid].conversation) do
-    if msg.preserve or msg.preserve == nil and (msg.role == "Instruction" or msg.role == "Context" or msg.role == "Example") then
+    if msg.preserve or msg.preserve == nil and message.is_general_instruction_role(msg.role) then
       table.insert(conv, msg)
     end
   end

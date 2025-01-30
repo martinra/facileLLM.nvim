@@ -1,8 +1,12 @@
+local session = require("facilellm.session")
 local ui_common = require("facilellm.ui.common")
 
 
 ---@type FacileLLM.SessionId?
 local recent_sessionid = nil
+
+---@type FacileLLM.SessionId?
+local recent_completion_sessionid = nil
 
 
 ---@param sessionid FacileLLM.SessionId
@@ -17,6 +21,11 @@ end
 ---@return nil
 local touch = function (sessionid)
   recent_sessionid = sessionid
+
+  local provider_config = session.get_provider_config(sessionid)
+  if provider_config and provider_config.completion_tags then
+    recent_completion_sessionid = sessionid
+  end
 end
 
 ---@param winid WinId
@@ -35,10 +44,15 @@ local get_most_recent = function ()
   return recent_sessionid
 end
 
+---@return FacileLLM.SessionId?
+local get_most_recent_completion = function ()
+  return recent_completion_sessionid
+end
 
 return {
   delete = delete,
   touch = touch,
   touch_window = touch_window,
   get_most_recent = get_most_recent,
+  get_most_recent_completion = get_most_recent_completion,
 }

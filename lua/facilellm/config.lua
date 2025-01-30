@@ -13,6 +13,7 @@
 ---@field opts table Options that are forwarded to the implementation.
 ---@field conversation FacileLLM.ConversationName | FacileLLM.Conversation
 ---@field registers FacileLLM.Config.Register[]
+---@field completion_tags FacileLLM.Config.CompletionTags?
 ---@field autostart boolean
 ---@field autoclear boolean
 
@@ -95,6 +96,11 @@
 ---@class FacileLLM.Config.Register
 ---@field names string
 ---@field postprocess function?(FacileLLM.Message): (nil | string | string[])
+
+---@class FacileLLM.Config.CompletionTags
+---@field context_tags FacileLLM.Template.ContextTags
+---@field completion_begin_tag string
+---@field completion_end_tag string
 
 
 local util = require("facilellm.util")
@@ -414,6 +420,22 @@ local validate_registers = function (registers)
   end
 end
 
+---@param tags table
+---@return nil
+local validate_completion_tags = function (tags)
+  vim.validate({
+    context_tags         = {tags.context_tags,         "t", true},
+    completion_begin_tag = {tags.completion_begin_tag, "s", true},
+    completion_end_tag   = {tags.completion_end_tag,   "s", true},
+  })
+  vim.validate({
+    before_cursor_tag   = {tags.context_tags.before_cursor_tag,   "s", true},
+    after_cursor_tag    = {tags.context_tags.after_cursor_tag,    "s", true},
+    cursor_position_tag = {tags.context_tags.cursor_position_tag, "s", true},
+    filetype_tag        = {tags.context_tags.filetype_tag,        "s", true},
+  })
+end
+
 ---@param provider table
 ---@return nil
 local validate_provider_config = function (provider)
@@ -421,13 +443,14 @@ local validate_provider_config = function (provider)
     provider       = {provider, "t", false}
   })
   vim.validate({
-    name           = {provider.name,           "s",        true},
-    implementation = {provider.implementation, {"s", "t"}, false},
-    opts           = {provider.opts,           "t",        true},
-    conversation   = {provider.conversation,   {"s", "t"}, true},
-    registers      = {provider.registers,      "t",        true},
-    autostart      = {provider.autostart,      "b",        true},
-    autoclear      = {provider.autoclear,      "b",        true},
+    name            = {provider.name,            "s",        true},
+    implementation  = {provider.implementation,  {"s", "t"}, false},
+    opts            = {provider.opts,            "t",        true},
+    conversation    = {provider.conversation,    {"s", "t"}, true},
+    registers       = {provider.registers,       "t",        true},
+    completion_tags = {provider.completion_tags, "t",        true},
+    autostart       = {provider.autostart,       "b",        true},
+    autoclear       = {provider.autoclear,       "b",        true},
   })
   if provider.implementation and type(provider.implementation) == "table" then
     validate_implementation(provider.implementation)
@@ -437,6 +460,9 @@ local validate_provider_config = function (provider)
   end
   if provider.registers then
     validate_registers(provider.registers)
+  end
+  if provider.completion_tags then
+    validate_completion_tags(provider.completion_tags)
   end
 end
 

@@ -12,6 +12,7 @@
 ---@field mark integer
 
 
+local blink_cmp_callback = require("facilellm.ui.blink_cmp.callback")
 local config = require("facilellm.config")
 local message = require("facilellm.session.message")
 local session = require("facilellm.session")
@@ -530,6 +531,7 @@ local on_complete_query = function (sessionid, response_callback)
   local msg = session.get_last_llm_message(sessionid)
   if msg then
     set_registers(sessionid, msg.lines)
+    blink_cmp_callback.set_completions(sessionid, msg.lines)
     if response_callback then
       response_callback(msg.lines)
     end

@@ -35,10 +35,11 @@ function src:get_completions (ctx, cb)
     return
   end
   ---@cast completion_tags FacileLLM.Config.CompletionTags
+  local context_tags = completion_tags.context_tags
 
   ui_session.clear_interaction(sessionid)
   ui_session.append_conversation(sessionid,
-    template.template_filetype_and_context(0, completion_tags.context_tags)
+    template.template_filetype_and_context(0, context_tags)
   )
 
   callback.activate(sessionid, cb)

@@ -420,16 +420,21 @@ end
 ---@return nil
 local validate_completion_tags = function (tags)
   vim.validate({
-    context_tags         = {tags.context_tags,         "t", true},
-    completion_begin_tag = {tags.completion_begin_tag, "s", true},
-    completion_end_tag   = {tags.completion_end_tag,   "s", true},
+    context_tags         = {tags.context_tags,         "t", false},
+    completion_begin_tag = {tags.completion_begin_tag, "s", false},
+    completion_end_tag   = {tags.completion_end_tag,   "s", false},
   })
   vim.validate({
-    before_cursor_tag   = {tags.context_tags.before_cursor_tag,   "s", true},
-    after_cursor_tag    = {tags.context_tags.after_cursor_tag,    "s", true},
-    cursor_position_tag = {tags.context_tags.cursor_position_tag, "s", true},
-    filetype_tag        = {tags.context_tags.filetype_tag,        "s", true},
+    size                = {tags.context_tags.size,                "n", true},
+    before_cursor_tag   = {tags.context_tags.before_cursor_tag,   "s", false},
+    cursor_position_tag = {tags.context_tags.cursor_position_tag, "s", false},
+    after_cursor_tag    = {tags.context_tags.after_cursor_tag,    "s", false},
+    reverse             = {tags.context_tags.reverse,             "b", false},
+    filetype_tag        = {tags.context_tags.filetype_tag,        "s", false},
   })
+  if tags.context_tags.size and tags.context_tags.size <= 0 then
+    error("invalid context size " .. tags.context_tags.size)
+  end
 end
 
 ---@param provider table
@@ -589,7 +594,7 @@ local validate_facilellm_config = function (opts)
   })
   vim.validate({
     -- default_provider validated when validating providers
-    providers         = {opts.providers,            "t", true},
+    providers         = {opts.providers,         "t", true},
     conversations     = {opts.conversations,     "t", true},
     conversations_csv = {opts.conversations_csv, "s", true},
     naming            = {opts.naming,            "t", true},

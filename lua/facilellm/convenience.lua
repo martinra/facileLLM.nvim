@@ -1,6 +1,7 @@
 local config = require("facilellm.config")
 local provider = require("facilellm.provider")
 local session = require("facilellm.session")
+local ui_recent = require("facilellm.ui.recent_session")
 local ui_select = require("facilellm.ui.select_session")
 local ui_session = require("facilellm.ui.session")
 local util = require("facilellm.util")
@@ -118,7 +119,7 @@ end
 ---@param sessionid FacileLLM.SessionId?
 ---@return nil
 local show = function (sessionid)
-  sessionid = sessionid or ui_select.get_most_recent()
+  sessionid = sessionid or ui_recent.get_most_recent()
   sessionid = sessionid or session.get_some_session()
   sessionid = sessionid or create_from_provider()
 
@@ -128,7 +129,7 @@ end
 ---@param sessionid FacileLLM.SessionId?
 ---@return nil
 local focus = function (sessionid)
-  sessionid = sessionid or ui_select.get_most_recent()
+  sessionid = sessionid or ui_recent.get_most_recent()
   sessionid = sessionid or session.get_some_session()
   if not sessionid then
     return
@@ -151,7 +152,7 @@ end
 
 ---@return nil
 local add_visual_as_input_and_query = function ()
-  local sessionid = ui_select.get_most_recent()
+  local sessionid = ui_recent.get_most_recent()
   if not sessionid then
     return
   end
@@ -164,7 +165,7 @@ end
 
 ---@return nil
 local add_visual_as_instruction = function ()
-  local sessionid = ui_select.get_most_recent()
+  local sessionid = ui_recent.get_most_recent()
   if not sessionid then
     return
   end
@@ -177,7 +178,7 @@ end
 
 ---@return nil
 local add_visual_as_context = function ()
-  local sessionid = ui_select.get_most_recent()
+  local sessionid = ui_recent.get_most_recent()
   if not sessionid then
     return
   end
@@ -190,7 +191,7 @@ end
 
 ---@return nil
 local add_visual_as_example = function ()
-  local sessionid = ui_select.get_most_recent()
+  local sessionid = ui_recent.get_most_recent()
   if not sessionid then
     return
   end
@@ -203,7 +204,7 @@ end
 
 ---@return nil
 local add_line_as_input_and_query = function ()
-  local sessionid = ui_select.get_most_recent()
+  local sessionid = ui_recent.get_most_recent()
   if not sessionid then
     return
   end
@@ -222,7 +223,7 @@ end
 ---@param method ("substitute"| "append"| "prepend")
 ---@return nil
 local add_visual_as_input_query_and_insert = function (method)
-  local sessionid = ui_select.get_most_recent()
+  local sessionid = ui_recent.get_most_recent()
   if not sessionid then
     return
   end
@@ -276,7 +277,7 @@ end
 ---@param method ("substitute"| "append"| "prepend")
 ---@return nil
 local add_line_as_input_query_and_insert = function (method)
-  local sessionid = ui_select.get_most_recent()
+  local sessionid = ui_recent.get_most_recent()
   if not sessionid then
     return
   end

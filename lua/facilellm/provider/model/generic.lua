@@ -11,8 +11,16 @@ local expand_file_context = function (lines)
       goto continue_line
     end
 
-    local cmd = ""
-    for _, chunk in ipairs(vim.split(line, "%s+")) do
+    -- Skip if not an fd command
+    if string.sub(line, 1, 3) ~= "fd " then
+      goto continue_line
+    end
+
+    local cmd = "fd"
+    local chunks = vim.split(line, "%s+")
+    -- Skip the initial "fd" command
+    for i = 2, #chunks do
+      local chunk = chunks[i]
       if string.sub(chunk, 1, 1) ~= "-" or
         chunk == "-H" or chunk == "--hidden" or
         chunk == "-I" or chunk == "--no-ignore" or

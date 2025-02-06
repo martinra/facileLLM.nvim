@@ -1,3 +1,8 @@
+--- Convenience functions for FacileLLM
+--- Provides high-level functions for common operations like creating sessions,
+--- managing providers, and handling visual/line selections for LLM interactions.
+---@module 'facilellm.convenience'
+
 local config = require("facilellm.config")
 local provider = require("facilellm.provider")
 local session = require("facilellm.session")
@@ -7,6 +12,12 @@ local ui_session = require("facilellm.ui.session")
 local util = require("facilellm.util")
 
 
+--- Opens a selection UI to choose the default provider from configured providers
+--- Uses the current visual selection as input and queries the LLM
+--- Uses the current visual selection as an instruction message
+--- Uses the current visual selection as context message
+--- Uses the current visual selection as an example message
+--- Uses the current line as input and queries the LLM
 ---@return nil
 local select_default_provider = function ()
   ui_select.select_provider(config.opts.providers,
@@ -17,14 +28,16 @@ local select_default_provider = function ()
   )
 end
 
----@param provider_config? FacileLLM.Config.Provider
----@return FacileLLM.SessionId
+--- Creates a new session from a provider configuration
+---@param provider_config? FacileLLM.Config.Provider The provider configuration to use, or default if nil
+---@return FacileLLM.SessionId The ID of the newly created session
 local create_from_provider = function (provider_config)
   provider_config = provider_config or provider.get_default_provider_config()
   return ui_session.create(provider_config)
 end
 
----@params opts table? options passed through to telescope
+--- Opens a selection UI to create a new session from available providers
+---@param opts table? Options passed through to telescope
 ---@return nil
 local create_from_provider_selection = function (opts)
   ui_select.select_provider(config.opts.providers,
@@ -37,7 +50,8 @@ local create_from_provider_selection = function (opts)
   )
 end
 
----@params opts table? options passed through to telescope
+--- Opens a selection UI to create a new session with a predefined conversation
+---@param opts table? Options passed through to telescope
 ---@return nil
 local create_from_conversation_selection = function (opts)
   ui_select.select_conversation(config.opts.conversations,
@@ -53,7 +67,8 @@ local create_from_conversation_selection = function (opts)
   )
 end
 
----@params opts table? options passed through to telescope
+--- Opens a selection UI to create a new session by selecting both provider and conversation
+---@param opts table? Options passed through to telescope
 ---@return nil
 local create_from_provider_conversation_selection = function (opts)
   ui_select.select_provider(config.opts.providers,
@@ -73,7 +88,8 @@ local create_from_provider_conversation_selection = function (opts)
   )
 end
 
----@params opts table? options passed through to telescope
+--- Opens a selection UI to delete a session
+---@param opts table? Options passed through to telescope
 ---@return nil
 local delete_from_selection = function (opts)
   ui_select.select_session(session.get_session_names(),
@@ -85,7 +101,8 @@ local delete_from_selection = function (opts)
   )
 end
 
----@params opts table? options passed through to telescope
+--- Opens a selection UI to rename a session
+---@param opts table? Options passed through to telescope
 ---@return nil
 local rename_from_selection = function (opts)
   ui_select.select_session(session.get_session_names(),
@@ -97,7 +114,8 @@ local rename_from_selection = function (opts)
   )
 end
 
----@params opts table? options passed through to telescope
+--- Opens a selection UI to change a session's provider
+---@param opts table? Options passed through to telescope
 ---@return nil
 local set_provider_from_selection = function (opts)
   ui_select.select_session(session.get_session_names(),
@@ -116,7 +134,8 @@ local set_provider_from_selection = function (opts)
   )
 end
 
----@param sessionid FacileLLM.SessionId?
+--- Shows a session in the current window, creating one if needed
+---@param sessionid FacileLLM.SessionId? The session to show, or most recent if nil
 ---@return nil
 local show = function (sessionid)
   sessionid = sessionid or ui_recent.get_most_recent()
@@ -126,7 +145,8 @@ local show = function (sessionid)
   ui_session.set_current_win_conversation_input(sessionid)
 end
 
----@param sessionid FacileLLM.SessionId?
+--- Focuses on a specific session window
+---@param sessionid FacileLLM.SessionId? The session to focus, or most recent if nil
 ---@return nil
 local focus = function (sessionid)
   sessionid = sessionid or ui_recent.get_most_recent()
@@ -138,7 +158,8 @@ local focus = function (sessionid)
   ui_session.set_current_win_conversation_input(sessionid)
 end
 
----@params opts table? options passed through to telescope
+--- Opens a selection UI to focus on a specific session
+---@param opts table? Options passed through to telescope
 ---@return nil
 local focus_from_selection = function (opts)
   ui_select.select_session(session.get_session_names(),
@@ -216,11 +237,10 @@ local add_line_as_input_and_query = function ()
   end
 end
 
--- Use the visual line selection as input. Depending on the value of method
--- * substitute the selection by the LLM output,
--- * append the LLM output after the selection, or
--- * prepend the LLM output before the selection.
----@param method ("substitute"| "append"| "prepend")
+--- Uses the visual line selection as input and inserts the LLM response
+--- The response can either substitute the selection, be appended after it,
+--- or be prepended before it.
+---@param method ("substitute"| "append"| "prepend") How to insert the LLM response
 ---@return nil
 local add_visual_as_input_query_and_insert = function (method)
   local sessionid = ui_recent.get_most_recent()
@@ -270,11 +290,10 @@ local add_visual_as_input_query_and_insert = function (method)
   ui_session.add_input_message_query_and_insert(sessionid, lines)
 end
 
--- In normal mode use current line as input. Depending on the value of method
--- * substitute the current line by the LLM output,
--- * append the LLM output after the current line, or
--- * prepend the LLM output before the current line.
----@param method ("substitute"| "append"| "prepend")
+--- Uses the current line as input in normal mode and inserts the LLM response
+--- The response can either substitute the line, be appended after it,
+--- or be prepended before it.
+---@param method ("substitute"| "append"| "prepend") How to insert the LLM response
 ---@return nil
 local add_line_as_input_query_and_insert = function (method)
   local sessionid = ui_recent.get_most_recent()

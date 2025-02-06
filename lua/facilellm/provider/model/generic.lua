@@ -11,11 +11,6 @@ local expand_file_context = function (lines)
       goto continue_line
     end
 
-    -- Skip if not an fd command
-    if string.sub(line, 1, 3) ~= "fd " then
-      goto continue_line
-    end
-
     local cmd = "fd"
     local chunks = vim.split(line, "%s+")
     -- Skip the initial "fd" command

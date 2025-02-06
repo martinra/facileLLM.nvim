@@ -1,6 +1,7 @@
 -- Prompt conversion for LLama3
 
 
+local generic = require("facilellm.provider.model.generic")
 local message = require("facilellm.session.message")
 
 
@@ -24,6 +25,7 @@ local convert_msg_to_llama = function (msg)
   end
   prompt = prompt .. "<|end_header_id|>\n\n"
 
+  prompt = prompt .. generic.convert_msg_minimal_roles(msg)
   if msg.role == "Context" then
     prompt = prompt .. "The conversation will be based on the following context:\n"
   elseif msg.role == "Example" then
@@ -35,10 +37,11 @@ local convert_msg_to_llama = function (msg)
 end
 
 ---@param conversation FacileLLM.Conversation
----@param params table?
+---@param opts table?
 ---@return table
-local convert_conv_to_llama = function (conversation, params)
-  params = params or {}
+local convert_conv_to_llama = function (conversation, opts)
+  opts = opts or {}
+  params = opts.params or {}
 
   local prompt = "<|begin_of_text|>"
   for _,msg in ipairs(conversation) do

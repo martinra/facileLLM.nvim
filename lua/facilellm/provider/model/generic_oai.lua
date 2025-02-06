@@ -1,3 +1,4 @@
+local generic = require("facilellm.provider.model.generic")
 local message = require("facilellm.session.message")
 
 
@@ -29,35 +30,23 @@ local convert_role_to_oai = function (role)
 end
 
 ---@param msg FacileLLM.Message
+---@param opts table?
 ---@return FacileLLM.API.OpenAI.Message
-local convert_msg_to_oai = function (msg)
-  local msg_oai = {
+local convert_msg_to_oai = function (msg, opts)
+  return {
     role = convert_role_to_oai(msg.role),
-    content = table.concat(msg.lines, "\n"),
+    content = generic.convert_msg_minimal_roles(msg, opts)
   }
-  if msg.role == "Context" then
-    msg_oai.content =
-      "The conversation will be based on the following context:\n" ..
-      '"""\n' ..
-      msg_oai.content .. "\n" ..
-      '"""'
-    elseif msg.role == "Example" then
-    msg_oai.content =
-      "This is an example of how you should respond:\n" ..
-      '"""\n' ..
-      msg_oai.content .. "\n" ..
-      '"""'
-  end
-  return msg_oai
 end
 
 ---@param conversation FacileLLM.Conversation
+---@param opts table?
 ---@return FacileLLM.API.OpenAI.Message[]
-local convert_conv_to_oai = function (conversation)
+local convert_conv_to_oai = function (conversation, opts)
   local oai_messages = {}
   for _,msg in ipairs(conversation) do
     if not message.isempty(msg) and not message.ispruned(msg) then
-      table.insert(oai_messages, convert_msg_to_oai(msg))
+      table.insert(oai_messages, convert_msg_to_oai(msg, opts))
     end
   end
   return oai_messages

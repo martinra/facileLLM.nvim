@@ -113,7 +113,7 @@ local response_to = function (conversation, add_message, on_complete, opts)
   local data = util.deep_copy_values(opts.params)
   data.stream = true
   data.model = opts.openai_model
-  data.messages = opts.prompt_conversion.convert_conv_to_oai(conversation)
+  data.messages = opts.prompt_conversion.convert_conv_to_oai(conversation, opts)
 
   ---@diagnostic disable-next-line missing-fields
   local curl_job = job:new({

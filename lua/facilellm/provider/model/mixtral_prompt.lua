@@ -1,6 +1,7 @@
 -- Prompt conversion for MistralAI
 
 
+local generic = require("facilellm.provider.model.generic")
 local message = require("facilellm.session.message")
 
 
@@ -15,13 +16,7 @@ local convert_msg_to_mixtral = function (msg)
     prompt = prompt .. " [/INST] "
   end
 
-  if msg.role == "Instruction" then
-    prompt = prompt .. "During the conversation follow this instruction:\n\"\"\""
-  elseif msg.role == "Context" then
-    prompt = prompt .. "The conversation will be based on the following context:\n\"\"\""
-  elseif msg.role == "Example" then
-    prompt = prompt .. "This is an example of how you should respond:\n\"\"\""
-  end
+  prompt = prompt .. generic.convert_msg_minimal_roles(msg)
 
   prompt = prompt .. content
   if msg.role == "Instruction" or
@@ -39,10 +34,11 @@ local convert_msg_to_mixtral = function (msg)
 end
 
 ---@param conversation FacileLLM.Conversation
----@param params table?
+---@param opts table?
 ---@return table
-local convert_conv_to_mixtral = function (conversation, params)
-  params = params or {}
+local convert_conv_to_mixtral = function (conversation, opts)
+  opts = opts or {}
+  params = opts.params or {}
 
   local prompt = "<s> [INST] "
   for _,msg in ipairs(conversation) do

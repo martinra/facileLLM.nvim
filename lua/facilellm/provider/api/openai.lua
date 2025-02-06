@@ -12,26 +12,6 @@ local provider_util = require("facilellm.provider.util")
 local util = require("facilellm.util")
 
 
-local log = require("structlog")
-log.configure({
-  facilellm_openai = {
-    pipelines = {
-      {
-        level = log.level.INFO,
-        processors = {
-          log.processors.Timestamper("%H:%M:%S"),
-        },
-        formatter = log.formatters.Format(
-          "%s [%s] %s: %-30s",
-          { "timestamp", "level", "logger_name", "msg" }
-        ),
-        sink = log.sinks.File("./facilellm_openai.log"),
-      },
-    },
-  },
-})
-
-
 ---@param stdout_record FacileLLM.API.OpenAI.StdOutRecord
 ---@param data string
 local append_to_stdout_record = function (stdout_record, data)

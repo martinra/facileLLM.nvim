@@ -6,26 +6,6 @@ local job = require("plenary.job")
 local provider_util = require("facilellm.provider.util")
 
 
-local log = require("structlog")
-log.configure({
-  facilellm_replicate = {
-    pipelines = {
-      {
-        level = log.level.INFO,
-        processors = {
-          log.processors.Timestamper("%H:%M:%S"),
-        },
-        formatter = log.formatters.Format(
-          "%s [%s] %s: %-30s",
-          { "timestamp", "level", "logger_name", "msg" }
-        ),
-        sink = log.sinks.File("./facilellm_replicate.log"),
-      },
-    },
-  },
-})
-
-
 local schedule_prediction = {}
 
 ---@param url string

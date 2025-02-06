@@ -680,9 +680,7 @@ local M = {
 ---@param opts table?
 ---@return nil
 M.setup = function (opts)
-  opts = opts or {}
-  validate_facilellm_config(opts)
-  M.opts = extend_facilellm_config(opts)
+  M.opts = extend_facilellm_config(opts or {})
   validate_facilellm_config(M.opts)
 
   set_highlights()

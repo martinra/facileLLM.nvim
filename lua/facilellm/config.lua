@@ -438,7 +438,6 @@ local validate_completion_tags = function (tags)
     cursor_position_tag = {tags.context_tags.cursor_position_tag, "s", false},
     after_cursor_tag    = {tags.context_tags.after_cursor_tag,    "s", false},
     reverse             = {tags.context_tags.reverse,             "b", false},
-    filetype_tag        = {tags.context_tags.filetype_tag,        "s", false},
   })
   if tags.context_tags.size and tags.context_tags.size <= 0 then
     error("invalid context size " .. tags.context_tags.size)

@@ -6,7 +6,6 @@
 ---@field cursor_position_tag string
 ---@field after_cursor_tag string 
 ---@field reverse boolean
----@field filetype_tag string
 
 
 ---@param winid WinId
@@ -54,15 +53,15 @@ local context_after_cursor = function (winid, context_size)
 end
 
 ---@param winid WinId
----@param tags FacileLLM.Template.ContextTags
+---@param context_tags FacileLLM.Template.ContextTags
+---@param filetype_tag string
 ---@return FacileLLM.Conversation
-local template_filetype_and_context = function (winid, tags)
-  local size = tags.size
-  local before_cursor_tag = tags.before_cursor_tag
-  local cursor_position_tag = tags.cursor_position_tag
-  local after_cursor_tag = tags.after_cursor_tag
-  local reverse = tags.reverse
-  local filetype_tag = tags.filetype_tag
+local template_filetype_and_context = function (winid, context_tags, filetype_tag)
+  local size                = context_tags.size
+  local before_cursor_tag   = context_tags.before_cursor_tag
+  local cursor_position_tag = context_tags.cursor_position_tag
+  local after_cursor_tag    = context_tags.after_cursor_tag
+  local reverse             = context_tags.reverse
 
   local before = context_before_cursor(winid, size)
   local after = context_after_cursor(winid, size)

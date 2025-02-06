@@ -29,8 +29,10 @@ function src:get_completions (ctx, cb)
   end
   ---@cast sessionid FacileLLM.SessionId
 
-  local completion_tags = session.get_provider_config(sessionid).completion_tags
-  if completion_tags == nil then
+  local config = session.get_provider_config(sessionid)
+  local completion_tags = config.completion_tags
+  local filetype_tag = config.filetype_tag
+  if completion_tags == nil or filetype_tag == nil then
     cb()
     return
   end
@@ -39,7 +41,7 @@ function src:get_completions (ctx, cb)
 
   ui_session.clear_interaction(sessionid)
   ui_session.append_conversation(sessionid,
-    template.template_filetype_and_context(0, context_tags)
+    template.template_filetype_and_context(0, context_tags, filetype_tag)
   )
 
   callback.activate(sessionid, cb)

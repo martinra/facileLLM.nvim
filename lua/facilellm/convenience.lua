@@ -172,7 +172,7 @@ local add_visual_as_instruction = function ()
 
   local lines = util.get_visual_selection()
   if lines then
-    ui_session.add_message(sessionid, "Instruction", lines)
+    ui_session.add_instruction_message(sessionid, lines)
   end
 end
 
@@ -185,7 +185,7 @@ local add_visual_as_context = function ()
 
   local lines = util.get_visual_selection()
   if lines then
-    ui_session.add_message(sessionid, "Context", lines)
+    ui_session.add_context_message(sessionid, lines)
   end
 end
 
@@ -198,7 +198,7 @@ local add_visual_as_example = function ()
 
   local lines = util.get_visual_selection()
   if lines then
-    ui_session.add_message(sessionid, "Example", lines)
+    ui_session.add_example_message(sessionid, lines)
   end
 end
 

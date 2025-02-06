@@ -385,19 +385,19 @@ local set_buf_keymaps = function (sessionid)
   if config.opts.interface.keymaps.input_instruction ~= "" then
     ui_input.set_instruction_keymap(input_bufnr,
       "n", config.opts.interface.keymaps.input_instruction, function (lines)
-      ui_session.add_message(sessionid, "Instruction", lines)
+      ui_session.add_instruction_message(sessionid, lines)
     end)
   end
   if config.opts.interface.keymaps.input_context ~= "" then
     ui_input.set_context_keymap(input_bufnr,
       "n", config.opts.interface.keymaps.input_context, function (lines)
-      ui_session.add_message(sessionid, "Context", lines)
+      ui_session.add_context_message(sessionid, lines)
     end)
   end
   if config.opts.interface.keymaps.input_example ~= "" then
     ui_input.set_example_keymap(input_bufnr,
       "n", config.opts.interface.keymaps.input_example, function (lines)
-      ui_session.add_message(sessionid, "Example", lines)
+      ui_session.add_example_message(sessionid, lines)
     end)
   end
 
@@ -469,12 +469,29 @@ local set_buf_keymaps = function (sessionid)
 end
 
 ---@param sessionid FacileLLM.SessionId
----@param role FacileLLM.MsgRole
 ---@param lines string[]
 ---@return nil
-local add_message = function (sessionid, role, lines)
+local add_input_message = function (sessionid, lines)
   ui_recent.touch(sessionid)
-  session.add_message(sessionid, role, lines)
+  session.add_input_message(sessionid, lines)
+  render_conversation(sessionid)
+end
+
+---@param sessionid FacileLLM.SessionId
+---@param lines string[]
+---@return nil
+local add_context_message = function (sessionid, lines)
+  ui_recent.touch(sessionid)
+  session.add_context_message(sessionid, lines)
+  render_conversation(sessionid)
+end
+
+---@param sessionid FacileLLM.SessionId
+---@param lines string[]
+---@return nil
+local add_example_message = function (sessionid, lines)
+  ui_recent.touch(sessionid)
+  session.add_example_message(sessionid, lines)
   render_conversation(sessionid)
 end
 
@@ -565,7 +582,7 @@ local add_input_message_and_query = function (sessionid, lines, response_callbac
   if session.get_provider_config(sessionid).autoclear then
     clear_interaction(sessionid)
   end
-  session.add_message(sessionid, "Input", lines)
+  session.add_input_message(sessionid, lines)
   query(sessionid, response_callback)
 end
 
@@ -738,7 +755,9 @@ return {
   clear_conversation                 = clear_conversation,
   clear_interaction                  = clear_interaction,
   render_conversation                = render_conversation,
-  add_message                        = add_message,
+  add_input_message                  = add_input_message,
+  add_context_message                = add_context_message,
+  add_example_message                = add_example_message,
   append_conversation                = append_conversation,
   query                              = query,
   add_input_message_and_query        = add_input_message_and_query,

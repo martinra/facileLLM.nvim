@@ -207,11 +207,31 @@ local get_last_llm_message = function (sessionid)
 end
 
 ---@param sessionid FacileLLM.SessionId
----@param role FacileLLM.MsgRole
 ---@param content string | string[]
 ---@return nil
-local add_message = function (sessionid, role, content)
-  conversation.add_message(get_conversation(sessionid), role, content)
+local add_llm_message = function (sessionid, content)
+  conversation.add_llm_message(get_conversation(sessionid), content)
+end
+
+---@param sessionid FacileLLM.SessionId
+---@param content string | string[]
+---@return nil
+local add_input_message = function (sessionid, content)
+  conversation.add_input_message(get_conversation(sessionid), content)
+end
+
+---@param sessionid FacileLLM.SessionId
+---@param content string | string[]
+---@return nil
+local add_context_message = function (sessionid, content)
+  conversation.add_context_message(get_conversation(sessionid), content)
+end
+
+---@param sessionid FacileLLM.SessionId
+---@param content string | string[]
+---@return nil
+local add_example_message = function (sessionid, content)
+  conversation.add_example_message(get_conversation(sessionid), content)
 end
 
 ---@param sessionid FacileLLM.SessionId
@@ -291,7 +311,7 @@ local query_provider = function (sessionid, render_conversation, on_complete)
     ---@param content string | string[]
     ---@return nil
     function (content)
-      add_message(sessionid, "LLM", content)
+      add_llm_message(sessionid, content)
       render_conversation(sessionid)
     end)
 
@@ -329,7 +349,10 @@ return {
   get_conversation       = get_conversation,
   get_last_message_with_index = get_last_message_with_index,
   get_last_llm_message   = get_last_llm_message,
-  add_message            = add_message,
+  add_llm_message        = add_llm_message,
+  add_input_message      = add_input_message,
+  add_context_message    = add_context_message,
+  add_example_message    = add_example_message,
   append_conversation    = append_conversation,
   is_conversation_locked = is_conversation_locked,
   lock_conversation      = lock_conversation,

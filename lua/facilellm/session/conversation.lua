@@ -41,12 +41,40 @@ local add_message = function (conversation, role, content)
   end
 end
 
+---@param conversation FacileLLM.Conversation
+---@param content string | string[]
+---@return nil
+local add_llm_message = function (conversation, content)
+  add_message(conversation, "LLM", content)
+end
+
+---@param conversation FacileLLM.Conversation
+---@param content string | string[]
+---@return nil
+local add_input_message = function (conversation, content)
+  add_message(conversation, "Input", content)
+end
+
+---@param conversation FacileLLM.Conversation
+---@param content string | string[]
+---@return nil
+local add_context_message = function (conversation, content)
+  add_message(conversation, "Context", content)
+end
+
+---@param conversation FacileLLM.Conversation
+---@param content string | string[]
+---@return nil
+local add_example_message = function (conversation, content)
+  add_message(conversation, "Example", content)
+end
+
 ---@param conv FacileLLM.Conversation
 ---@param conv_append FacileLLM.Conversation
 ---@return nil
 local append = function (conv, conv_append)
   for _,msg in ipairs(conv_append) do
-    add_message(conv, msg.role, msg.lines)
+    table.insert(conv, msg)
   end
 end
 
@@ -73,10 +101,13 @@ end
 
 
 return {
-  create = create,
-  add_message = add_message,
-  append = append,
+  create                      = create,
+  add_llm_message             = add_llm_message,
+  add_input_message           = add_input_message,
+  add_context_message         = add_context_message,
+  add_example_message         = add_example_message,
+  append                      = append,
   get_last_message_with_index = get_last_message_with_index,
-  get_last_llm_message = get_last_llm_message,
+  get_last_llm_message        = get_last_llm_message,
 }
 

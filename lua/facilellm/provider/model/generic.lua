@@ -61,10 +61,11 @@ end
 local convert_msg_minimal_roles = function (msg, opts)
   if msg.role == "Context" then
     return
-    "The conversation will be based on the following context:\n" ..
+    "Important context for this conversation:\n" ..
     '"""\n' ..
     table.concat(msg.lines, "\n") .. "\n" ..
-    '"""'
+    '"""\n' ..
+    "Use this context to inform your responses. Refer to specific details when relevant."
   elseif msg.role == "FileContext" then
     ---@cast msg FacileLLM.FileContextMessage
     local content = ""
@@ -77,16 +78,18 @@ local convert_msg_minimal_roles = function (msg, opts)
     end
 
     return
-    "The conversation will be based on the content of the following files:\n" ..
+    "Reference the following file contents in your responses:\n" ..
     '"""\n' ..
     content ..
-    '"""'
+    '"""\n' ..
+    "When discussing code, refer to specific files and line numbers where appropriate."
   elseif msg.role == "Example" then
     return
-    "This is an example of how you should respond:\n" ..
+    "Format your responses following this example:\n" ..
     '"""\n' ..
     table.concat(msg.lines, "\n") .. "\n" ..
-    '"""'
+    '"""\n' ..
+    "Match the style, format and level of detail shown in this example."
   else
     return table.concat(msg.lines, "\n")
   end

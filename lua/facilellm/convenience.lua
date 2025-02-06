@@ -12,12 +12,7 @@ local ui_session = require("facilellm.ui.session")
 local util = require("facilellm.util")
 
 
---- Opens a selection UI to choose the default provider from configured providers
---- Uses the current visual selection as input and queries the LLM
---- Uses the current visual selection as an instruction message
---- Uses the current visual selection as context message
---- Uses the current visual selection as an example message
---- Uses the current line as input and queries the LLM
+--- Opens a selection UI to choose the default provider from configured providers.
 ---@return nil
 local select_default_provider = function ()
   ui_select.select_provider(config.opts.providers,
@@ -28,7 +23,7 @@ local select_default_provider = function ()
   )
 end
 
---- Creates a new session from a provider configuration
+--- Creates a new session from a provider configuration.
 ---@param provider_config? FacileLLM.Config.Provider The provider configuration to use, or default if nil
 ---@return FacileLLM.SessionId The ID of the newly created session
 local create_from_provider = function (provider_config)
@@ -36,7 +31,7 @@ local create_from_provider = function (provider_config)
   return ui_session.create(provider_config)
 end
 
---- Opens a selection UI to create a new session from available providers
+--- Opens a selection UI to create a new session from available providers.
 ---@param opts table? Options passed through to telescope
 ---@return nil
 local create_from_provider_selection = function (opts)
@@ -50,7 +45,7 @@ local create_from_provider_selection = function (opts)
   )
 end
 
---- Opens a selection UI to create a new session with a predefined conversation
+--- Opens a selection UI to create a new session from available converstrations, using the default provider.
 ---@param opts table? Options passed through to telescope
 ---@return nil
 local create_from_conversation_selection = function (opts)
@@ -67,7 +62,7 @@ local create_from_conversation_selection = function (opts)
   )
 end
 
---- Opens a selection UI to create a new session by selecting both provider and conversation
+--- Opens a selection UI to create a new session by selecting both provider and conversation separately.
 ---@param opts table? Options passed through to telescope
 ---@return nil
 local create_from_provider_conversation_selection = function (opts)
@@ -88,7 +83,7 @@ local create_from_provider_conversation_selection = function (opts)
   )
 end
 
---- Opens a selection UI to delete a session
+--- Opens a selection UI to delete a session.
 ---@param opts table? Options passed through to telescope
 ---@return nil
 local delete_from_selection = function (opts)
@@ -101,7 +96,7 @@ local delete_from_selection = function (opts)
   )
 end
 
---- Opens a selection UI to rename a session
+--- Opens a selection UI to rename a session.
 ---@param opts table? Options passed through to telescope
 ---@return nil
 local rename_from_selection = function (opts)
@@ -114,7 +109,7 @@ local rename_from_selection = function (opts)
   )
 end
 
---- Opens a selection UI to change a session's provider
+--- Opens a selection UI to change a session's provider.
 ---@param opts table? Options passed through to telescope
 ---@return nil
 local set_provider_from_selection = function (opts)
@@ -134,7 +129,7 @@ local set_provider_from_selection = function (opts)
   )
 end
 
---- Shows a session in the current window, creating one if needed
+--- Shows a session in the current FacileLLM window, creating one if needed.
 ---@param sessionid FacileLLM.SessionId? The session to show, or most recent if nil
 ---@return nil
 local show = function (sessionid)
@@ -145,7 +140,7 @@ local show = function (sessionid)
   ui_session.set_current_win_conversation_input(sessionid)
 end
 
---- Focuses on a specific session window
+--- Focuses on a specific session's window.
 ---@param sessionid FacileLLM.SessionId? The session to focus, or most recent if nil
 ---@return nil
 local focus = function (sessionid)
@@ -158,7 +153,7 @@ local focus = function (sessionid)
   ui_session.set_current_win_conversation_input(sessionid)
 end
 
---- Opens a selection UI to focus on a specific session
+--- Opens a selection UI to focus on a specific session.
 ---@param opts table? Options passed through to telescope
 ---@return nil
 local focus_from_selection = function (opts)

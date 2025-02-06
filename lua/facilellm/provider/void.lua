@@ -1,4 +1,6 @@
 local conversation = require("facilellm.session.conversation")
+local generic = require("facilellm.provider.model.generic")
+local log = require("facilellm.log")
 
 
 local R = {}
@@ -89,6 +91,13 @@ end
 ---@param opts table
 ---@return function?
 local response_to = function (conv, add_message, on_complete, opts)
+  local logger = log.get_logger()
+  logger:info("conversation sent to LLM", conv)
+  for _, msg in ipairs(conv) do
+    logger:info("expanded message", { content = generic.convert_msg_minimal_roles(msg) })
+  end
+
+
   local _, msg = conversation.get_last_message_with_index(conv)
   if not msg then
     add_message("The void tried to hear your message, but there is nothing to be heard.")

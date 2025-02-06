@@ -235,7 +235,7 @@ temperature of a model without having to setup many of them.
 The next provider is an instance of a Meta model run via the Replicate API.
 
 ```lua
-implementation = "Replicate Meta",
+implementation = require("facilellm.provider.api.replicate"),
 ```
 
 The options that are available to change are 
@@ -264,7 +264,7 @@ opts = {
 This provider is an instance of a MistralAI model run via the Replicate API.
 
 ```lua
-implementation = "Replicate MistralAI",
+implementation = require("facilellm.provider.api.replicate"),
 ```
 
 The options that are available to change are 

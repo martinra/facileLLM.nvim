@@ -153,6 +153,25 @@ local csv_to_conversations = function (text)
   return conversatations
 end
 
+---@param filename string
+---@return string?, string
+local read_with_filetype = function (filename)
+  local filetype = vim.filetype.match({ filename = filename })
+
+  local file = io.open(filename,"r")
+  if file == nil then
+    return nil, ""
+  end
+
+  local content = ""
+  for line in file:lines() do
+    content = content .. line .. "\n"
+  end
+  file:close()
+
+  return filetype, content
+end
+
 
 return {
   deep_copy_values     = M.deep_copy_values,
@@ -163,4 +182,5 @@ return {
   create_fold          = create_fold,
   delete_fold          = delete_fold,
   csv_to_conversations = csv_to_conversations,
+  read_with_filetype   = read_with_filetype,
 }

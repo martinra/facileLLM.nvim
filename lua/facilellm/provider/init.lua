@@ -1,7 +1,7 @@
 ---@class FacileLLM.Provider
 ---@field name string
 ---@field params table
----@field response_to function(conv: Conversation, add_msg: function, on_cmpl: function, opt:table): function?
+---@field response_to function(conv: Conversation, add_msg: function, on_cmpl: function, opts:table): function?
 
 ---@class FacileLLM.Provider.PromptConversion
 ---@field convert_conv_to_prompt function(FacileLLM.Conversation): string

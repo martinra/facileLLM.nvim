@@ -394,6 +394,14 @@ local set_buf_keymaps = function (sessionid)
       ui_session.add_context_message(sessionid, lines)
     end)
   end
+  if config.opts.interface.keymaps.input_file_context ~= "" then
+    ui_input.set_file_context_keymap(input_bufnr,
+      "n", config.opts.interface.keymaps.input_file_context,
+      function (lines)
+        local provider_config = session.get_provider_config(sessionid)
+        ui_session.add_file_context_message(sessionid, lines, provider_config.filetype_tag)
+    end)
+  end
   if config.opts.interface.keymaps.input_example ~= "" then
     ui_input.set_example_keymap(input_bufnr,
       "n", config.opts.interface.keymaps.input_example, function (lines)
@@ -483,6 +491,16 @@ end
 local add_context_message = function (sessionid, lines)
   ui_recent.touch(sessionid)
   session.add_context_message(sessionid, lines)
+  render_conversation(sessionid)
+end
+
+---@param sessionid FacileLLM.SessionId
+---@param lines string[]
+---@param filetype_tag string
+---@return nil
+local add_file_context_message = function (sessionid, lines, filetype_tag)
+  ui_recent.touch(sessionid)
+  session.add_file_context_message(sessionid, lines, filetype_tag)
   render_conversation(sessionid)
 end
 
@@ -757,6 +775,7 @@ return {
   render_conversation                = render_conversation,
   add_input_message                  = add_input_message,
   add_context_message                = add_context_message,
+  add_file_context_message           = add_file_context_message,
   add_example_message                = add_example_message,
   append_conversation                = append_conversation,
   query                              = query,

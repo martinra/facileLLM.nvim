@@ -113,6 +113,32 @@ end
 ---@param bufnr BufNr
 ---@param mode string
 ---@param lhs string
+---@param on_file_context function(string[]): nil
+---@return nil
+local set_file_context_keymap = function (bufnr, mode, lhs, on_file_context)
+  vim.keymap.set(mode, lhs,
+    function ()
+      local sessionid = ui_common.buf_get_session(bufnr)
+      ---@cast sessionid FacileLLM.SessionId
+
+      if session.is_conversation_locked(sessionid)
+        and config.opts.feedback.conversation_lock.input_file_context then
+        signal_response_not_yet_complete(bufnr)
+        return
+      end
+
+      local lines = clear_input_buffer(bufnr)
+      if on_file_context and not util.isempty_lines(lines) then
+        on_file_context(lines)
+      end
+    end,
+    { buffer = bufnr })
+end
+
+
+---@param bufnr BufNr
+---@param mode string
+---@param lhs string
 ---@param on_example function(string[]): nil
 ---@return nil
 local set_example_keymap = function (bufnr, mode, lhs, on_example)
@@ -193,5 +219,6 @@ return {
   set_confirm_keymap = set_confirm_keymap,
   set_instruction_keymap = set_instruction_keymap,
   set_context_keymap = set_context_keymap,
+  set_file_context_keymap = set_file_context_keymap,
   set_example_keymap = set_example_keymap,
 }

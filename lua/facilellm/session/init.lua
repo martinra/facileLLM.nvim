@@ -229,6 +229,14 @@ end
 
 ---@param sessionid FacileLLM.SessionId
 ---@param content string | string[]
+---@param filetype_tag string
+---@return nil
+local add_file_context_message = function (sessionid, content, filetype_tag)
+  conversation.add_file_context_message(get_conversation(sessionid), content, filetype_tag)
+end
+
+---@param sessionid FacileLLM.SessionId
+---@param content string | string[]
 ---@return nil
 local add_example_message = function (sessionid, content)
   conversation.add_example_message(get_conversation(sessionid), content)
@@ -352,6 +360,7 @@ return {
   add_llm_message        = add_llm_message,
   add_input_message      = add_input_message,
   add_context_message    = add_context_message,
+  add_file_context_message = add_file_context_message,
   add_example_message    = add_example_message,
   append_conversation    = append_conversation,
   is_conversation_locked = is_conversation_locked,

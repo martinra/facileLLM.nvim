@@ -43,6 +43,12 @@ local fold_messages = function (winid)
     end
     hlroleexpr = hlroleexpr .. config.opts.naming.role_display.context
   end
+  if config.opts.interface.fold_context then
+    if config.opts.interface.fold_instruction then
+      hlroleexpr = hlroleexpr .. "\\|"
+    end
+    hlroleexpr = hlroleexpr .. config.opts.naming.role_display.file_context
+  end
   if config.opts.interface.fold_example then
     if config.opts.interface.fold_instruction
       or config.opts.interface.fold_context then
@@ -56,6 +62,8 @@ local fold_messages = function (winid)
   allroleexpr = allroleexpr .. config.opts.naming.role_display.instruction
   allroleexpr = allroleexpr .. "\\|"
   allroleexpr = allroleexpr .. config.opts.naming.role_display.context
+  allroleexpr = allroleexpr .. "\\|"
+  allroleexpr = allroleexpr .. config.opts.naming.role_display.file_context
   allroleexpr = allroleexpr .. "\\|"
   allroleexpr = allroleexpr .. config.opts.naming.role_display.example
   allroleexpr = allroleexpr .. "\\|"

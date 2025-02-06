@@ -13,6 +13,7 @@
 ---@field opts table Options that are forwarded to the implementation.
 ---@field conversation FacileLLM.ConversationName | FacileLLM.Conversation
 ---@field registers FacileLLM.Config.Register[]
+---@field filetype_tag string
 ---@field completion_tags FacileLLM.Config.CompletionTags?
 ---@field autostart boolean
 ---@field autoclear boolean
@@ -26,6 +27,7 @@
 ---@class FacileLLM.Config.Naming.RoleDisplay
 ---@field instruction string
 ---@field context string
+---@field file_context string
 ---@field example string
 ---@field input string
 ---@field llm string
@@ -53,6 +55,7 @@
 ---@field input_confirm string
 ---@field input_instruction string
 ---@field input_context string
+---@field input_file_context string
 ---@field input_example string
 ---@field requery string
 ---@field prune_message string
@@ -89,6 +92,7 @@
 ---@field input_confirm boolean
 ---@field input_instruction boolean
 ---@field input_context boolean
+---@field input_file_context boolean
 ---@field input_example boolean
 ---@field warn_on_query boolean
 ---@field warn_on_clear boolean
@@ -232,6 +236,7 @@ local default_provider_config = function ()
     },
     autostart      = false,
     autoclear      = false,
+    filetype_tag   = "# language: ",
   }
 end
 
@@ -282,11 +287,12 @@ local default_opts = function ()
 
     naming = {
       role_display = {
-        instruction = "## Instruction:",
-        context     = "## Context:",
-        example     = "## Example:",
-        input       = "## Input:",
-        llm         = "## LLM:",
+        instruction  = "## Instruction:",
+        context      = "## Context:",
+        file_context = "## File Context:",
+        example      = "## Example:",
+        input        = "## Input:",
+        llm          = "## LLM:",
       },
       conversation_buffer_prefix = "facileLLM",
       input_buffer_prefix = "facileLLM Input",
@@ -315,6 +321,7 @@ local default_opts = function ()
         input_confirm       = "<Enter>",
         input_instruction   = "<C-i>",
         input_context       = "<C-k>",
+        input_file_context  = "<C-f>",
         input_example       = "<C-e>",
         requery             = "<C-r>",
 
@@ -351,12 +358,13 @@ local default_opts = function ()
       pending_insertion_feedback = true,
       pending_insertion_feedback_message = "Will insert pending LLM response",
       conversation_lock = {
-        input_confirm     = true,
-        input_instruction = true,
-        input_context     = true,
-        input_example     = true,
-        warn_on_query     = true,
-        warn_on_clear     = true,
+        input_confirm      = true,
+        input_instruction  = true,
+        input_context      = true,
+        input_file_context = true,
+        input_example      = true,
+        warn_on_query      = true,
+        warn_on_clear      = true,
       },
     },
   }
@@ -449,6 +457,7 @@ local validate_provider_config = function (provider)
     opts            = {provider.opts,            "t",        true},
     conversation    = {provider.conversation,    {"s", "t"}, true},
     registers       = {provider.registers,       "t",        true},
+    filetype_tag    = {provider.filetype_tag,    "s",        false},
     completion_tags = {provider.completion_tags, "t",        true},
     autostart       = {provider.autostart,       "b",        true},
     autoclear       = {provider.autoclear,       "b",        true},
@@ -519,6 +528,7 @@ local validate_interface = function (interface)
       input_confirm        = {keymaps.input_confirm,       "s", true},
       input_instruction    = {keymaps.input_instruction,   "s", true},
       input_context        = {keymaps.input_context,       "s", true},
+      input_file_context   = {keymaps.input_file_context,  "s", true},
       input_example        = {keymaps.input_example,       "s", true},
 
       prune_message        = {keymaps.prune_message,       "s", true},
@@ -576,12 +586,13 @@ local validate_feedback = function (feedback)
   if feedback.conversation_lock then
     local conversation_lock = feedback.conversation_lock
     vim.validate({
-      input_confirm     = {conversation_lock.input_confirm,     "b", true},
-      input_instruction = {conversation_lock.input_instruction, "b", true},
-      input_context     = {conversation_lock.input_context,     "b", true},
-      input_example     = {conversation_lock.input_example,     "b", true},
-      warn_on_query     = {conversation_lock.warn_on_query,     "b", true},
-      warn_on_clear     = {conversation_lock.warn_on_clear,     "b", true},
+      input_confirm      = {conversation_lock.input_confirm,      "b", true},
+      input_instruction  = {conversation_lock.input_instruction,  "b", true},
+      input_context      = {conversation_lock.input_context,      "b", true},
+      input_file_context = {conversation_lock.input_file_context, "b", true},
+      input_example      = {conversation_lock.input_example,      "b", true},
+      warn_on_query      = {conversation_lock.warn_on_query,      "b", true},
+      warn_on_clear      = {conversation_lock.warn_on_clear,      "b", true},
     })
   end
 end

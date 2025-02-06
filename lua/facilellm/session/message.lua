@@ -1,8 +1,7 @@
 -- Possible roles in a Message need to be provided/translated
 -- by a model, we do not check them. The default role for
 -- input is "Input".
----TODO: add FileContext
----@alias FacileLLM.MsgRole ("Instruction"| "Context"| "Example"| "Input"| "LLM")
+---@alias FacileLLM.MsgRole ("Instruction"| "Context"| "FileContext"| "Example"| "Input"| "LLM")
 
 ---@alias FacileLLM.MsgStatus (nil| "pruned"| "purged")
 
@@ -13,17 +12,21 @@
 ---@field preserve boolean?
 ---@field cache boolean?
 
+---@class FacileLLM.FileContextMessage : FacileLLM.Message
+---@field filetype_tag string
+
 
 ---@param role string
 ---@return boolean
 local is_general_instruction_role = function (role)
-  return role == "Instruction" or role == "Context" or role == "Example"
+  return role == "Instruction" or role == "Context" or role == "FileContext" or role == "Example"
 end
 
 ---@param role FacileLLM.MsgRole
 ---@param content nil | string | string[]
+---@param opts table?
 ---@return FacileLLM.Message
-local create = function (role, content)
+local create = function (role, content, opts)
   local lines = {}
   if type(content) == "string" then
     lines = vim.split(content, "\n")
@@ -39,7 +42,7 @@ local create = function (role, content)
     preserve = is_general_instruction_role(role),
     cache = is_general_instruction_role(role),
   }
-  return msg
+  return vim.tbl_deep_extend("keep", msg, opts or {})
 end
 
 ---@param msg FacileLLM.Message

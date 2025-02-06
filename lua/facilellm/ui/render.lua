@@ -26,6 +26,8 @@ local role_display = function (role)
     return config.opts.naming.role_display.instruction
   elseif role == "Context" then
     return config.opts.naming.role_display.context
+  elseif role == "FileContext" then
+    return config.opts.naming.role_display.file_context
   elseif role == "Example" then
     return config.opts.naming.role_display.example
   elseif role == "Input" then

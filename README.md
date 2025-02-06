@@ -208,6 +208,10 @@ opts = {
   openai_model = "gpt-3.5-turbo",
   params = {
     temperature = 0.9,
+    max_tokens = 1024,
+    top_p = 1,
+    frequency_penalty = 0,
+    presence_penalty = 0,
   },
 },
 ```
@@ -223,18 +227,18 @@ points to GPT-3.5 Turbo.
 
 The field `params` specifies parameters that are provided to the model when
 calling the API. Changes to fields of `params` after initializing a session
-take effect on future API calls. This allows for exmaple to adjust the
+take effect on future API calls. This allows for example to adjust the
 temperature of a model without having to setup many of them.
 
 ### Llama3 via Replicate configuration
 
-The next provideris an instance of a Meta model run via the Replicate API.
+The next provider is an instance of a Meta model run via the Replicate API.
 
 ```lua
-implementation = require("facilellm.provider.replicate"),
+implementation = "Replicate Meta",
 ```
 
-The options that are availabe to change are 
+The options that are available to change are 
 
 ```lua
 opts = {
@@ -244,7 +248,7 @@ opts = {
   end,
   replicate_version = nil,
   replicate_model_name = "Llama3 8b Instruct",
-  prompt_conversion = require("facilellm.provider.llama3_prompt"),
+  prompt_conversion = require("facilellm.provider.model.llama3_prompt"),
   params = {
     temperature = 0.6,
     top_p = 0.9,
@@ -260,10 +264,10 @@ opts = {
 This provider is an instance of a MistralAI model run via the Replicate API.
 
 ```lua
-implementation = require("facilellm.provider.replicate"),
+implementation = "Replicate MistralAI",
 ```
 
-The options that are availabe to change are 
+The options that are available to change are 
 
 ```lua
 opts = {
@@ -273,7 +277,7 @@ opts = {
   end,
   replicate_version = nil,
   replicate_model_name = "Mixtral 8x7B Instruct v0.1",
-  prompt_conversion = require("facilellm.provider.mixtral_prompt"),
+  prompt_conversion = require("facilellm.provider.model.mixtral_prompt"),
   params = {
     temperature = 0.6,
     top_p = 0.9,

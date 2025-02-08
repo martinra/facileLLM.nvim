@@ -479,9 +479,9 @@ end
 ---@param sessionid FacileLLM.SessionId
 ---@param lines string[]
 ---@return nil
-local add_input_message = function (sessionid, lines)
+local add_instruction_message = function (sessionid, lines)
   ui_recent.touch(sessionid)
-  session.add_input_message(sessionid, lines)
+  session.add_instruction_message(sessionid, lines)
   render_conversation(sessionid)
 end
 
@@ -510,6 +510,15 @@ end
 local add_example_message = function (sessionid, lines)
   ui_recent.touch(sessionid)
   session.add_example_message(sessionid, lines)
+  render_conversation(sessionid)
+end
+
+---@param sessionid FacileLLM.SessionId
+---@param lines string[]
+---@return nil
+local add_input_message = function (sessionid, lines)
+  ui_recent.touch(sessionid)
+  session.add_input_message(sessionid, lines)
   render_conversation(sessionid)
 end
 
@@ -774,6 +783,7 @@ return {
   clear_interaction                  = clear_interaction,
   render_conversation                = render_conversation,
   add_input_message                  = add_input_message,
+  add_instruction_message            = add_instruction_message,
   add_context_message                = add_context_message,
   add_file_context_message           = add_file_context_message,
   add_example_message                = add_example_message,

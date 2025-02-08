@@ -209,15 +209,8 @@ end
 ---@param sessionid FacileLLM.SessionId
 ---@param content string | string[]
 ---@return nil
-local add_llm_message = function (sessionid, content)
-  conversation.add_llm_message(get_conversation(sessionid), content)
-end
-
----@param sessionid FacileLLM.SessionId
----@param content string | string[]
----@return nil
-local add_input_message = function (sessionid, content)
-  conversation.add_input_message(get_conversation(sessionid), content)
+local add_instruction_message = function (sessionid, content)
+  conversation.add_instruction_message(get_conversation(sessionid), content)
 end
 
 ---@param sessionid FacileLLM.SessionId
@@ -240,6 +233,20 @@ end
 ---@return nil
 local add_example_message = function (sessionid, content)
   conversation.add_example_message(get_conversation(sessionid), content)
+end
+
+---@param sessionid FacileLLM.SessionId
+---@param content string | string[]
+---@return nil
+local add_input_message = function (sessionid, content)
+  conversation.add_input_message(get_conversation(sessionid), content)
+end
+
+---@param sessionid FacileLLM.SessionId
+---@param content string | string[]
+---@return nil
+local add_llm_message = function (sessionid, content)
+  conversation.add_llm_message(get_conversation(sessionid), content)
 end
 
 ---@param sessionid FacileLLM.SessionId
@@ -359,6 +366,7 @@ return {
   get_last_llm_message   = get_last_llm_message,
   add_llm_message        = add_llm_message,
   add_input_message      = add_input_message,
+  add_instruction_message = add_instruction_message,
   add_context_message    = add_context_message,
   add_file_context_message = add_file_context_message,
   add_example_message    = add_example_message,

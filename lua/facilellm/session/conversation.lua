@@ -135,6 +135,71 @@ local get_last_llm_message = function (conv)
   end
 end
 
+---@param lines string[]
+---@return FacileLLM.Conversation
+local parse_rendered_conversation = function(lines)
+  ---@type FacileLLM.Conversation
+  local conv = {}
+  if #lines == 0 then
+    return conv
+  end
+
+  local current_role = nil
+  local current_lines = {}
+
+  local function flush_message()
+    if current_role  then
+      local first_nonempty_line = 0
+      for lx = 1,#current_lines do
+        if current_lines[lx] ~= "" then
+          first_nonempty_line = lx
+          break
+        end
+      end
+      if first_nonempty_line ~= 0 then
+        for _ = 1,first_nonempty_line-1 do
+          table.remove(current_lines,1)
+        end
+      end
+
+      for lx = #current_lines,1,-1 do
+        if current_lines[lx] ~= "" then
+          table.remove(current_lines)
+        end
+      end
+
+      if #current_lines > 0 then
+        table.insert(conv, message.create(current_role, current_lines))
+        current_lines = {}
+      end
+    end
+  end
+
+  for _, line in ipairs(lines) do
+    local role = line:match("^## ([^:]+):")
+    if role then
+      flush_message()
+      if role == "Instruction" or
+         role == "Context" or
+         role == "FileContext" or
+         role == "Example" or
+         role == "Input" or
+         role == "LLM" then
+        current_role = role
+      else
+        error("Unknown role in conversation: " .. role)
+      end
+    else
+      if current_role then
+        table.insert(current_lines, line)
+      end
+    end
+  end
+
+  flush_message()
+  return conv
+end
+
 
 return {
   create                      = create,
@@ -147,5 +212,6 @@ return {
   append                      = append,
   get_last_message_with_index = get_last_message_with_index,
   get_last_llm_message        = get_last_llm_message,
+  parse_rendered_conversation = parse_rendered_conversation,
 }
 

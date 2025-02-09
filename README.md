@@ -417,6 +417,7 @@ keymaps = {
   add_visual_as_input_query_and_append     = "<leader>aip",
   add_visual_as_input_query_and_prepend    = "<leader>aiP",
   add_visual_as_input_query_and_substitute = "<leader>ais",
+  add_visual_as_conversation               = "<leader>aiI",
   add_line_as_input_and_query              = "<leader>ai<Enter>",
   add_line_as_input_query_and_append       = "<leader>aip",
   add_line_as_input_query_and_prepend      = "<leader>aiP",
@@ -839,6 +840,16 @@ Same as `add_visual_as_input_query_and_append`, but delete the selection and
 substitute the response once completely received.
 
 Bound by default to `<leader>ais`.
+
+### `add_visual_as_conversation`
+
+In visual mode, parse the selected text as a rendered conversation and append it
+to the current session.
+
+This allows copying conversations between sessions or from other sources that
+use the same format.
+
+Bound by default to `<leader>aiI`.
 
 ### `add_line_as_input_and_query`
 

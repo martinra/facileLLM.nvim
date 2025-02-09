@@ -78,6 +78,7 @@
 ---@field add_visual_as_input_query_and_append string
 ---@field add_visual_as_input_query_and_prepend string
 ---@field add_visual_as_input_query_and_substitute string
+---@field add_visual_as_conversation string
 ---@field add_line_as_input_and_query string
 ---@field add_line_as_input_query_and_append string
 ---@field add_line_as_input_query_and_prepend string
@@ -187,6 +188,11 @@ local set_global_keymaps = function ()
   if config.opts.interface.keymaps.add_visual_as_input_query_and_substitute ~= "" then
     vim.keymap.set("v", config.opts.interface.keymaps.add_visual_as_input_query_and_substitute,
       function () facilellm.add_visual_as_input_query_and_insert("substitute") end, {}
+    )
+  end
+  if config.opts.interface.keymaps.add_visual_as_conversation ~= "" then
+    vim.keymap.set("v", config.opts.interface.keymaps.add_visual_as_conversation,
+      function () facilellm.add_visual_as_conversation() end, {}
     )
   end
 
@@ -348,6 +354,7 @@ local default_opts = function ()
         add_visual_as_input_query_and_append     = "<leader>aip",
         add_visual_as_input_query_and_prepend    = "<leader>aiP",
         add_visual_as_input_query_and_substitute = "<leader>ais",
+        add_visual_as_conversation               = "<leader>aiI",
         add_line_as_input_and_query              = "<leader>ai<Enter>",
         add_line_as_input_query_and_append       = "<leader>aip",
         add_line_as_input_query_and_prepend      = "<leader>aiP",
@@ -562,6 +569,8 @@ local validate_interface = function (interface)
         {keymaps.add_visual_as_input_query_and_prepend,    "s", true},
       add_visual_as_input_query_and_substitute  =
         {keymaps.add_visual_as_input_query_and_substitute, "s", true},
+      add_visual_as_conversation                =
+        {keymaps.add_visual_as_conversation,               "s", true},
 
       add_line_as_input_and_query             =
         {keymaps.add_line_as_input_and_query,            "s", true},

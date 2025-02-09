@@ -75,6 +75,7 @@ local convert_msg_minimal_roles = function (msg, opts)
     for _,filename in ipairs(expand_file_context(msg.lines)) do
       local filetype, file_content = util.read_with_filetype(filename)
       if filetype ~= nil then
+        content = content .. msg.filename_tag .. filename .. "\n"
         content = content .. msg.filetype_tag .. filetype .. "\n"
         content = content .. file_content .. "\n"
       end

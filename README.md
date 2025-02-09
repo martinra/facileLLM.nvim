@@ -132,14 +132,17 @@ functional example configuration of a provider is
 
 ```lua
 {
-  name           = "ChatGPT 3.5 (Hot)",
-  implementation = "OpenAI API",
-  opts           = {
-    url = "https://api.openai.com/v1/chat/completions",
+  name = "Claude Sonnet 3.5",
+  implementation = require("facilellm.provider.api.openai"),
+  opts = {
+    url = "https://openrouter.ai/api/v1/chat/completions",
     get_api_key = function ()
-      return require("facilellm.provider.util").get_api_key_from_pass("OpenAI/facilellm_token")
+      return require("facilellm.provider.util").get_api_key_from_pass("OpenRouter/facilellm_token")
     end,
-    openai_model = "gpt-3.5-turbo",
+    model = "anthropic/claude-3.5-sonnet",
+    prompt_conversion = require("facilellm.provider.model.claude_oai"),
+    filename_tag = "# file path: ",
+    filetype_tag = "# language: ",
     params = {
       temperature = 0.9,
     },
@@ -205,7 +208,7 @@ opts = {
   get_api_key = function ()
     return require("facilellm.provider.util").get_api_key_from_pass("OpenAI/facilellm_token")
   end,
-  openai_model = "gpt-3.5-turbo",
+  model = "gpt-3.5-turbo",
   params = {
     temperature = 0.9,
     max_tokens = 1024,
@@ -222,8 +225,8 @@ default points to the api endpoint of OpenAI the company.
 The field `get_api_key` is a function that acquires the API key. It defaults to
 an input prompt, but in the example above invokes a password manager.
 
-The field `openai_model` specifies the model provided by the API. The default
-points to GPT-3.5 Turbo.
+The field `model` specifies the model provided by the API. The default points
+to GPT-3.5 Turbo.
 
 The field `params` specifies parameters that are provided to the model when
 calling the API. Changes to fields of `params` after initializing a session

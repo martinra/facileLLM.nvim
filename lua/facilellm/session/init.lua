@@ -222,10 +222,11 @@ end
 
 ---@param sessionid FacileLLM.SessionId
 ---@param content string | string[]
+---@param filename_tag string
 ---@param filetype_tag string
 ---@return nil
-local add_file_context_message = function (sessionid, content, filetype_tag)
-  conversation.add_file_context_message(get_conversation(sessionid), content, filetype_tag)
+local add_file_context_message = function (sessionid, content, filename_tag, filetype_tag)
+  conversation.add_file_context_message(get_conversation(sessionid), content, filename_tag, filetype_tag)
 end
 
 ---@param sessionid FacileLLM.SessionId

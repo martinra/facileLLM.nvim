@@ -13,6 +13,7 @@
 ---@field cache boolean?
 
 ---@class FacileLLM.FileContextMessage : FacileLLM.Message
+---@field filename_tag string
 ---@field filetype_tag string
 
 

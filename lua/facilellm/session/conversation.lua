@@ -57,14 +57,15 @@ end
 
 ---@param conversation FacileLLM.Conversation
 ---@param content string | string[]
+---@param filename_tag string
 ---@param filetype_tag string
 ---@return nil
-local add_file_context_message = function (conversation, content, filetype_tag)
+local add_file_context_message = function (conversation, content, filename_tag, filetype_tag)
   local last_msg = conversation[#conversation]
   if last_msg and not message.ispruned(last_msg)
     and last_msg.role == "FileContext" then
     ---@cast last_msg FacileLLM.FileContextMessage
-    if last_msg.filetype_tag == filetype_tag then
+    if last_msg.filename_tag == filename_tag and last_msg.filetype_tag == filetype_tag then
       if type(content) == "string" then
         message.append(last_msg, content)
       else
@@ -72,7 +73,14 @@ local add_file_context_message = function (conversation, content, filetype_tag)
       end
     end
   else
-    table.insert(conversation, message.create("FileContext", content, {filetype_tag = filetype_tag}))
+    table.insert(conversation,
+      message.create(
+        "FileContext", content,
+        {
+          filename_tag = filename_tag,
+          filetype_tag = filetype_tag
+        }
+    ))
   end
 end
 

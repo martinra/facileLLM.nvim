@@ -13,6 +13,7 @@
 ---@field opts table Options that are forwarded to the implementation.
 ---@field conversation FacileLLM.ConversationName | FacileLLM.Conversation
 ---@field registers FacileLLM.Config.Register[]
+---@field filename_tag string
 ---@field filetype_tag string
 ---@field completion_tags FacileLLM.Config.CompletionTags?
 ---@field autostart boolean
@@ -236,6 +237,7 @@ local default_provider_config = function ()
     },
     autostart      = false,
     autoclear      = false,
+    filename_tag   = "# file path: ",
     filetype_tag   = "# language: ",
   }
 end
@@ -456,6 +458,7 @@ local validate_provider_config = function (provider)
     opts            = {provider.opts,            "t",        true},
     conversation    = {provider.conversation,    {"s", "t"}, true},
     registers       = {provider.registers,       "t",        true},
+    filename_tag    = {provider.filename_tag,    "s",        false},
     filetype_tag    = {provider.filetype_tag,    "s",        false},
     completion_tags = {provider.completion_tags, "t",        true},
     autostart       = {provider.autostart,       "b",        true},

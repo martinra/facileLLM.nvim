@@ -31,8 +31,9 @@ function src:get_completions (ctx, cb)
 
   local config = session.get_provider_config(sessionid)
   local completion_tags = config.completion_tags
+  local filename_tag = config.filename_tag
   local filetype_tag = config.filetype_tag
-  if completion_tags == nil or filetype_tag == nil then
+  if completion_tags == nil or filename_tag == nil or filetype_tag == nil then
     cb()
     return
   end
@@ -41,7 +42,7 @@ function src:get_completions (ctx, cb)
 
   ui_session.clear_interaction(sessionid)
   ui_session.append_conversation(sessionid,
-    template.template_filetype_and_context(0, context_tags, filetype_tag)
+    template.template_filetype_and_context(0, context_tags, filename_tag, filetype_tag)
   )
 
   callback.activate(sessionid, cb)

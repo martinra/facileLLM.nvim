@@ -54,9 +54,10 @@ end
 
 ---@param winid WinId
 ---@param context_tags FacileLLM.Template.ContextTags
+---@param filename_tag string
 ---@param filetype_tag string
 ---@return FacileLLM.Conversation
-local template_filetype_and_context = function (winid, context_tags, filetype_tag)
+local template_filetype_and_context = function (winid, context_tags, filename_tag, filetype_tag)
   local size                = context_tags.size
   local before_cursor_tag   = context_tags.before_cursor_tag
   local cursor_position_tag = context_tags.cursor_position_tag
@@ -76,8 +77,15 @@ local template_filetype_and_context = function (winid, context_tags, filetype_ta
   local filetype = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
 
   local lines = {}
+
+  if filename_tag ~= "" then
+    local filename = vim.api.nvim_buf_get_name(bufnr)
+    if filename ~= nil then
+      table.insert(lines, { filename_tag .. filename })
+    end
+  end
   if filetype_tag ~= "" then
-    lines = { filetype_tag .. filetype }
+    table.insert(lines, { filetype_tag .. filetype })
   end
 
   if not reverse then

@@ -1,23 +1,8 @@
 # Next Steps
 
-- for nvim-cmp
-  `---@field as_completion function?(FacileLLM.Message): nil`
-- for git patches
-  `---@field as_git_cherry_pick function?(FacileLLM.Message): string`
+- in context template add file path, so that completion can work more properly when file context is given.
 
-- prompt templates:
-  - create current completion model; bind aic to that model
-- use config conversations to extend template in front
-- file context list
-- clear conversation but not context or instruction extends to this
-- return patch; apply to new git branch if neogit is present; cherry pick
 - facilellm hot and cold presets; try them; associate with conversation?
-
-- rethink example and context roles
-
-- move class descriptions to top of files
-
-- when several prompts of the same kind follow each other, fuse them
 
 - conversation history option and then restore
   - limit on size
@@ -49,7 +34,6 @@
   - on focus only swap interaction provider
   - completions with multiple matching
   - fold input
-- git branch and cherry-pick on project
 
 ## user stories
 

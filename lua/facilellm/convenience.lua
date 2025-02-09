@@ -6,6 +6,7 @@
 local config = require("facilellm.config")
 local provider = require("facilellm.provider")
 local session = require("facilellm.session")
+local conversation = require("facilellm.session.conversation")
 local ui_recent = require("facilellm.ui.recent_session")
 local ui_select = require("facilellm.ui.select_session")
 local ui_session = require("facilellm.ui.session")
@@ -325,6 +326,22 @@ local add_line_as_input_query_and_insert = function (method)
   ui_session.add_input_message_query_and_insert(sessionid, lines)
 end
 
+---@return nil
+local add_visual_as_conversation = function()
+  local sessionid = ui_recent.get_most_recent()
+  if not sessionid then
+    return
+  end
+
+  local lines = util.get_visual_selection()
+  if not lines then
+    return
+  end
+
+  local conv = conversation.parse_rendered_conversation(lines)
+  session.append_conversation(sessionid, conv)
+end
+
 
 return {
   select_default_provider = select_default_provider,
@@ -345,4 +362,5 @@ return {
   add_visual_as_example = add_visual_as_example,
   add_visual_as_input_query_and_insert = add_visual_as_input_query_and_insert,
   add_line_as_input_query_and_insert = add_line_as_input_query_and_insert,
+  add_visual_as_conversation = add_visual_as_conversation,
 }

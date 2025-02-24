@@ -148,7 +148,7 @@ local parse_rendered_conversation = function(lines)
   local current_lines = {}
 
   local function flush_message()
-    if current_role  then
+    if current_role then
       local first_nonempty_line = 0
       for lx = 1,#current_lines do
         if current_lines[lx] ~= "" then
@@ -163,7 +163,7 @@ local parse_rendered_conversation = function(lines)
       end
 
       for lx = #current_lines,1,-1 do
-        if current_lines[lx] ~= "" then
+        if current_lines[lx] == "" then
           table.remove(current_lines)
         end
       end

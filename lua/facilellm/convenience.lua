@@ -339,7 +339,7 @@ local add_visual_as_conversation = function()
   end
 
   local conv = conversation.parse_rendered_conversation(lines)
-  session.append_conversation(sessionid, conv)
+  ui_session.append_conversation(sessionid, conv)
 end
 
 

@@ -295,12 +295,12 @@ local default_opts = function ()
 
     naming = {
       role_display = {
-        instruction  = "## Instruction:",
-        context      = "## Context:",
-        file_context = "## File Context:",
-        example      = "## Example:",
-        input        = "## Input:",
-        llm          = "## LLM:",
+        instruction  = "##-- Instruction:",
+        context      = "##-- Context:",
+        file_context = "##-- File Context:",
+        example      = "##-- Example:",
+        input        = "##-- Input:",
+        llm          = "##-- LLM:",
       },
       conversation_buffer_prefix = "facileLLM",
       input_buffer_prefix = "facileLLM Input",

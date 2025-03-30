@@ -1,26 +1,11 @@
 # Next Steps
 
-- render headlines with embracing newlines; truncate when submitting
-
-- update context and example translation to XML like tags
-
 - when in visual mode highlight several messages, allow to purge all of them
+- pruning in visual: prune messages touched by highlight
 
 - in payload field add `"include_reasoning": true`; this might mean to specialize on OpenRouter interface
 
-- in context template add file path, so that completion can work more properly when file context is given.
-
-- facilellm hot and cold presets; try them; associate with conversation?
-
-- conversation history option and then restore
-  - limit on size
-  - via tree?
-
 - config: don't open new windows except when asked explicitly
-
-- pruning in visual: prune messages touched by highlight
-
-- enable loading a session via visual mode
 
 - shortcut for changing model in session
 
@@ -45,6 +30,7 @@
 
 ## user stories
 
+- chat with local note files via fd
 - vocabulary extraction
   - first scan, then mark, then extract via AI
 - proofread EN document

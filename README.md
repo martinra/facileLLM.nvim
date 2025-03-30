@@ -733,6 +733,73 @@ prepared:
 },
 ```
 
+### Chatting with local markdown files
+
+This user story demonstrates how to configure DeepSeek R1 to chat with your local markdown note files.
+
+```lua
+{
+  name = "DeepSeek R1 Local Notes",
+  implementation = require("facilellm.provider.api.openai"),
+  opts = {
+    url = "https://api.deepseek.com/v1/chat/completions",
+    get_api_key = function ()
+      return require("facilellm.provider.util").get_api_key_from_pass("DeepSeek/api_key")
+    end,
+    model = "deepseek-chat",
+    prompt_conversion = require("facilellm.provider.model.generic_oai"),
+    filename_tag = "# file path: ",
+    filetype_tag = "# language: ",
+    params = {
+      temperature = 0.2,
+      max_tokens = 2048,
+    },
+  },
+  conversation = {
+    {
+      role = "Instruction",
+      lines = {
+        "You are a helpful assistant that helps users understand and reflect on their personal notes.",
+        "When referencing note files, include the file path in your response.",
+        "Be concise but thorough in your explanations."
+      }
+    },
+    {
+      role = "FileContext",
+      lines = {
+        "fd -e md -t f . ~/Notes"
+      }
+    }
+  },
+  registers = {
+    {
+      names = "l",
+    },
+  },
+  autostart = false,
+}
+```
+
+In this configuration:
+
+1. We set up DeepSeek R1 to use the OpenAI-compatible API endpoint
+2. We use the `FileContext` role with an `fd` command to include all markdown files from a documentation directory
+3. The `fd -e md -t f . ~/Note` command finds all markdown files in the specified directory
+4. The model will have access to all these files when answering questions
+
+To use this configuration:
+1. Start a session with this provider using `<leader>ain` and selecting "DeepSeek R1 Local Notes"
+2. Ask questions about your notes in the input buffer
+3. The model will respond with information from your markdown files
+
+You can customize the `fd` command to include different file types or directories:
+- `fd -e md -e txt . ~/Notes` - include both markdown and text files
+- `fd -e md -t f -E "*draft*" . ~/Notes` - exclude files with "draft" in the name
+- `fd -e md -t f . ~/Notes ~/Diary` - include files from multiple directories
+
+The `FileContext` role automatically expands the `fd` command and includes the content of all matching files, making them available to the model for reference.
+
+
 ## Global commands
 
 ### `show`

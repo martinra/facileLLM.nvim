@@ -176,23 +176,26 @@ local parse_rendered_conversation = function(lines)
   end
 
   for _, line in ipairs(lines) do
-    local role = line:match("^## ([^:]+):")
-    if role then
+    if line == config.opts.naming.role_display.instruction then
       flush_message()
-      if role == "Instruction" or
-         role == "Context" or
-         role == "FileContext" or
-         role == "Example" or
-         role == "Input" or
-         role == "LLM" then
-        current_role = role
-      else
-        error("Unknown role in conversation: " .. role)
-      end
-    else
-      if current_role then
-        table.insert(current_lines, line)
-      end
+      current_role = "Instruction"
+    elseif line == config.opts.naming.role_display.context then
+      flush_message()
+      current_role = "Context"
+    elseif line == config.opts.naming.role_display.file_context then
+      flush_message()
+      current_role = "FileContext"
+    elseif line == config.opts.naming.role_display.example then
+      flush_message()
+      current_role = "Example"
+    elseif line == config.opts.naming.role_display.input then
+      flush_message()
+      current_role = "Input"
+    elseif line == config.opts.naming.role_display.llm then
+      flush_message()
+      current_role = "LLM"
+    elseif current_role then
+      table.insert(current_lines, line)
     end
   end
 

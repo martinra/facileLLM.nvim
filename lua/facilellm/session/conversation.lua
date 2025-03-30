@@ -146,9 +146,16 @@ local parse_rendered_conversation = function(lines)
 
   local current_role = nil
   local current_lines = {}
+  local skip_next_empty_line = false
 
   local function flush_message()
     if current_role then
+      -- If the last line is empty, we want to ignore, since it comes from
+      -- blank line padding around role displays.
+      if #current_lines > 0 and current_lines[#current_lines] == "" then
+        table.remove(current_lines)
+      end
+
       local first_nonempty_line = 0
       for lx = 1,#current_lines do
         if current_lines[lx] ~= "" then
@@ -175,25 +182,34 @@ local parse_rendered_conversation = function(lines)
     end
   end
 
-  for _, line in ipairs(lines) do
+  for i, line in ipairs(lines) do
     if line == config.opts.naming.role_display.instruction then
       flush_message()
       current_role = "Instruction"
+      skip_next_empty_line = true
     elseif line == config.opts.naming.role_display.context then
       flush_message()
       current_role = "Context"
+      skip_next_empty_line = true
     elseif line == config.opts.naming.role_display.file_context then
       flush_message()
       current_role = "FileContext"
+      skip_next_empty_line = true
     elseif line == config.opts.naming.role_display.example then
       flush_message()
       current_role = "Example"
+      skip_next_empty_line = true
     elseif line == config.opts.naming.role_display.input then
       flush_message()
       current_role = "Input"
+      skip_next_empty_line = true
     elseif line == config.opts.naming.role_display.llm then
       flush_message()
       current_role = "LLM"
+      skip_next_empty_line = true
+    -- Skip the empty line after a role display
+    elseif line == "" and skip_next_empty_line then
+      skip_next_empty_line = false
     elseif current_role then
       table.insert(current_lines, line)
     end

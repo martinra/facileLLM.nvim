@@ -18,6 +18,8 @@ local convert_role_to_oai = function (role)
     return "system"
   elseif role == "Context" then
     return "system"
+  elseif role == "FileContext" then
+    return "system"
   elseif role == "Example" then
     return "system"
   elseif role == "LLM" then

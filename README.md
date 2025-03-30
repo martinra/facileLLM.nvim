@@ -733,6 +733,119 @@ prepared:
 },
 ```
 
+### Vocabulary Extraction from Language Learning Materials
+
+This enhanced example shows how to configure an LLM to extract and format vocabulary from language learning resources, with special attention to structured output for Anki integration:
+
+```lua
+{
+  name = "Language Learning Assistant (Spanish)",
+  implementation = require("facilellm.provider.api.openai"),
+  opts = {
+    url = "https://api.openai.com/v1/chat/completions",
+    get_api_key = function ()
+      return require("facilellm.provider.util").get_api_key_from_pass("OpenAI/langlearn_key")
+    end,
+    model = "chatgpt-4o-latest",
+    prompt_conversion = require("facilellm.provider.model.generic_oai"),
+    filename_tag = "# FILE: ",
+    filetype_tag = "# LANGUAGE: ",
+    params = {
+      temperature = 0.3,
+      max_tokens = 2048,
+      top_p = 0.95,
+    },
+  },
+  conversation = {
+    {
+      role = "Instruction",
+      lines = {
+        "You are a language learning specialist. Analyze provided materials and:",
+        "1. Identify key vocabulary, idioms, and grammatical structures",
+        "2. Provide definitions and usage examples",
+        "3. Note any cultural context",
+        "4. Format output in clear, consistent structures",
+        "5. Highlight differences from similar constructs"
+      }
+    },
+    {
+      role = "Example",
+      lines = {
+        "```csv",
+        "palabra; grammatical_category; example_sentence; notes",
+        "sobremesa; noun; Después de comer, disfrutamos la sobremesa.; Unique Spanish tradition",
+        "```",
+        "```markdown",
+        "| Word       | Category | Example                      | Notes                  |",
+        "|------------|----------|------------------------------|------------------------|",
+        "| madrugar   | verb     | Madrugo para hacer ejercicio | Literally \"to early\"  |",
+        "```",
+      }
+    },
+    {
+      role = "FileContext",
+      lines = {
+        "fd -e md -e pdf -e txt . ~/LanguageMaterials/Spanish"
+      }
+    }
+  },
+  registers = {
+    {
+      names = "l",
+      postprocess = function(lines)
+        return table.concat(lines, "\n")
+      end
+    },
+    {
+      names = "c",
+      postprocess = function(lines)
+        return vim.fn.trim(table.concat(lines, "\n"):match("```csv\n(.-)\n```"))
+      end
+    },
+    {
+      names = "t",
+      postprocess = function(lines)
+        return vim.fn.trim(table.concat(lines, "\n"):match("```markdown\n(.-)\n```"))
+      end
+    }
+  },
+}
+```
+
+Key features of this configuration:
+
+1. **Comprehensive Language Analysis**:
+   - Processes multiple file types (MD, PDF, TXT)
+   - Extracts vocabulary, idioms, and grammar patterns
+   - Provides definitions, examples, and cultural notes
+
+2. **Structured Output Formats**:
+
+3. **Anki Integration Ready**:
+   - Register `c` captures CSV for direct Anki import
+   - Register `t` captures markdown tables for review
+   - Register `l` captures full response text
+
+4. **Smart File Context**:
+   ```lua
+   "fd -e md -e pdf -e txt . ~/LanguageMaterials/Spanish"
+   ```
+   - Scans multiple directories and file types
+   - Excludes draft files and temporary files
+   - Limits depth for focused content
+
+Usage questions to the LLM:
+- Extract vocabulary from Chapter 3 focusing on irregular verbs
+- Identify cultural references in the festival document and explain them
+- Compare these grammar structures to their French equivalents
+
+Best practices:
+1. Use temperature 0.2-0.4 for consistent formatting
+2. Include both technical and colloquial examples
+3. Regularize output with postprocess functions
+4. Combine with pruning/purging to maintain focus
+5. Use file context versioning for material updates
+
 ### Chatting with local markdown files
 
 This user story demonstrates how to configure DeepSeek R1 to chat with your local markdown note files.
@@ -798,7 +911,6 @@ You can customize the `fd` command to include different file types or directorie
 - `fd -e md -t f . ~/Notes ~/Diary` - include files from multiple directories
 
 The `FileContext` role automatically expands the `fd` command and includes the content of all matching files, making them available to the model for reference.
-
 
 ## Global commands
 

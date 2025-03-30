@@ -30,7 +30,6 @@
 
 ## user stories
 
-- chat with local note files via fd
 - vocabulary extraction
   - first scan, then mark, then extract via AI
 - proofread EN document

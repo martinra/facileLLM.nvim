@@ -47,7 +47,13 @@ local preview_conversation = function (conv)
   for mx = 1, #conv do
     local msg = conv[mx]
     if not message.ispruned(msg) then
+      -- Add newline before role display, except for the first message
+      if mx > 1 then
+        table.insert(lines, "")
+      end
       table.insert(lines, role_display(msg.role))
+      -- Add newline after role display
+      table.insert(lines, "")
       for _,l in ipairs(msg.lines) do
         table.insert(lines, l)
       end
@@ -80,10 +86,20 @@ local get_message_range = function (mx, msg, render_state)
   local row, col = get_message_start(mx, render_state)
   local end_row, end_col
   if render_state.pos.msg == mx then
-    end_row = row + render_state.pos.line
+    -- Role displays are padded by the blank lines except for the first one,
+    -- which only has a trailing one.
+    if mx == 1 then
+      end_row = row + 1 + render_state.pos.line
+    else
+      end_row = row + 2 + render_state.pos.line
+    end
     end_col = render_state.pos.char
   else
-    end_row = row + #msg.lines
+    if mx == 1 then
+      end_row = row + 1 + #msg.lines
+    else
+      end_row = row + 2 + #msg.lines
+    end
     if #msg.lines == 0 then
       end_col = string.len(role_display(msg.role))
     else
@@ -114,6 +130,10 @@ end
 ---@return nil
 local set_highlight_role = function (bufnr, mx, msg, render_state)
   local row, col = get_message_start(mx, render_state)
+  -- All but the first role display are surrounded by padding new lines
+  if mx > 1 then
+    row = row + 1
+  end
   local end_row, end_col = row, string.len(role_display(msg.role))
   local ns = get_namespace_highlight_role()
   vim.api.nvim_buf_set_extmark(bufnr, ns,
@@ -268,15 +288,16 @@ local render_conversation = function (bufnr, conv, render_state)
 
       -- Render role
       if mx ~= render_state.pos.msg then
-        if render_state.offset_total == 0 then
+        if mx == 1 then
           -- The very first line in the buffer when inserted needs to overwrite the
-          -- initial one.
-          vim.api.nvim_buf_set_lines(bufnr, -2, -1, false, {role_display(msg.role)})
+          -- initial one. In that case, we do not include a leading blank line.
+          vim.api.nvim_buf_set_lines(bufnr, -2, -1, false, {role_display(msg.role), ""})
+          render_state.offset_total = render_state.offset_total + 2
         else
-          vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, {role_display(msg.role)})
+          -- Add a blank line before the role display (except for first message)
+          vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, {"", role_display(msg.role), ""})
+          render_state.offset_total = render_state.offset_total + 3
         end
-
-        render_state.offset_total = render_state.offset_total + 1
 
         if config.opts.interface.highlight_role then
           set_highlight_role(bufnr, mx, msg, render_state)
@@ -293,9 +314,15 @@ local render_conversation = function (bufnr, conv, render_state)
         -- Render the remainder of the last rendered line, if it was extended.
         local line = msg.lines[render_state.pos.line]
         if render_state.pos.char ~= string.len(line) then
+          local pos_line
+          if mx == 1 then
+            pos_line = render_state.offsets[mx]+1+render_state.pos.line
+          else
+            pos_line = render_state.offsets[mx]+2+render_state.pos.line
+          end
           vim.api.nvim_buf_set_text(bufnr,
-            render_state.offsets[mx]+render_state.pos.line, render_state.pos.char,
-            render_state.offsets[mx]+render_state.pos.line, render_state.pos.char,
+            pos_line, render_state.pos.char,
+            pos_line, render_state.pos.char,
             { string.sub(line, render_state.pos.char+1, string.len(line)) })
         end
 

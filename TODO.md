@@ -1,5 +1,15 @@
 # Next Steps
 
+- in the parser remove the fixation on prefix,
+
+- render headlines with embracing newlines; truncate when submitting
+
+- update context and example translation to XML like tags
+
+- when in visual mode highlight several messages, allow to purge all of them
+
+- in payload field add `"include_reasoning": true`; this might mean to specialize on OpenRouter interface
+
 - in context template add file path, so that completion can work more properly when file context is given.
 
 - facilellm hot and cold presets; try them; associate with conversation?

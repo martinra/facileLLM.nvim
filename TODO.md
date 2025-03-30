@@ -1,7 +1,5 @@
 # Next Steps
 
-- in the parser remove the fixation on prefix,
-
 - render headlines with embracing newlines; truncate when submitting
 
 - update context and example translation to XML like tags

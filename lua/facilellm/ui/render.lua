@@ -7,12 +7,12 @@
 ---@field prune_extmarks table<FacileLLM.MsgIndex, integer>
 
 ---@class FacileLLM.RenderState.Position
----@field msg FacileLLM.MsgIndex index of the last rendered message
+---@field mx FacileLLM.MsgIndex index of the last rendered message
 ---@field line integer index of the last rendered line
 ---@field char integer index of the last rendered character
 
 ---@class FacileLLM.RenderState.HighlightReceiving
----@field msg FacileLLM.MsgIndex
+---@field mx FacileLLM.MsgIndex
 ---@field extmark integer?
 
 
@@ -92,7 +92,7 @@ local get_message_range = function (mx, msg, render_state)
   --  which only has a trailing one. This means that in general every message
   --  receives two extra lines, except for the last rendered one which only
   --  receives one.
-  if mx == render_state.pos.msg then
+  if mx == render_state.pos.mx then
     end_row = row + 1 + render_state.pos.line
     end_col = render_state.pos.char
   elseif mx == render_state.last_displayed_mx then
@@ -231,7 +231,7 @@ end
 ---@return nil
 local start_highlight_receiving = function (conv, render_state)
   render_state.highlight_receiving = {
-    msg = #conv + 1,
+    mx = #conv + 1,
     extmark = nil,
   }
 end
@@ -264,7 +264,7 @@ end
 ---@return nil
 local clear_conversation = function (bufnr, render_state)
   render_state.pos = {
-    msg = 0, line = 0, char = 0
+    mx = 0, line = 0, char = 0
   }
   render_state.last_displayed_mx = 0
   render_state.offsets = {}
@@ -292,7 +292,7 @@ local render_conversation = function (bufnr, conv, render_state)
 
   vim.api.nvim_set_option_value("modifiable", true, { buf = bufnr})
 
-  for mx = render_state.pos.msg, #conv do
+  for mx = render_state.pos.mx, #conv do
     local msg = conv[mx]
     if msg and not message.ispurged(msg) then
       if not render_state.offsets[mx] then
@@ -300,7 +300,7 @@ local render_conversation = function (bufnr, conv, render_state)
       end
 
       -- Render role
-      if mx ~= render_state.pos.msg then
+      if mx ~= render_state.pos.mx then
         if mx == 1 then
           -- The very first line in the buffer when inserted needs to overwrite the
           -- initial one. In that case, we do not include a leading blank line.
@@ -319,7 +319,7 @@ local render_conversation = function (bufnr, conv, render_state)
       end
 
       -- Render lines
-      if mx ~= render_state.pos.msg or render_state.pos.line == 0 then
+      if mx ~= render_state.pos.mx or render_state.pos.line == 0 then
         vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, msg.lines)
         render_state.offset_total = render_state.offset_total + #msg.lines
       else
@@ -350,7 +350,7 @@ local render_conversation = function (bufnr, conv, render_state)
         end
       end
 
-      render_state.pos.msg = mx
+      render_state.pos.mx = mx
       render_state.pos.line = #msg.lines
       local line = msg.lines[#msg.lines]
       render_state.pos.char = line and string.len(line) or 0
@@ -358,7 +358,7 @@ local render_conversation = function (bufnr, conv, render_state)
 
       if config.opts.feedback.highlight_message_while_receiving
         and render_state.highlight_receiving
-        and render_state.highlight_receiving.msg == mx then
+        and render_state.highlight_receiving.mx == mx then
         set_highlight_receiving(bufnr, mx, msg, render_state)
       end
       if message.ispruned(msg) then
@@ -398,7 +398,7 @@ local prune_message = function (bufnr, mx, msg, render_state)
     vim.notify("only rendering pruned messages as such", vim.log.levels.WARN)
     return
   end
-  if render_state.pos.msg >= mx then
+  if render_state.pos.mx >= mx then
     set_highlight_pruned(bufnr, mx, msg, render_state)
   end
 end
@@ -413,7 +413,7 @@ local deprune_message = function (bufnr, mx, msg, render_state)
     vim.notify("only rendering unpruned messages as such", vim.log.levels.WARN)
     return
   end
-  if render_state.offsets[mx] and render_state.pos.msg >= mx then
+  if render_state.offsets[mx] and render_state.pos.mx >= mx then
     del_highlight_pruned(bufnr, mx, render_state)
   end
 end
@@ -430,10 +430,10 @@ local purge_message = function (bufnr, mx, msg, render_state)
   end
 
   -- In this case the message has not yet been rendered or is already purged.
-  if render_state.pos.msg < mx or render_state.offsets[mx] == nil then
+  if render_state.pos.mx < mx or render_state.offsets[mx] == nil then
     return
   end
-  if render_state.highlight_receiving and render_state.highlight_receiving.msg == mx then
+  if render_state.highlight_receiving and render_state.highlight_receiving.mx == mx then
     end_highlight_receiving(bufnr, render_state)
   end
   if render_state.prune_extmarks[mx] then

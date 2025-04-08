@@ -41,7 +41,7 @@ end
 ---@return table
 local convert_conv_to_llama = function (conversation, opts)
   opts = opts or {}
-  params = opts.params or {}
+  local params = opts.params or {}
 
   local prompt = "<|begin_of_text|>"
   for _,msg in ipairs(conversation) do

@@ -1,5 +1,6 @@
 ---@class FacileLLM.RenderState
 ---@field pos FacileLLM.RenderState.Position
+---@field last_displayed_mx FacileLLM.MsgIndex
 ---@field offsets integer[]
 ---@field offset_total integer total number of lines rendered
 ---@field highlight_receiving FacileLLM.RenderState.HighlightReceiving?
@@ -63,6 +64,7 @@ local preview_conversation = function (conv)
   return lines
 end
 
+---This assumes that the message is displayed.
 ---@param mx FacileLLM.MsgIndex
 ---@param render_state FacileLLM.RenderState
 ---@return integer
@@ -75,6 +77,7 @@ end
 
 ---Following the convention of extmarks, we return 0-based inclusive row
 ---indices.
+---This assumes that the message is displayed.
 ---@param mx FacileLLM.MsgIndex
 ---@param msg FacileLLM.Message
 ---@param render_state FacileLLM.RenderState
@@ -85,27 +88,36 @@ end
 local get_message_range = function (mx, msg, render_state)
   local row, col = get_message_start(mx, render_state)
   local end_row, end_col
-  if render_state.pos.msg == mx then
-    -- Role displays are padded by the blank lines except for the first one,
-    -- which only has a trailing one.
-    if mx == 1 then
-      end_row = row + 1 + render_state.pos.line
-    else
-      end_row = row + 2 + render_state.pos.line
-    end
+  --  Role displays are padded by the blank lines except for the first one,
+  --  which only has a trailing one. This means that in general every message
+  --  receives two extra lines, except for the last rendered one which only
+  --  receives one.
+  if mx == render_state.pos.msg then
+    end_row = row + 1 + render_state.pos.line
     end_col = render_state.pos.char
-  else
-    if mx == 1 then
-      end_row = row + 1 + #msg.lines
-    else
-      end_row = row + 2 + #msg.lines
-    end
-    if #msg.lines == 0 then
-      end_col = string.len(role_display(msg.role))
-    else
+  elseif mx == render_state.last_displayed_mx then
+    end_row = row + 1 + #msg.lines
+    -- The last line contains text, except if there is no text
+    if #msg.lines ~= 0 then
       end_col = string.len(msg.lines[#msg.lines])
+    else
+      end_col = 0
     end
+  else
+    end_row = row + 2 + #msg.lines
+    -- The last line is always an empty one that originates from padding.
+    end_col = 0
   end
+  return row, col, end_row, end_col
+end
+
+---Following the convention of extmarks, we return 0-based inclusive row
+---indices.
+---This assumes that the message is displayed.
+local get_role_range = function (mx, msg, render_state)
+  -- See get_message_range for a description of padding lines.
+  local row, col = get_message_start(mx, render_state)
+  local end_row, end_col = row, string.len(role_display(msg.role))
   return row, col, end_row, end_col
 end
 
@@ -123,18 +135,14 @@ local get_namespace_highlight_pruned = function ()
   return vim.api.nvim_create_namespace("facilellm-highlight-pruned")
 end
 
+---This assumes that the message is displayed.
 ---@param bufnr BufNr
 ---@param mx FacileLLM.MsgIndex
 ---@param msg FacileLLM.Message
 ---@param render_state FacileLLM.RenderState
 ---@return nil
 local set_highlight_role = function (bufnr, mx, msg, render_state)
-  local row, col = get_message_start(mx, render_state)
-  -- All but the first role display are surrounded by padding new lines
-  if mx > 1 then
-    row = row + 1
-  end
-  local end_row, end_col = row, string.len(role_display(msg.role))
+  local row, col, end_row, end_col = get_role_range(mx, msg, render_state)
   local ns = get_namespace_highlight_role()
   vim.api.nvim_buf_set_extmark(bufnr, ns,
     row, col,
@@ -145,6 +153,7 @@ local set_highlight_role = function (bufnr, mx, msg, render_state)
     })
 end
 
+---This assumes that the message is displayed.
 ---@param bufnr BufNr
 ---@param mx FacileLLM.MsgIndex
 ---@param msg FacileLLM.Message
@@ -174,6 +183,7 @@ local set_highlight_receiving = function (bufnr, mx, msg, render_state)
   end
 end
 
+---This assumes that the message is displayed.
 ---@param bufnr BufNr
 ---@param mx FacileLLM.MsgIndex
 ---@param msg FacileLLM.Message
@@ -203,6 +213,7 @@ local set_highlight_pruned = function (bufnr, mx, msg, render_state)
   end
 end
 
+---This assumes that the message is displayed.
 ---@param bufnr BufNr
 ---@param mx FacileLLM.MsgIndex
 ---@param render_state FacileLLM.RenderState
@@ -240,6 +251,7 @@ local create_state = function ()
     pos = {
       msg = 0, line = 0, char = 0
     },
+    last_displayed_mx = 0,
     offsets = {},
     offset_total = 0,
     highlight_receiving = nil,
@@ -254,6 +266,7 @@ local clear_conversation = function (bufnr, render_state)
   render_state.pos = {
     msg = 0, line = 0, char = 0
   }
+  render_state.last_displayed_mx = 0
   render_state.offsets = {}
   render_state.offset_total = 0
 
@@ -297,6 +310,7 @@ local render_conversation = function (bufnr, conv, render_state)
           -- Add a blank line before the role display (except for first message)
           vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, {"", role_display(msg.role), ""})
           render_state.offset_total = render_state.offset_total + 3
+          render_state.offsets[mx] = render_state.offsets[mx] + 1
         end
 
         if config.opts.interface.highlight_role then
@@ -307,9 +321,7 @@ local render_conversation = function (bufnr, conv, render_state)
       -- Render lines
       if mx ~= render_state.pos.msg or render_state.pos.line == 0 then
         vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, msg.lines)
-
         render_state.offset_total = render_state.offset_total + #msg.lines
-
       else
         -- Render the remainder of the last rendered line, if it was extended.
         local line = msg.lines[render_state.pos.line]
@@ -342,6 +354,7 @@ local render_conversation = function (bufnr, conv, render_state)
       render_state.pos.line = #msg.lines
       local line = msg.lines[#msg.lines]
       render_state.pos.char = line and string.len(line) or 0
+      render_state.last_displayed_mx = mx
 
       if config.opts.feedback.highlight_message_while_receiving
         and render_state.highlight_receiving
@@ -420,7 +433,6 @@ local purge_message = function (bufnr, mx, msg, render_state)
   if render_state.pos.msg < mx or render_state.offsets[mx] == nil then
     return
   end
-
   if render_state.highlight_receiving and render_state.highlight_receiving.msg == mx then
     end_highlight_receiving(bufnr, render_state)
   end
@@ -431,17 +443,29 @@ local purge_message = function (bufnr, mx, msg, render_state)
   local row, _, row_end, _ = get_message_range(mx, msg, render_state)
   vim.api.nvim_set_option_value("modifiable", true, { buf = bufnr })
   vim.api.nvim_buf_set_lines(bufnr, row, row_end+1, false, {})
+  local offset_reduction = row_end - row + 1
+  -- If the last viewed message is purged then the preceeding padding line has
+  -- to be removed as well. An exception is the first message, which is not
+  -- preceeded by such a line.
+  if render_state.last_displayed_mx == mx and mx ~= 1 then
+    vim.api.nvim_buf_set_lines(bufnr, row-1, row, false, {})
+    offset_reduction = offset_reduction + 1
+  end
   vim.api.nvim_set_option_value("modifiable", false, { buf = bufnr })
 
-  local offset_reduction
-  if render_state.pos.msg == mx then
-    offset_reduction = 1 + render_state.pos.line
-  else
-    offset_reduction = 1 + #msg.lines
+  if render_state.last_displayed_mx == mx then
+    for ix = mx-1,1,-1 do
+      if render_state.offsets[ix] ~= nil then
+        render_state.last_displayed_mx = ix
+        goto break_set_last_displayed_mx
+      end
+    end
+    render_state.last_displayed_mx = 0
+    ::break_set_last_displayed_mx::
   end
+
   render_state.offset_total = render_state.offset_total - offset_reduction
   render_state.offsets[mx] = nil
-
   for ox,_ in pairs(render_state.offsets) do
     if ox > mx then
       render_state.offsets[ox] = render_state.offsets[ox] - offset_reduction
@@ -454,6 +478,7 @@ end
 ---@param render_state FacileLLM.RenderState
 ---@return integer
 local get_message_index = function (row, conv, render_state)
+  -- Iterating via pairs skips the offsets that are set to nil.
   for mx,_ in pairs(render_state.offsets) do
     local mrow, _, end_mrow, _ = get_message_range(mx, conv[mx], render_state)
     if mrow <= row and row <= end_mrow then

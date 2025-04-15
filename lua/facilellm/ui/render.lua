@@ -249,7 +249,7 @@ end
 local create_state = function ()
   return {
     pos = {
-      msg = 0, line = 0, char = 0
+      mx = 0, line = 0, char = 0
     },
     last_displayed_mx = 0,
     offsets = {},
@@ -326,12 +326,7 @@ local render_conversation = function (bufnr, conv, render_state)
         -- Render the remainder of the last rendered line, if it was extended.
         local line = msg.lines[render_state.pos.line]
         if render_state.pos.char ~= string.len(line) then
-          local pos_line
-          if mx == 1 then
-            pos_line = render_state.offsets[mx]+1+render_state.pos.line
-          else
-            pos_line = render_state.offsets[mx]+2+render_state.pos.line
-          end
+          local pos_line = render_state.offsets[mx]+1+render_state.pos.line
           vim.api.nvim_buf_set_text(bufnr,
             pos_line, render_state.pos.char,
             pos_line, render_state.pos.char,

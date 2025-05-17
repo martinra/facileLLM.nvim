@@ -475,7 +475,7 @@ local set_buf_keymaps = function (sessionid)
         end
 
         message.purge(conv[mx])
-        ui_render.purge_message(bufnr, mx, conv[mx], render_state)
+        ui_render.purge_message(bufnr, mx, conv, render_state)
       end,
       { buffer = conv_bufnr })
   end
@@ -640,7 +640,9 @@ end
 ---@param sessionid FacileLLM.SessionId
 ---@return nil
 local requery = function (sessionid)
+  -- TODO: adjust this function to only get index
   local mx, msg = session.get_last_message_with_index(sessionid)
+  local conv = session.get_conversation(sessionid)
   if not msg or msg.role ~= "LLM" and msg.role ~= "Input" then
     return
   end
@@ -652,7 +654,7 @@ local requery = function (sessionid)
   ui_recent.touch(sessionid)
   if msg.role == "LLM" then
     message.purge(msg)
-    ui_render.purge_message(bufnr, mx, msg, render_state)
+    ui_render.purge_message(bufnr, mx, conv, render_state)
   end
   query(sessionid)
 end

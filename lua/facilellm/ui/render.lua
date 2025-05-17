@@ -1,5 +1,6 @@
 ---@class FacileLLM.RenderState
 ---@field pos FacileLLM.RenderState.Position
+---@field purged_head_mx FacileLLM.MsgIndex
 ---@field last_displayed_mx FacileLLM.MsgIndex
 ---@field offsets integer[]
 ---@field offset_total integer total number of lines rendered
@@ -251,6 +252,7 @@ local create_state = function ()
     pos = {
       mx = 0, line = 0, char = 0
     },
+    purged_head_mx = 0,
     last_displayed_mx = 0,
     offsets = {},
     offset_total = 0,
@@ -301,7 +303,7 @@ local render_conversation = function (bufnr, conv, render_state)
 
       -- Render role
       if mx ~= render_state.pos.mx then
-        if mx == 1 then
+        if mx == 1 + render_state.purged_head_mx then
           -- The very first line in the buffer when inserted needs to overwrite the
           -- initial one. In that case, we do not include a leading blank line.
           vim.api.nvim_buf_set_lines(bufnr, -2, -1, false, {role_display(msg.role), ""})
@@ -415,14 +417,27 @@ end
 
 ---@param bufnr BufNr
 ---@param mx FacileLLM.MsgIndex
----@param msg FacileLLM.Message
+---@param conv FacileLLM.Conversation
 ---@param render_state FacileLLM.RenderState
 ---@return nil
-local purge_message = function (bufnr, mx, msg, render_state)
+local purge_message = function (bufnr, mx, conv, render_state)
+  msg = conv[mx]
   if not message.ispurged(msg) then
     vim.notify("only rendering purged messages as such", vim.log.levels.WARN)
     return
   end
+
+  if mx == 1 + render_state.purged_head_mx then
+    render_state.purged_head_mx = mx
+    for px = mx+1,1,#conv do
+      if ispurged(conv[px]) then
+        render_state.purged_head_mx = px
+      else
+        goto break_update_purged_head_mx
+      end
+    end
+  end
+  ::break_update_purged_head_mx::
 
   -- In this case the message has not yet been rendered or is already purged.
   if render_state.pos.mx < mx or render_state.offsets[mx] == nil then
@@ -440,9 +455,11 @@ local purge_message = function (bufnr, mx, msg, render_state)
   vim.api.nvim_buf_set_lines(bufnr, row, row_end+1, false, {})
   local offset_reduction = row_end - row + 1
   -- If the last viewed message is purged then the preceeding padding line has
-  -- to be removed as well. An exception is the first message, which is not
-  -- preceeded by such a line.
-  if render_state.last_displayed_mx == mx and mx ~= 1 then
+  -- to be removed as well.
+  -- An exception is the first message, which is not preceeded by such a line.
+  -- Since we have already updated the purged_head_mx, we have to check that mx
+  -- is not less equal to it.
+  if render_state.last_displayed_mx == mx and mx > render_state.purged_head_mx then
     vim.api.nvim_buf_set_lines(bufnr, row-1, row, false, {})
     offset_reduction = offset_reduction + 1
   end

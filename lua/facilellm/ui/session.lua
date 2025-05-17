@@ -640,7 +640,6 @@ end
 ---@param sessionid FacileLLM.SessionId
 ---@return nil
 local requery = function (sessionid)
-  -- TODO: adjust this function to only get index
   local mx, msg = session.get_last_message_with_index(sessionid)
   local conv = session.get_conversation(sessionid)
   if not msg or msg.role ~= "LLM" and msg.role ~= "Input" then
